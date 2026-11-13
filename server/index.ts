@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 import { join } from "node:path";
 import { handle } from "./api/index";
+import { usePersistence } from "./learning/index";
 import { logLine } from "./log";
 import { REPO_ROOT } from "./paths";
 
@@ -11,8 +12,11 @@ try {
   // No .env: defaults apply (LIVE_LLM off, port 8787).
 }
 
+// Opt-in: LEARNING_FILE set = stored corrections survive a restart. Unset = in memory, clean every start.
+usePersistence(process.env.LEARNING_FILE);
+
 const port = Number(process.env.PORT ?? 8787);
 
 createServer((req, res) => void handle(req, res)).listen(port, () => {
-  logLine({ kind: "server.listening", port, liveLlm: process.env.LIVE_LLM === "1" });
+  logLine({ kind: "server.listening", port, liveLlm: process.env.LIVE_LLM === "1", learningFile: process.env.LEARNING_FILE || null });
 });
