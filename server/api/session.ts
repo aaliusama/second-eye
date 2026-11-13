@@ -11,6 +11,7 @@ import {
   type Rehearsal,
   type Scene,
 } from "@site/contracts";
+import { computeProfiles, runAgent, stepsFor, suggestCorrections, type AgentRun, type TimelineStep } from "../agent/index";
 import { proposeFixes, runChecks } from "../checks/index";
 import { extract } from "../extract/index";
 import * as learning from "../learning/index";
@@ -35,6 +36,34 @@ export interface Session {
   /** Messages whose place could not be told; the superintendent maps the nickname. */
   unresolved: learning.Unresolved[];
   liveCount: number;
+  /** Site agent (server/agent): action ids that already ran, its timeline, and its escalations. */
+  agentDone: string[];
+  agentLog: TimelineStep[];
+  escalations: AgentRun["escalations"];
+}
+
+/**
+ * Let the site agent act on the session at the given replay times. Its DMs join the chat as
+ * dm:<crewId> messages; done ids carry over so nothing is sent twice.
+ */
+function stepAgent(s: Session, steps: string[]): void {
+  const run = runAgent(
+    {
+      scene: s.scene,
+      messages: s.messages,
+      findings: s.findings,
+      fixes: s.fixes,
+      rehearsals: s.rehearsals,
+      learning: learning.getContext(),
+      done: s.agentDone,
+    },
+    steps,
+  );
+  s.messages.push(...run.sent);
+  s.agentLog.push(...run.timeline);
+  s.escalations.push(...run.escalations);
+  s.agentDone = run.done;
+  for (const step of run.timeline) logLine({ kind: "agent.step", time: step.time, actions: step.actions.map((a) => a.id) });
 }
 
 export class NotFoundError extends Error {}
@@ -58,7 +87,9 @@ export function getSession(): Promise<Session> {
     const p = (async (): Promise<Session> => {
       const start = learning.applyToScene(await loadStartScene());
       const state = await runReplay(await loadGoldenReplay(), start);
-      return { ...state, liveCount: 0 };
+      const s: Session = { ...state, liveCount: 0, agentDone: [], agentLog: [], escalations: [] };
+      stepAgent(s, stepsFor(s.messages, s.t));
+      return s;
     })();
     // A failed replay is not cached; the next request tries again.
     p.catch(() => {
@@ -67,6 +98,23 @@ export function getSession(): Promise<Session> {
     current = p;
   }
   return current;
+}
+
+/**
+ * End-of-run learning: crews the agent put on watch (missed changes, unanswered questions) are stored
+ * as crew_misread corrections, so the next run's agent warns them as soon as a change lands.
+ * Same correction id is stored once.
+ */
+export async function learnFromRun(): Promise<number> {
+  if (!current) return 0;
+  const s = await current;
+  const known = new Set(learning.all().map((c) => c.id));
+  const fresh = suggestCorrections(computeProfiles(s.scene.crews, s.findings, s.fixes, s.messages), sessionNow(s)).filter(
+    (c) => !known.has(c.id),
+  );
+  for (const c of fresh) learning.record(c);
+  if (fresh.length > 0) logLine({ kind: "learning.crew_watch", corrections: fresh.map((c) => c.id) });
+  return fresh.length;
 }
 
 /** Drop the session. keepLearning=true is "run 2": the replay is played again with stored corrections. */
@@ -144,6 +192,7 @@ export function postMessage(req: PostMessageRequest): Promise<PostMessageRespons
     s.fixes.push(...fixes);
     s.unresolved.push(...resolved.unresolved);
     logLine({ kind: "api.message", messageId: message.id, cacheId, findings: findings.length, fixes: fixes.length });
+    stepAgent(s, [message.time]);
     return { message, operations: result.operations, intents: result.intents, findings, fixes };
   });
 }
@@ -180,6 +229,7 @@ export function approveFix(id: string): Promise<ApproveFixResponse> {
       s.messages.push(...sent);
       s.scene = applyOperations(s.scene, heardOperations(s, fix, sent));
       logLine({ kind: "api.fix_approved", fixId: fix.id, sent: sent.map((m) => m.id) });
+      stepAgent(s, [time]);
     }
     return { fix: structuredClone(fix), sent };
   });

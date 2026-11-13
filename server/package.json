@@ -17,6 +17,7 @@
     "tsx": "^4.23.15"
   },
   "dependencies": {
-    "@site/contracts": "^0.0.0"
+    "@site/contracts": "^0.0.0",
+    "zod": "^4.6.7"
   }
 }

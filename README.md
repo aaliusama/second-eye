@@ -46,6 +46,10 @@ The server listens on port 8787. The web app reaches it through the Vite proxy a
 | `POST /api/corrections` | store a correction (nickname, crew misread, fix decision) for the next run |
 | `POST /api/reset` `{keepLearning}` | start a new run; `keepLearning` defaults to `true` |
 | `GET /api/eval` | golden replay scored against `data/labels.json` |
+| `POST /api/ask` `{crewId?, text}` | a crew asks; the answer comes from the record with sources; design decisions go to the superintendent |
+| `GET /api/briefing?crew=[&day=]` | a crew's morning briefing: tasks in order, holds, changes since they last posted |
+| `GET /api/digest[?day=]` | the superintendent's evening digest: holds by check, open decisions, silent crews, pending fixes |
+| `GET /api/agent/log` | what the site agent did on its own: escalations, DMs, follow-ups, auto-resolves, held until 06:00 |
 
 ## Crew phone messages in demo mode
 

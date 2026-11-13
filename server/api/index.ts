@@ -18,11 +18,13 @@ import { getPlan } from "../model/index";
 import { loadGoldenReplay, loadStartScene } from "../model/load";
 import { runReplay } from "../model/replay";
 import { evalPath } from "../paths";
+import { handleQueryRoute } from "../query/index";
 import {
   approveFix,
   getSession,
   getUnresolved,
   latestDay,
+  learnFromRun,
   NotFoundError,
   postMessage,
   recordCorrection,
@@ -173,11 +175,30 @@ export async function handle(req: IncomingMessage, res: ServerResponse): Promise
         return send(res, 400, { error: "invalid body: keepLearning must be a boolean" });
       }
       const keepLearning = keepRaw ?? true;
+      // Run 2 learns from run 1: crews the agent put on watch are stored before the session drops.
+      const learnedCrews = keepLearning ? await learnFromRun() : 0;
       resetSession({ keepLearning });
       const s = await getSession();
-      logLine({ kind: "api.reset", keepLearning, findings: s.findings.length });
-      return send(res, 200, { ok: true, keepLearning, t: sessionNow(s) });
+      logLine({ kind: "api.reset", keepLearning, learnedCrews, findings: s.findings.length });
+      return send(res, 200, { ok: true, keepLearning, learnedCrews, t: sessionNow(s) });
     }
+
+    if (route === "GET /api/agent/log") {
+      const s = await getSession();
+      return send(res, 200, { timeline: s.agentLog, escalations: s.escalations });
+    }
+
+    // Lane E: POST /api/ask, GET /api/briefing, GET /api/digest. Answers come from the record.
+    const queryHandled = await handleQueryRoute(
+      req,
+      res,
+      async () => {
+        const s = await getSession();
+        return { t: sessionNow(s), scene: s.scene, findings: s.findings, messages: s.messages, fixes: s.fixes };
+      },
+      () => learning.getContext(),
+    );
+    if (queryHandled) return;
 
     return send(res, 404, { error: `not found: ${route}` });
   } catch (err) {
