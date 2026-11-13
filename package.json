@@ -9,7 +9,8 @@
     "contracts",
     "server",
     "eval",
-    "web"
+    "web",
+    "mcp"
   ],
   "scripts": {
     "demo": "concurrently -k -n server,web -c blue,magenta \"npm run start -w @site/server\" \"npm run dev -w @site/web\"",

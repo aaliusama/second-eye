@@ -20,3 +20,7 @@ One line per decision: date, who, what, why. On a merge conflict keep both lines
 - 2026-11-13, A: GET /api/state?t= applies stored corrections like a new run; docs changed to match the code.
 - 2026-11-13, I: e2e/ tests the demo story over HTTP against a spawned server (port 8790); it imports no server internals and is excluded from `npm test` by the root include pattern. Run with `npx vitest run --config e2e/vitest.config.ts`.
 - 2026-11-13, I: submission and pitch carry no numbers; every figure is a `[[from npm run eval]]` placeholder filled from the final eval run. The $1.85T figure is quoted only as the case book states it.
+- 2026-11-13, F: MCP server in its own workspace `mcp/`, stdio transport, `@modelcontextprotocol/sdk` pinned at 1.32.2. It reads the site only over HTTP (`SITE_API`), never imports server code.
+- 2026-11-13, F: MCP tools are read-only. No tool approves fixes or posts crew messages; decisions stay with the superintendent.
+- 2026-11-13, F: `is_place_clear` returns `clear` only when the place is on record, nothing is planned in an overlapping slot and no open finding touches it. Unknown place is `unknown`; a server error is a tool error. Findings whose fix is approved count as handled.
+- 2026-11-13, F: `check_plan` asks `POST /api/ask` when it exists; on 404 it answers from bookings and existing findings only and says it did not re-check.
