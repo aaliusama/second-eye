@@ -8,14 +8,14 @@
   },
   "perTrigger": {
     "live": {
-      "caught": 11,
-      "missed": 4,
-      "falseAlarms": 1
-    },
-    "rehearsal": {
       "caught": 12,
       "missed": 3,
-      "falseAlarms": 1
+      "falseAlarms": 0
+    },
+    "rehearsal": {
+      "caught": 13,
+      "missed": 2,
+      "falseAlarms": 0
     }
   },
   "perCrew": {
@@ -27,11 +27,11 @@
     "crew-electrical": {
       "caught": 3,
       "missed": 2,
-      "falseAlarms": 1
+      "falseAlarms": 0
     },
     "crew-painting": {
-      "caught": 3,
-      "missed": 1,
+      "caught": 4,
+      "missed": 0,
       "falseAlarms": 0
     },
     "crew-plumbing": {
@@ -229,50 +229,32 @@
       "id": "OD4",
       "check": "open_decision",
       "triggerMessageId": "m-170",
-      "caught": false,
-      "caughtBy": "none",
-      "incidentKeys": [],
-      "findingIds": []
-    }
-  ],
-  "falseAlarms": [
-    {
-      "key": "open_decision|m-081|paint-206-living",
-      "check": "open_decision",
-      "messageIds": [
-        "m-081"
-      ],
-      "elementIds": [
-        "paint-206-living"
-      ],
-      "crewIds": [
-        "crew-electrical"
-      ],
-      "triggers": [
-        "live",
-        "rehearsal"
+      "caught": true,
+      "caughtBy": "both",
+      "incidentKeys": [
+        "open_decision|m-170|paint-206-living"
       ],
       "findingIds": [
-        "f-open_decision-m-081-paint-206-living"
-      ],
-      "confidence": 1
+        "f-open_decision-m-170-paint-206-living"
+      ]
     }
   ],
+  "falseAlarms": [],
   "repeats": [],
   "messages": {
     "total": 190,
     "labelled": 13,
     "unlabelled": 177,
-    "unlabelledWithFalseAlarm": 1
+    "unlabelledWithFalseAlarm": 0
   },
   "labelsNotInReplay": [],
   "thresholds": [
     {
       "threshold": 0.5,
       "total": {
-        "caught": 12,
-        "missed": 3,
-        "falseAlarms": 1
+        "caught": 13,
+        "missed": 2,
+        "falseAlarms": 0
       },
       "perCheck": {
         "latest_change": {
@@ -291,18 +273,18 @@
           "falseAlarms": 0
         },
         "open_decision": {
-          "caught": 2,
-          "missed": 2,
-          "falseAlarms": 1
+          "caught": 3,
+          "missed": 1,
+          "falseAlarms": 0
         }
       }
     },
     {
       "threshold": 0.7,
       "total": {
-        "caught": 12,
-        "missed": 3,
-        "falseAlarms": 1
+        "caught": 13,
+        "missed": 2,
+        "falseAlarms": 0
       },
       "perCheck": {
         "latest_change": {
@@ -321,18 +303,18 @@
           "falseAlarms": 0
         },
         "open_decision": {
-          "caught": 2,
-          "missed": 2,
-          "falseAlarms": 1
+          "caught": 3,
+          "missed": 1,
+          "falseAlarms": 0
         }
       }
     },
     {
       "threshold": 0.9,
       "total": {
-        "caught": 12,
-        "missed": 3,
-        "falseAlarms": 1
+        "caught": 13,
+        "missed": 2,
+        "falseAlarms": 0
       },
       "perCheck": {
         "latest_change": {
@@ -351,9 +333,9 @@
           "falseAlarms": 0
         },
         "open_decision": {
-          "caught": 2,
-          "missed": 2,
-          "falseAlarms": 1
+          "caught": 3,
+          "missed": 1,
+          "falseAlarms": 0
         }
       }
     }

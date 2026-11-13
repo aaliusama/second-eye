@@ -15,6 +15,34 @@ describe("score", () => {
     expect(score("fixture", fixtureLabels, []).total).toEqual({ caught: 0, missed: 1, falseAlarms: 0 });
   });
 
+  it.each([
+    { elementIds: ["W-08"] },
+    { crewIds: ["crew-drywall"] },
+  ])("does not credit the right message and check on the wrong crew or element: %j", (over) => {
+    const wrong: Finding = { ...fixtureFinding, ...over };
+    expect(score("fixture", fixtureLabels, [wrong]).total).toEqual({ caught: 0, missed: 1, falseAlarms: 1 });
+    const detail = scoreDetail("fixture", fixtureLabels, [wrong], [], []);
+    expect(detail.cases[0]!.caughtBy).toBe("none");
+    expect(detail.perTrigger.live).toEqual({ caught: 0, missed: 1, falseAlarms: 1 });
+  });
+
+  it("matches all labelled crews and elements while allowing extra evidence elements", () => {
+    const extra: Finding = { ...fixtureFinding, elementIds: ["room-204", "W-12"], crewIds: ["crew-drywall", "crew-plumbing"] };
+    expect(score("fixture", fixtureLabels, [extra]).total).toEqual({ caught: 1, missed: 0, falseAlarms: 0 });
+    const labels: LabelSet = { cases: [{ ...fixtureLabels.cases[0]!, elementIds: ["W-12", "W-08"] }] };
+    expect(score("fixture", labels, [extra]).total).toEqual({ caught: 0, missed: 1, falseAlarms: 1 });
+    const twoCrews: LabelSet = { cases: [{ ...fixtureLabels.cases[0]!, crewIds: ["crew-plumbing", "crew-drywall"] }] };
+    expect(score("fixture", twoCrews, [fixtureFinding]).total).toEqual({ caught: 0, missed: 1, falseAlarms: 1 });
+    expect(score("fixture", twoCrews, [extra]).total).toEqual({ caught: 1, missed: 0, falseAlarms: 0 });
+  });
+
+  it("two cases from one message require findings for each labelled element", () => {
+    const labels: LabelSet = {
+      cases: [...fixtureLabels.cases, { ...fixtureLabels.cases[0]!, id: "case-002", elementIds: ["W-08"] }],
+    };
+    expect(score("fixture", labels, [fixtureFinding]).total).toEqual({ caught: 1, missed: 1, falseAlarms: 0 });
+  });
+
   it("counts an unlabelled finding as a false alarm", () => {
     const stray = { ...fixtureFinding, id: "f-x", sourceMessageId: "m-999", elementIds: ["W-08"] };
     expect(score("fixture", fixtureLabels, [fixtureFinding, stray]).total.falseAlarms).toBe(1);
@@ -28,6 +56,29 @@ describe("score", () => {
     const d = scoreDetail("x", fixtureLabels, [fixtureFinding, again], [], []);
     expect(d.repeats.map((i) => i.messageIds)).toEqual([["m-090"]]);
     expect(d.falseAlarms).toEqual([]);
+  });
+
+  it("counts a new risk source for the same crews and elements as a false alarm, not a repeat", () => {
+    const later: Finding = { ...fixtureFinding, id: "f-later", sourceMessageId: "m-090", evidenceMessageIds: ["m-new-change"] };
+    const d = scoreDetail("x", fixtureLabels, [fixtureFinding, later], [], []);
+    expect(d.repeats).toEqual([]);
+    expect(d.falseAlarms.map((i) => i.findingIds)).toEqual([["f-later"]]);
+    expect(score("x", fixtureLabels, [fixtureFinding, later]).total.falseAlarms).toBe(1);
+  });
+
+  it("does not infer a restatement without risk evidence", () => {
+    const caught: Finding = { ...fixtureFinding, evidenceMessageIds: [] };
+    const later = { ...caught, id: "f-later", sourceMessageId: "m-090" };
+    expect(score("x", fixtureLabels, [caught, later]).total).toEqual({ caught: 1, missed: 0, falseAlarms: 1 });
+  });
+
+  it("does not suppress another clash pair in the same room with the same crews", () => {
+    const clash: Finding = { ...fixtureFinding, check: "space_clash", elementIds: ["room-206"], crewIds: ["crew-electrical", "crew-painting"], sourceMessageId: "m-061", evidenceMessageIds: ["m-060"] };
+    const labels: LabelSet = { cases: [{ id: "clash", check: "space_clash", triggerMessageId: "m-061", crewIds: clash.crewIds, elementIds: clash.elementIds, note: "" }] };
+    const later = { ...clash, id: "f-later", sourceMessageId: "m-091", evidenceMessageIds: ["m-090"] };
+    const d = scoreDetail("x", labels, [clash, later], [], []);
+    expect(d.repeats).toEqual([]);
+    expect(d.falseAlarms).toHaveLength(1);
   });
 
   it("lists all four checks even with no cases and no findings", () => {

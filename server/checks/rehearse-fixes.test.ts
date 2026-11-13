@@ -4,6 +4,7 @@ import type { ChatMessage, Finding, Plan, PlanTask, Scene } from "@site/contract
 import { fixtureFinding, fixtureFix, fixtureMessages, fixtureScene } from "@site/contracts/fixtures";
 import { rehearse } from "./rehearse";
 import { cite, proposeFixes } from "./fixes";
+import { runChecks } from "./index";
 
 const base = fixtureScene.tasks[0]!;
 const task = (over: Partial<PlanTask>): PlanTask => ({ ...base, ...over });
@@ -71,17 +72,75 @@ describe("proposeFixes", () => {
     expect(fix!.description).toBe("Send the latest Unit 204 bathroom east wall position to Novak Plumbing before they start.");
   });
 
-  it("space_clash suggests the other slot to each crew", () => {
-    const clashTask = task({ id: "task-004", crewId: "crew-drywall", slot: "afternoon" });
-    const f: Finding = {
-      ...fixtureFinding, id: "f-clash", check: "space_clash", severity: "warn", ghost: undefined,
-      crewIds: ["crew-plumbing", "crew-drywall"], taskIds: ["task-001", "task-004"], evidenceMessageIds: [],
-    };
-    const [fix] = proposeFixes([f], sceneWith([morning, clashTask]));
+  it("space_clash moves one crew and keeps the other in its morning slot", () => {
+    const clashTask = task({ id: "task-004", crewId: "crew-drywall", slot: "morning", taskType: "finish_drywall", sourceMessageId: "m-003" });
+    const s = sceneWith([morning, clashTask]);
+    const f = runChecks(s, plan(s.tasks)).find((x) => x.check === "space_clash")!;
+    const [fix] = proposeFixes([f], s);
     expect(fix!.kind).toBe("reorder");
-    expect(fix!.messages.map((m) => m.crewId)).toEqual(["crew-plumbing", "crew-drywall"]);
-    expect(fix!.messages[0]!.text).toMatch(/^HOLD: Walsh Drywall is also in Unit 204 in the morning per the record \(m-002\)\. Move to the afternoon\.$/);
-    expect(fix!.messages[1]!.text).toMatch(/Move to the morning\.$/);
+    const text = Object.fromEntries(fix!.messages.map((m) => [m.crewId, m.text]));
+    expect(text["crew-plumbing"]).toContain("Keep your morning slot.");
+    expect(text["crew-drywall"]).toContain("Move to the afternoon.");
+    expect(fix!.messages.filter((m) => m.text.includes("Move to the afternoon."))).toHaveLength(1);
+    expect(proposeFixes([f], sceneWith([clashTask, morning]))).toEqual([fix]);
+    const corrected = [morning, { ...clashTask, slot: "afternoon" as const }];
+    expect(runChecks(sceneWith(corrected), plan(corrected)).filter((x) => x.check === "space_clash")).toEqual([]);
+    expect(FixSchema.parse(fix)).toEqual(fix);
+  });
+
+  it.each(["full_day", "afternoon"] as const)("does not invent a free slot when the clash occupies %s", (slot) => {
+    const other = task({ id: "task-004", crewId: "crew-drywall", slot, taskType: "finish_drywall" });
+    const own = { ...morning, slot };
+    const s = sceneWith([own, other]);
+    const f = runChecks(s, plan(s.tasks)).find((x) => x.check === "space_clash")!;
+    const [fix] = proposeFixes([f], s);
+    expect(fix!.messages.every((m) => m.text.includes("Confirm a revised slot with the superintendent."))).toBe(true);
+    expect(fix!.messages.some((m) => /Move to the (morning|afternoon)\./.test(m.text))).toBe(false);
+  });
+
+  it("does not move a crew into another recorded booking", () => {
+    const other = task({ id: "task-004", crewId: "crew-drywall", taskType: "finish_drywall" });
+    const booking = task({ id: "task-005", crewId: "crew-plumbing", slot: "afternoon" });
+    const s = sceneWith([morning, other, booking]);
+    const f = runChecks(s, plan(s.tasks)).find((x) => x.check === "space_clash")!;
+    expect(proposeFixes([f], s)[0]!.messages.every((m) => m.text.includes("Confirm a revised slot with the superintendent."))).toBe(true);
+  });
+
+  it("does not move a crew that already has afternoon work elsewhere", () => {
+    const other = task({ id: "task-004", crewId: "crew-drywall", taskType: "finish_drywall" });
+    const booking = task({ id: "task-005", crewId: "crew-drywall", slot: "afternoon", placeId: "room-203" });
+    const s = sceneWith([morning, other, booking]);
+    const f = runChecks(s, plan(s.tasks)).find((x) => x.check === "space_clash")!;
+    expect(proposeFixes([f], s)[0]!.messages.every((m) => m.text.includes("Confirm a revised slot with the superintendent."))).toBe(true);
+  });
+
+  it("does not guess a morning slot when the live intent has no recorded task", () => {
+    const f: Finding = {
+      ...fixtureFinding, check: "space_clash", crewIds: ["crew-plumbing", "crew-drywall"], taskIds: [morning.id], ghost: undefined,
+    };
+    const [fix] = proposeFixes([f], sceneWith([morning]));
+    expect(fix!.messages.find((m) => m.crewId === "crew-drywall")!.text).toContain("in an overlapping slot");
+    expect(fix!.messages.every((m) => m.text.includes("Confirm a revised slot with the superintendent."))).toBe(true);
+  });
+
+  it("does not shorten full-day work to fit it in the afternoon", () => {
+    const other = task({ id: "task-004", crewId: "crew-drywall", slot: "full_day", taskType: "finish_drywall" });
+    const s = sceneWith([morning, other]);
+    const f = runChecks(s, plan(s.tasks)).find((x) => x.check === "space_clash")!;
+    expect(proposeFixes([f], s)[0]!.messages.every((m) => m.text.includes("Confirm a revised slot with the superintendent."))).toBe(true);
+  });
+
+  it.each(["latest_change", "space_clash", "order_of_work", "open_decision"] as const)("a %s warning stays a request to confirm in the crew message", (check) => {
+    for (const trigger of ["live", "rehearsal"] as const) {
+      const f: Finding = { ...fixtureFinding, check, trigger, severity: "warn" };
+      const [fix] = proposeFixes([f], fixtureScene, fixtureMessages);
+      expect(fix!.kind).toBe("notify_crew");
+      expect(fix!.messages[0]!.text).toMatch(/^WARN:/);
+      expect(fix!.messages[0]!.text).toContain("Please confirm the record before changing the plan.");
+      expect(fix!.messages[0]!.text).not.toMatch(/HOLD:|Work to the new line|Move to the|Wait until/);
+      expect(fix!.sourceMessageId).toBe(f.sourceMessageId);
+      expect(FixSchema.parse(fix)).toEqual(fix);
+    }
   });
 
   it("order_of_work and open_decision become holds", () => {
@@ -151,15 +210,18 @@ describe("proposeFixes", () => {
       expect(proposeFixes([evening], fixtureScene, [before, change, other])[0]!.kind).toBe("ask_crew");
     });
 
-    it("multi-crew finding asks only if every crew is silent", () => {
+    it("multi-crew finding asks each silent crew, while a crew that spoke gets the normal fix", () => {
       const clash: Finding = { ...evening, crewIds: ["crew-drywall", "crew-plumbing"], evidenceMessageIds: ["m-001"] };
       expect(proposeFixes([clash], fixtureScene, [before, change])[0]!.kind).toBe("ask_crew");
       expect(proposeFixes([clash], fixtureScene, [before, change, plumbing])[0]!.kind).toBe("notify_crew");
+      const mixed = proposeFixes([clash], fixtureScene, [before, change, plumbing])[0]!;
+      expect(mixed.messages.find((m) => m.crewId === "crew-drywall")!.text).toMatch(/^Are you still planning/);
+      expect(mixed.messages.find((m) => m.crewId === "crew-plumbing")!.text).toMatch(/^HOLD:/);
     });
 
     it("no evidence in messages falls back to the source message time; none at all is not silent", () => {
       const noEvidence: Finding = { ...evening, evidenceMessageIds: ["m-404"] };
-      expect(proposeFixes([noEvidence], fixtureScene, [before])[0]!.kind).toBe("ask_crew");
+      expect(proposeFixes([noEvidence], fixtureScene, [before])[0]!.kind).toBe("notify_crew");
       expect(proposeFixes([noEvidence], fixtureScene, [])[0]!.kind).toBe("notify_crew");
     });
 
@@ -169,14 +231,19 @@ describe("proposeFixes", () => {
       expect(proposeFixes([fixtureFinding], sceneWith([unsure]), [change])[0]!.kind).toBe("notify_crew");
     });
 
-    it("undefined messages behaves as before; low confidence still asks with messages", () => {
+    it("undefined messages preserves the fallback; low confidence alone does not ask a crew that has replied", () => {
       const fs = [evening, fixtureFinding];
       expect(proposeFixes(fs, fixtureScene, undefined)).toEqual(proposeFixes(fs, fixtureScene));
       expect(proposeFixes(fs, fixtureScene).map((x) => x.kind)).toEqual(["notify_crew", "notify_crew"]);
       const unsure = task({ id: "task-001", confidence: 0.5 });
       const [fix] = proposeFixes([evening], sceneWith([unsure]), [before, change, plumbing]);
-      expect(fix!.kind).toBe("ask_crew");
+      expect(fix!.kind).toBe("notify_crew");
       expect(fix!.messages[0]!.text.endsWith("Reply before 07:00.")).toBe(false);
+    });
+
+    it("a system DM does not make a silent crew look like it replied", () => {
+      const system: ChatMessage = { ...plumbing, id: "agent-question", senderRole: "system", text: "Are you still planning?" };
+      expect(proposeFixes([evening], fixtureScene, [before, change, system])[0]!.kind).toBe("ask_crew");
     });
   });
 });

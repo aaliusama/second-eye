@@ -225,15 +225,20 @@ function orderOfWork(ctx: Ctx, work: Work): Finding[] {
 }
 
 /**
- * open_decision: the work touches an element (elementIds or placeId) still "proposed". For tile and fixture work,
- * a proposed fixture or zone inside the place counts too (the 205 tile choice when tiling names only the unit).
+ * open_decision: the work touches an element (elementIds or placeId) still "proposed". A task-relevant
+ * proposed material or fixture inside the place counts too when the work names only the place or wall.
  */
 function openDecision(ctx: Ctx, work: Work): Finding[] {
   const place = elementOf(ctx.scene, work.placeId);
+  const decisionName = DECISION_INSIDE_PLACE[work.taskType];
+  // Installing one named fixture does not depend on every other fixture in the unit.
+  const namedFixture = work.taskType === "install_fixtures" &&
+    work.elementIds.some((id) => elementOf(ctx.scene, id)?.type === "fixture");
   const insidePlace =
-    place && DECISION_INSIDE_PLACE.has(work.taskType)
+    place && decisionName && !namedFixture
       ? ctx.scene.elements
           .filter((e) => e.id !== place.id && (e.type === "fixture" || e.type === "zone") && e.state === "proposed")
+          .filter((e) => decisionName.test(e.name))
           .filter((e) => inside(midpoint(e.geometry), place.geometry))
           .map((e) => e.id)
       : [];
@@ -247,7 +252,7 @@ function openDecision(ctx: Ctx, work: Work): Finding[] {
     const severity = HOLD_ON_OPEN_DECISION.has(work.taskType) ? "hold" : "warn";
     out.push(
       finding(ctx, "open_decision", elementId, work, {
-        ...sure(severity, summary, severity === "hold" && unsure(ctx, [work.confidence], [work.placeId])),
+        ...sure(severity, summary, unsure(ctx, [work.confidence, ...(proposedBy ? [proposedBy.confidence] : [])], [elementId, work.placeId])),
         evidenceMessageIds: proposedBy ? [proposedBy.sourceMessageId] : [],
         crewIds: [work.crewId],
         elementIds: [elementId],

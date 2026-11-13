@@ -20,7 +20,9 @@ async function main(): Promise<void> {
   const labels = LabelSet.parse(JSON.parse(raw));
   const replay = await loadGoldenReplay();
   const state = await runReplay(replay, await loadStartScene());
-  const live = state.findings;
+  // Evaluation measures alerts emitted during the replay, including ones a later message fixed.
+  // The UI's active queue alone would erase successful catches (and past false alarms).
+  const live = [...state.findings, ...state.resolvedFindings];
   const rehearsal = rehearsalFindings(state.rehearsals);
   const results = score(replay.id, labels, [...live, ...rehearsal]);
   const detail = scoreDetail(

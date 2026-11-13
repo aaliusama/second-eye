@@ -1,4 +1,5 @@
 import type { ChatMessage, Finding, Fix, PlanTask, Scene, Slot, TaskType } from "@site/contracts";
+import { slotsOverlap } from "./rules";
 
 // Owner: C. One proposed fix per finding. Pure and deterministic, same order as findings.
 
@@ -60,19 +61,20 @@ function riskTime(f: Finding, messages: ChatMessage[]): string | undefined {
 }
 
 /**
- * Listen step: a crew is silent about a finding when it has posted nothing after the risk
- * entered the record. Every crew on the finding must be silent. Unknown risk time: not silent.
+ * Only messages from people count as a crew response. A system DM addressed to a crew is not its reply.
  */
-function allCrewsSilent(f: Finding, messages: ChatMessage[]): boolean {
+function silentCrews(f: Finding, messages: ChatMessage[]): string[] {
   const since = riskTime(f, messages);
-  if (since === undefined) return false;
-  return f.crewIds.every((crewId) => !messages.some((m) => m.crewId === crewId && m.time > since));
+  if (since === undefined) return [];
+  return f.crewIds.filter((crewId) => !messages.some((m) =>
+    m.crewId === crewId && m.senderRole !== "system" && m.time >= since,
+  ));
 }
 
 /**
  * One fix per finding. With `messages` (the chat so far), an evening rehearsal finding whose
- * crews have all been silent since the change becomes an ask_crew question. Without `messages`,
- * only the low-confidence listen rule applies. Live findings never become ask_crew, but with `messages`
+ * crews have all been silent since the change becomes an ask_crew question; mixed findings question only
+ * the silent crews. Without `messages`, only the low-confidence fallback applies. Live findings never become ask_crew, but with `messages`
  * every other crew on a live finding that has been silent since the statement gets a question instead of a HOLD.
  */
 export function proposeFixes(findings: Finding[], scene: Scene, messages?: ChatMessage[]): Fix[] {
@@ -109,23 +111,41 @@ export function proposeFixes(findings: Finding[], scene: Scene, messages?: ChatM
       }
       case "space_clash": {
         const place = elementName(tasks[0]?.placeId ?? f.elementIds[0]);
+        // Keep the earlier trade in place; move only the later trade, and only into a free afternoon.
+        // Full-day work cannot be squeezed into a half-day. Otherwise ask for a revised slot.
+        const ordered = [...tasks].sort(
+          (a, b) => WORK_ORDER.indexOf(a.taskType) - WORK_ORDER.indexOf(b.taskType) || a.id.localeCompare(b.id),
+        );
+        const [stay, move] = ordered;
+        const canMove =
+          ordered.length === 2 && f.crewIds.length === 2 && stay.crewId !== move.crewId &&
+          stay.day === move.day && stay.placeId === move.placeId && stay.slot === "morning" && move.slot === "morning" &&
+          !scene.tasks.some((t) =>
+            t.id !== move.id && t.status === "planned" && t.day === move.day && slotsOverlap(t.slot, "afternoon") &&
+            (t.placeId === move.placeId || t.crewId === move.crewId),
+          );
         const messages = f.crewIds.map((crewId) => {
           const own = tasks.find((t) => t.crewId === crewId);
           const others = joinNames(f.crewIds.filter((c) => c !== crewId).map(crewName)) || "another crew";
-          const slot = own?.slot ?? "morning";
-          const move =
-            slot === "morning"
-              ? "Move to the afternoon."
-              : slot === "afternoon"
-                ? "Move to the morning."
-                : "Split the day or move to another day.";
+          const when = own ? SLOT_TEXT[own.slot] : "in an overlapping slot";
+          const correction = canMove
+            ? crewId === move.crewId
+              ? `Move to the afternoon. ${crewName(stay.crewId)} keeps the morning slot.`
+              : `Keep your morning slot. ${crewName(move.crewId)} moves to the afternoon.`
+            : "Confirm a revised slot with the superintendent.";
           return {
             crewId,
-            text: `HOLD: ${others} is also in ${place} ${SLOT_TEXT[slot]} per the record (${sources}). ${move}`,
+            text: `HOLD: ${others} is also in ${place} ${when} per the record (${sources}). ${correction}`,
           };
         });
         reason = `${place} is booked twice in the same slot per the record (${sources}).`;
-        fix = { kind: "reorder", description: `Move one crew to the other slot so ${place} is clear.`, messages };
+        fix = {
+          kind: "reorder",
+          description: canMove
+            ? `Keep ${crewName(stay.crewId)} in the morning; move ${crewName(move.crewId)} to the afternoon in ${place}.`
+            : `Agree a revised slot with ${crews} so ${place} is clear.`,
+          messages,
+        };
         break;
       }
       case "order_of_work": {
@@ -150,8 +170,18 @@ export function proposeFixes(findings: Finding[], scene: Scene, messages?: ChatM
       }
     }
 
+    // An unsure record can request confirmation; it must not turn a warning into a work order.
+    if (f.severity === "warn") {
+      reason = `${f.summary} Sources: ${sources}.`;
+      fix = {
+        kind: "notify_crew",
+        description: `Ask ${crews} to confirm the record before changing the plan.`,
+        messages: toAll(`WARN: ${reason} Please confirm the record before changing the plan.`),
+      };
+    }
+
     const question = (crewId: string) => {
-      const task = tasks.find((t) => t.crewId === crewId) ?? tasks[0];
+      const task = tasks.find((t) => t.crewId === crewId);
       return task
         ? `Are you still planning ${lowerFirst(task.description)} ${SLOT_TEXT[task.slot]}?`
         : `Are you still planning work on ${element}?`;
@@ -163,7 +193,7 @@ export function proposeFixes(findings: Finding[], scene: Scene, messages?: ChatM
       const said = messages?.find((m) => m.id === f.sourceMessageId);
       if (!said?.crewId) return { ...base, ...fix };
       const silent = (crewId: string) =>
-        crewId !== said.crewId && !messages!.some((m) => m.crewId === crewId && m.time > said.time);
+        crewId !== said.crewId && !messages!.some((m) => m.crewId === crewId && m.senderRole !== "system" && m.time >= said.time);
       return {
         ...base,
         ...fix,
@@ -174,12 +204,13 @@ export function proposeFixes(findings: Finding[], scene: Scene, messages?: ChatM
     }
 
     // Listen rule, evening: ask instead of tell when the crews went quiet since the change
-    // (needs `messages`), or when every plan task behind the finding is low confidence.
-    const silent = messages !== undefined && allCrewsSilent(f, messages);
+    // (needs `messages`), or as a fallback without chat when every plan task is low confidence.
+    const quiet = messages === undefined ? [] : silentCrews(f, messages);
+    const silent = quiet.length === f.crewIds.length;
     const unsure =
       tasks.length > 0 &&
       tasks.length === f.taskIds.length &&
-      tasks.every((t) => t.confidence < LISTEN_THRESHOLD);
+      tasks.every((t) => t.confidence < LISTEN_THRESHOLD) && messages === undefined;
     if (silent || unsure) {
       const replyBy = silent ? ` Reply before ${REPLY_BY}.` : "";
       return {
@@ -192,6 +223,12 @@ export function proposeFixes(findings: Finding[], scene: Scene, messages?: ChatM
       };
     }
 
-    return { ...base, ...fix };
+    return {
+      ...base,
+      ...fix,
+      messages: fix.messages.map((m) => quiet.includes(m.crewId)
+        ? { crewId: m.crewId, text: `${question(m.crewId)} ${reason} Reply before ${REPLY_BY}.` }
+        : m),
+    };
   });
 }
