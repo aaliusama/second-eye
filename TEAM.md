@@ -13,11 +13,33 @@ Code freeze: **Sat 14 Nov, 15:00 sharp**. Submit by 14:30.
 | Workstream | Person | Writes only in |
 |---|---|---|
 | A - Spine | Hassan | `contracts/`, `server/model/`, `server/learning/`, `server/index.ts`, `server/api/`, repo root config (`package.json`, `tsconfig*.json`, `.env.example`, `.gitignore`), `README.md`, `docs/architecture.md` |
-| B - Data + extraction | <name> | `data/`, `server/extract/` |
+| B - Data + extraction | Hassan (agent) | `data/`, `server/extract/` |
 | C - Checks + eval | Hassan | `server/checks/`, `eval/` |
-| D - Web + story | <name> | `web/`, `docs/demo-script.md` |
+| D - Web + story | Hassan (agent) | `web/`, `docs/demo-script.md` |
 
 Shared: `docs/decisions.md`. Anyone appends one line per decision; on a merge conflict keep both lines.
+
+## Status (updated on every merge to main)
+
+Last update: Fri 13 Nov, night. `main`: typecheck clean, 167 unit tests, e2e 6 pass / 6 todo, eval 1/1 on slice 1 (full scenario pending B).
+
+| Lane | What | State |
+|---|---|---|
+| A | live chat cache ids, learned nicknames, approve clears ghost, agent + query routes wired | on main |
+| B | 6-unit scenario, ~200 messages, labels, Groq extraction + cache, phone script | building |
+| C | eval of live + rehearsal, planted-incident and false-alarm tests | on main |
+| D | flat drafting view, ghost reveal, approvals, slider, phone, panels, demo script | on main |
+| E | crews ask questions, briefings, digest (`/api/ask`, `/api/briefing`, `/api/digest`) | on main |
+| F | MCP server for agents and robots, demo robot planner | on main |
+| G | autonomous site agent (`/api/agent/log`), crews on watch learned for run 2 | on main |
+| H | 3D cut-away view with ghost reveal | on main |
+| I | judging map, submission draft, pitch, e2e test | on main |
+| J | question parser matches walls by name ("where is the 204 east wall?") | building |
+| K | new shapes lifted into `contracts/` | building |
+| L | presenter mode: one key per demo beat | building |
+| M | e2e covers everything on main; scripted demo video recorder | building |
+
+Groq key: put it in `.env` after `GROQ_API_KEY=` (see README, Environment).
 
 ## Kickoff (all four, 20:45 - 21:15, no code before it ends)
 
