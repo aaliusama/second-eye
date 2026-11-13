@@ -16,7 +16,8 @@
     "dev": "concurrently -k -n server,web -c blue,magenta \"npm run dev -w @site/server\" \"npm run dev -w @site/web\"",
     "test": "vitest run",
     "eval": "npm run eval -w @site/eval",
-    "typecheck": "npm run typecheck --workspaces --if-present"
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "cache-id": "tsx server/api/cache-id.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",

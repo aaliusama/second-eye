@@ -41,10 +41,21 @@ The server listens on port 8787. The web app reaches it through the Vite proxy a
 | `GET /api/messages` | all messages in the session |
 | `GET /api/rehearsal[?day=]` | rehearsal of one day's plan; defaults to the latest planned day |
 | `GET /api/fixes` | proposed and approved fixes |
+| `GET /api/unresolved` | messages whose place nobody could tell yet (not a contract shape) |
 | `POST /api/fixes/:id/approve` | approve a fix, send its DMs, store the decision |
 | `POST /api/corrections` | store a correction (nickname, crew misread, fix decision) for the next run |
 | `POST /api/reset` `{keepLearning}` | start a new run; `keepLearning` defaults to `true` |
 | `GET /api/eval` | golden replay scored against `data/labels.json` |
+
+## Crew phone messages in demo mode
+
+A message posted live gets an id from its words: `live-<10 hex>`, the same for the same text and crew, ignoring case, extra spaces and trailing punctuation. Extraction reads `data/llm-cache/<id>.json`, so a scripted phone message works offline once its cache entry exists. Every post logs `{"kind":"api.message","messageId":...,"cacheId":...}`.
+
+To get the file name for a scripted message:
+
+```
+npm run cache-id -- "tomorrow morning we close up the blue room" crew-drywall
+```
 
 ## Layout
 

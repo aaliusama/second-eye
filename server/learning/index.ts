@@ -3,6 +3,8 @@ import { Correction, type LearningContext, type Scene } from "@site/contracts";
 // Owner: A. Stored corrections and how they change the next run.
 // In memory for now; npm run demo starts from a clean store.
 
+export { placesNamed, resolvePlaces, type Resolved, type Unresolved } from "./resolve";
+
 const corrections: Correction[] = [];
 
 export function record(correction: Correction): void {

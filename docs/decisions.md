@@ -14,3 +14,7 @@ One line per decision: date, who, what, why. On a merge conflict keep both lines
 - 2026-11-13, C: live and rehearsal findings can share an id (same check, source message and key) with a different trigger. Clients key findings by (id, trigger). Ids unchanged because fix ids and the evening fix dedupe in server/model/replay.ts rely on them.
 - 2026-11-13, C: rehearsal findings keep the time they were found (scene time), not the frame time; a full_day finding shows in two frames and must stay one finding. The slider uses frame.time.
 - 2026-11-13, C: order_of_work is satisfied when the same crew does the prerequisite earlier in its own order in the same day and slot (close wall, then finish drywall, in one morning).
+- 2026-11-13, A: live message ids come from the words (sha256 of normalised text + crewId), so scripted phone messages hit data/llm-cache offline; a repeat in one session is stored as `-2` and reads the same entry.
+- 2026-11-13, A: learning resolves an unclear place by rule after extraction (exactly one known nickname in the text), so run 2 differs from run 1 with cached LLM output; unresolved messages go to GET /api/unresolved, a non-contract route until A adds it to contracts.
+- 2026-11-13, A: approving a notify_crew fix for a latest_change finding records a move to the current geometry from the sent DM, so the crew has heard it; other fix kinds change nothing in the model.
+- 2026-11-13, A: GET /api/state?t= applies stored corrections like a new run; docs changed to match the code.
