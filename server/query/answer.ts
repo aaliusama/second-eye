@@ -37,11 +37,11 @@ const taskWords = (t: string) => t.replace(/_/g, " ");
 
 const NOT_FOUND = "I could not tell what you asked; forwarded to the superintendent.";
 
-export function notFound(q: Question, reason = "question not understood"): Answer {
+export function notFound(q: Question, reason = "question not understood", text = NOT_FOUND): Answer {
   return {
     questionId: q.id,
     kind: "not_found",
-    text: NOT_FOUND,
+    text,
     sourceMessageIds: [],
     elementIds: [],
     escalation: { to: "superintendent", reason },

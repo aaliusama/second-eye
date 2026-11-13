@@ -1,11 +1,11 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { Day, type LearningContext } from "@site/contracts";
 import { logLine } from "../log";
-import { answerQuery, type QueryState } from "./answer";
+import { answerQuery, notFound, type QueryState } from "./answer";
 import { briefing, digest } from "./briefing";
 import { readCache, writeCache } from "./cache";
 import { groqModel, groqParse } from "./llm";
-import { cacheKey, guard, keywordParse } from "./parse";
+import { cacheKey, diagnose, guard, keywordParse } from "./parse";
 import { AskRequest, type Answer, type Question, type StructuredQuery } from "./schema";
 
 // Owner: E. "Crews text the system and get answers from the record, while decisions go to the superintendent."
@@ -40,7 +40,9 @@ export async function parseQuestion(q: Question, ctx: AskContext): Promise<{ que
 
 export async function ask(q: Question, ctx: AskContext): Promise<Answer & { via: ParsedVia }> {
   const { query, via } = await parseQuestion(q, ctx);
-  const answer = answerQuery(q, query, ctx.state);
+  // Not understood: say what was found and what was missing, so the crew can re-ask.
+  const why = query ? undefined : diagnose(q, ctx.state.scene, ctx.learning);
+  const answer = why ? notFound(q, why.reason, why.text) : answerQuery(q, query, ctx.state);
   logLine({ kind: "query.answer", questionId: q.id, via, query, answerKind: answer.kind, sources: answer.sourceMessageIds });
   return { ...answer, via };
 }
