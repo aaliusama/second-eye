@@ -36,3 +36,7 @@ One line per decision: date, who, what, why. On a merge conflict keep both lines
 - 2026-11-13, E: any question asking to change the design, choose a material or decide is escalated to the superintendent, whatever the parser said. The system never decides.
 - 2026-11-13, E: "can I start" runs the four checks on a synthetic intent and answers HOLD or CLEAR. With no own task in that place, it checks the elements inside the place.
 - 2026-11-13, E: shapes (Question, StructuredQuery, Answer) live in `server/query/schema.ts` until A lifts them into contracts.
+- 2026-11-13, D: flat view draws built rooms and zones as a light ink wash, not a solid fill; solid ink fill stays for built walls, doors and fixtures, so the plan stays readable.
+- 2026-11-13, D: the web keys findings by `${id}:${trigger}`; the ghost for an incident is drawn once per finding id (live wins). A finding whose fix is approved is drawn as resolved: no ghost, element in `clear`, no redline on the slider.
+- 2026-11-13, D: the ghost reveal plays once per new ghost and again after "Run again"; reduced motion jumps to the end state. The rehearsal slider is a pure function of its step (07:00-17:00, half hours; before 12:00 shows the morning frame).
+- 2026-11-13, D: routes that have not landed (unresolved, ask, briefing, agent log, 3D view) hide or fall back; the flat plan never depends on them. The 3D view is lazy-loaded from `web/src/three/ModelView3D.tsx` only if the file exists.
