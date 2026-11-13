@@ -1,6 +1,6 @@
 # Demo script
 
-Owner: D. Read before any task that touches what a judge sees.
+Owner: D (presenter mode: L). Read before any task that touches what a judge sees.
 
 Length: 3 minutes. A judge understands it in 20 s; the ghost wall is on screen within 90 s.
 
@@ -8,26 +8,43 @@ Anchor sentence: the site checks every crew's stated plan against a live model o
 
 ## Setup (before the judges arrive)
 
-- `npm run demo`, then open http://localhost:5173 on the laptop (1440x900 or larger, light room is fine: the page is light on purpose).
-- Open http://localhost:5173/phone on a real phone on the same network, or in a second narrow window. Pick the crew named in each beat.
-- Click **Start clean** in the Learning panel so run 1 starts with nothing learned. Reload the page: the ghost reveal plays once on load.
-- Phone texts below in `[[...]]` come from `data/scenario.md` (Phone script) once B writes it. Each text must have a cache entry (its id is printed in the server log as `cacheId` on every post); otherwise the phone answers "Not found" honestly.
+- `npm run demo`, then open http://localhost:5173/?present=1 on the laptop (1440x900 or larger; the page is light on purpose, it survives a projector).
+- A small step bar sits bottom-left of the plan. It is the only thing presenter mode adds to the screen.
+- Press **R** once: the run starts clean (nothing learned) and the bar shows beat 1.
+- Optional: open http://localhost:5173/phone on a real phone on the same network to hold up. The presenter beats post from the **Crew phone** inset on the laptop; the real phone refreshes with them.
+- Phone texts live in one place: `web/src/present/beats.ts` (`PHONE`). Each must have a cache entry (`npm run cache-id -- "<text>" <crewId>` prints its id); without one the phone answers "Not found" honestly. A text still in `[[...]]` is not sent and the bar says so.
+
+## Keys (presenter mode)
+
+| Key | Does |
+|---|---|
+| → | next beat: runs its action once, then sets the view |
+| ← | previous beat: view only, nothing is sent again |
+| R | reset: start clean (POST /api/reset, nothing learned) and go to beat 1 |
+| H | hide or show the step bar (keys still work) |
+| P | presenter mode on or off without the URL flag |
+
+Every beat calls the same code as the buttons (store actions, the phone's own send). Nothing on screen is staged.
 
 ## Beats
 
-| Time | Beat | Do | Judge sees |
-|---|---|---|---|
-| 0:00-0:20 | Problem | Say: "Site decisions live in group chats. A change made in the office thread never reaches the plumber who starts tomorrow." Point at the plan. | A construction drawing of level 2, crews as letter badges, "Simulated site data" top right. |
-| 0:20-0:45 | Build: chat becomes the model | In **The record**, click **Model after this message** on the architect's Rev C message (m-001), then **Back to now**. Click the wall in unit 204: the inspector shows its history, each row quoting the message it came from. | Every element has a source. "v2 Moved, Thu 12 Nov 14:02" quotes the architect. |
-| 0:45-1:20 | Live check: the ghost wall | On the phone, as Novak Plumbing, send `[[phone text: plumbing states tomorrow's rough-in in the 204 bath]]`. | The phone answers HOLD with one reason and the source. The main screen frames unit 204, draws the true wall, grows the red ghost to where plumbing thinks the wall is, then "0.4 m east". Everything holds still. |
-| 1:20-1:35 | Why | Click the ghost. | "Why this is held": what was said, and "What Novak Plumbing did not hear" quoting the office-thread change. |
-| 1:35-2:00 | Rehearse tomorrow | Drag the time slider from 07:00 to 17:00. | Crew lanes show who is where; the track is already marked in redline where tomorrow has clashes. Clashing rooms outline in redline as the cursor passes. |
-| 2:00-2:20 | Fix | In **Needs approval**, click **Send fix to Novak Plumbing**. | The item reads "Fix sent" with the exact text sent; the wall turns green; the ghost is gone; the phone shows the HOLD message from the system. |
-| 2:20-2:45 | Learn | On the phone send `[[phone text: a crew names "the blue room"]]`. It appears under **Learning**; pick Unit 204, click **Remember this place**, then **Run again with what we learned**. Send the same text again. | Run 1: the place is unconfirmed and the superintendent maps it once. Run 2: resolved on its own, the check runs at once. |
-| 2:45-3:00 | Numbers, close | Scroll the side column to **Measured**. Say the numbers exactly as shown. Close with the anchor sentence. | Caught / missed / false alarms per check, labelled with the replay id and case count. Nothing typed by hand. |
+| Time | Beat (key →) | What happens | Say | Manual fallback |
+|---|---|---|---|---|
+| 0:00 | 1 Problem | Run starts clean; whole floor; phone closed. | "Site decisions live in group chats. A change made in the office thread never reaches the plumber who starts tomorrow." | **Start clean** in Learning. |
+| 0:20 | 2 Build | Model shown as of the architect's Rev C (m-001); the inspector opens on the wall that message moved, every history row quoting its message. | "Chat becomes the model. Every element has a source." | In **The record**, **Model after this message** on m-001, then click the 204 east wall. |
+| 0:45 | 3 Ghost wall | Back to now. The phone (as Novak Plumbing) sends `PHONE.plumbingIntent`; the phone answers HOLD with one reason and the source. The plan frames unit 204, draws the true wall, grows the red ghost to where plumbing thinks the wall is, then "0.4 m east". Everything holds still. | "Plumbing says what it does tomorrow. Red is where plumbing thinks the wall is: 40 cm off." | **Crew phone**, pick Novak Plumbing, type the text, Send. |
+| 1:20 | 4 Why | Inspector on the ghost: what was said, and "What Novak Plumbing did not hear" quoting the office-thread change. | "The change was said in a thread plumbing does not read." | Click the ghost. |
+| 1:35 | 5 Rehearse | Slider jumps to the first clash on tomorrow's track; held rooms outline in redline. | "Tomorrow, played forward the evening before." | Drag the slider to the redline mark. |
+| 2:00 | 6 Fix | Top fix approved: "Fix sent" with the exact text, the wall turns green, the ghost is gone, the phone shows the HOLD message from the system. | "One tap. The crew gets the message, the model knows they heard it." | **Send fix to Novak Plumbing**. |
+| 2:10 | 7 Ask | The phone asks `PHONE.question`; the answer comes from the record with sources (CLEAR now that the fix reached them). | "Crews text a question and get an answer from the record. Decisions still go to the superintendent." | Type the question in the phone. |
+| 2:20 | 8 Learn | The phone sends `PHONE.blueRoom`; run 1 cannot place "the blue room", it appears under **Learning**. | "Crews have nicknames. The record does not guess." | Type the text in the phone. |
+| 2:35 | 9 Run 2 | "The blue room" is mapped to Unit 204, the run starts again with what was learned, and the same words are sent again: resolved on its own. The agent log shows the crew on watch warned as soon as the wall moved. | "The superintendent answered once. The next run knows." | **Remember this place**, **Run again with what we learned**, send the text again. |
+| 2:45 | 10 Numbers | Side column scrolls to **Measured**. | Say the numbers exactly as shown. Close with the anchor sentence. | Scroll to **Measured**. |
 
 ## Fallbacks
 
-- Phone not on the network: use the **Crew phone** inset (bottom right of the plan).
+- Phone not on the network: the laptop's **Crew phone** inset does everything; presenter beats use it anyway.
+- A text has no cache entry: the phone answers "Not found" with its id. Keep going; the ghost from the golden replay is already on the plan and beat 3 replays its reveal.
 - A route not on the server yet: its panel hides or says so; the flat plan and the ghost never depend on it.
+- 3D: the **Flat | 3D** toggle is optional. Stay on flat for the reveal; it is the one that always works.
 - Reduced motion on the presenting machine: the reveal jumps to its end state. Say "here is where plumbing thinks the wall is" and point.

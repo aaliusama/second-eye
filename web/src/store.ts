@@ -23,6 +23,13 @@ interface SiteStore {
   /** Bumped by "Run again", so the ghost reveal plays again. */
   run: number;
   busy?: string;
+  /** Crew phone inset on the main screen. */
+  phoneOpen: boolean;
+  /**
+   * A message the presenter sends from the phone. The Phone component picks it up and submits it
+   * through its own send path (same API calls as typing), then calls `done`.
+   */
+  phoneScript?: { nonce: number; crewId: string; text: string; done: () => void };
 
   refresh: () => Promise<void>;
   setAsOf: (t: string | undefined) => Promise<void>;
@@ -31,6 +38,11 @@ interface SiteStore {
   approve: (fixId: string) => Promise<void>;
   runAgain: (keepLearning: boolean) => Promise<void>;
   teach: (item: UnresolvedItem, alias: string, elementId: string) => Promise<void>;
+  setPhoneOpen: (open: boolean) => void;
+  /** Open the phone and send `text` as `crewId` through the phone's own send. Resolves when answered. */
+  phoneSend: (crewId: string, text: string) => Promise<void>;
+  /** Play the ghost reveal again for the ghosts on screen. */
+  replayReveal: () => void;
 }
 
 const settle = <T,>(p: Promise<T | undefined>): Promise<T | null> => p.then((v) => v ?? null).catch(() => null);
@@ -41,6 +53,7 @@ export const useSite = create<SiteStore>((set, get) => ({
   slider: 0,
   selection: undefined,
   run: 0,
+  phoneOpen: false,
 
   refresh: async () => {
     try {
@@ -114,4 +127,14 @@ export const useSite = create<SiteStore>((set, get) => ({
       set({ busy: undefined });
     }
   },
+
+  setPhoneOpen: (phoneOpen) => set({ phoneOpen }),
+
+  phoneSend: (crewId, text) =>
+    new Promise<void>((resolve) => {
+      const nonce = (get().phoneScript?.nonce ?? 0) + 1;
+      set({ phoneOpen: true, phoneScript: { nonce, crewId, text, done: resolve } });
+    }),
+
+  replayReveal: () => set({ run: get().run + 1 }),
 }));

@@ -4,6 +4,7 @@ import { elementById, findingKey, formatTime, frameAt, messageMap, resolvedFindi
 import { FlatView } from "./FlatView";
 import { AgentLog, Inspector, Learning, Measured, Queue, Record } from "./panels";
 import { Phone } from "./Phone";
+import { Presenter } from "./present/Presenter";
 import { useReveal } from "./reveal";
 import { Slider } from "./Slider";
 import { useSite } from "./store";
@@ -84,13 +85,17 @@ function Main() {
   const refresh = useSite((s) => s.refresh);
   const [view, setView] = useState<"flat" | "3d">("flat");
   const [no3D, setNo3D] = useState(false);
-  const [phoneOpen, setPhoneOpen] = useState(false);
+  const phoneOpen = useSite((s) => s.phoneOpen);
+  const setPhoneOpen = useSite((s) => s.setPhoneOpen);
 
   const d = useMemo(() => {
     if (!state) return undefined;
-    const frame = frameAt(rehearsal, slider);
+    // The rehearsal is tomorrow's plan as of now. When the record is shown as of an earlier time,
+    // leave it out, or the plan view would show findings from messages not yet said.
+    const plan = asOf ? undefined : rehearsal;
+    const frame = frameAt(plan, slider);
     const resolved = resolvedFindingIds(state.fixes);
-    const rehearsalFindings = rehearsal?.frames.flatMap((f) => f.findings) ?? [];
+    const rehearsalFindings = plan?.frames.flatMap((f) => f.findings) ?? [];
     const all = [...state.findings, ...rehearsalFindings];
     const visible = [...state.findings, ...(frame?.findings ?? [])].filter((f) => !resolved.has(f.id));
     // One ghost per finding id; the live one wins so the reveal key stays stable.
@@ -103,7 +108,7 @@ function Main() {
     const active = new Set(frame?.activeTaskIds ?? []);
     const activeTasks = state.scene.tasks.filter((t) => active.has(t.id));
     return { all, visible, ghosts, conflictIds, clearIds, activeTasks, resolved };
-  }, [state, rehearsal, slider]);
+  }, [state, rehearsal, slider, asOf]);
 
   const reveal = useReveal(d?.ghosts.map(findingKey) ?? [], run);
   const msgMap = useMemo(() => messageMap(messages), [messages]);
@@ -190,10 +195,11 @@ function Main() {
           flat
         )}
         <Inspector scene={state.scene} selection={selection} findings={d.all} messages={msgMap} onClose={() => select(undefined)} />
+        <Presenter />
         <div className="phone-inset">
           {phoneOpen && <Phone scene={state.scene} messages={messages} day={rehearsal?.day} compact onPosted={() => void refresh()} />}
           <div className="row">
-            <button type="button" className="quiet" aria-expanded={phoneOpen} onClick={() => setPhoneOpen((v) => !v)}>
+            <button type="button" className="quiet" aria-expanded={phoneOpen} onClick={() => setPhoneOpen(!phoneOpen)}>
               {phoneOpen ? "Hide crew phone" : "Crew phone"}
             </button>
             <a className="quiet link" href="/phone" target="_blank" rel="noreferrer">
@@ -215,7 +221,7 @@ function Main() {
       </aside>
 
       <footer className="bottom">
-        <Slider scene={state.scene} rehearsal={rehearsal} step={slider} onStep={setSlider} resolved={d.resolved} />
+        <Slider scene={state.scene} rehearsal={asOf ? undefined : rehearsal} step={slider} onStep={setSlider} resolved={d.resolved} />
       </footer>
     </div>
   );

@@ -1,7 +1,8 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import type { ChatMessage, PostMessageResponse, Scene } from "@site/contracts";
 import { announceChange, api, isQuestion, type Answer, type Briefing } from "./api";
 import { formatTime } from "./derive";
+import { useSite } from "./store";
 
 // Owner: D. A crew lead's phone: a plain message thread. System replies lead with HOLD or CLEAR,
 // then one reason, then the source. Questions go to /api/ask when the server has it.
@@ -87,14 +88,13 @@ export function Phone({
   }
   for (const [after, extra] of Object.entries(local)) if (!thread.some((l) => l.id === after)) lines.push(...extra);
 
-  async function send(e: FormEvent) {
-    e.preventDefault();
-    const body = text.trim();
-    if (!body || !crew) return;
+  /** One send path for typed and presenter-scripted messages: the same API calls either way. */
+  async function submit(body: string, as: { id: string; name: string } | undefined): Promise<void> {
+    if (!body || !as) return;
     setSending(true);
     try {
       if (isQuestion(body)) {
-        const answer = await api.ask(crew.id, body);
+        const answer = await api.ask(as.id, body);
         if (answer) {
           const key = `q-${Date.now()}`;
           setLocal((s) => ({
@@ -112,9 +112,9 @@ export function Phone({
       }
       const r = await api.postMessage({
         thread: "site-group",
-        senderName: crew.name,
+        senderName: as.name,
         senderRole: "crew_lead",
-        crewId: crew.id,
+        crewId: as.id,
         text: body,
         kind: "text",
       });
@@ -128,6 +128,31 @@ export function Phone({
       setSending(false);
     }
   }
+
+  function send(e: FormEvent) {
+    e.preventDefault();
+    void submit(text.trim(), crew);
+  }
+
+  // Presenter mode: a scripted message is sent at once (no typing effect) through submit().
+  const script = useSite((s) => s.phoneScript);
+  const handled = useRef(0);
+  useEffect(() => {
+    if (!script || script.nonce === handled.current) return;
+    handled.current = script.nonce;
+    const as = scene.crews.find((c) => c.id === script.crewId);
+    if (as) setCrewId(as.id);
+    void submit(script.text, as).finally(script.done);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [script]);
+
+  // Keep the newest message in view, so an answer is never below the fold of the thread.
+  const listRef = useRef<HTMLOListElement>(null);
+  const lineCount = lines.length;
+  useEffect(() => {
+    const el = listRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [lineCount, sending]);
 
   return (
     <section className={`phone${compact ? " compact" : ""}`} aria-label="Crew phone">
@@ -154,7 +179,7 @@ export function Phone({
           {briefing.length === 0 ? <p className="meta">Nothing on record for this crew.</p> : briefing.map((l, i) => <p key={i}>{l}</p>)}
         </div>
       )}
-      <ol className="bubbles" aria-live="polite">
+      <ol className="bubbles" aria-live="polite" ref={listRef}>
         {lines.length === 0 && <li className="meta">No messages from this crew yet.</li>}
         {lines.map((l) => (
           <li key={l.id} className={l.from}>
