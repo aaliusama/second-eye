@@ -36,7 +36,7 @@ Last update: Fri 13 Nov, night. `main`: typecheck clean, 188 unit tests, e2e 14 
 | I | judging map, submission draft, pitch, e2e test | on main |
 | J | question parser matches walls by name ("where is the 204 east wall?") | on main |
 | K | new shapes lifted into `contracts/` | on main |
-| L | presenter mode: one key per demo beat | building |
+| L | presenter mode: `?present=1`, one key per demo beat | on main |
 | M | e2e covers everything on main; scripted demo video recorder (`video/`) | on main |
 | N | premium pass: evening-rehearsal header with status strip, rail as tabs, plain-word approval cards, agent timeline | building |
 | O | premium pass: "Site chat" feed showing each message becoming operations with confidence (the Build step) | building |
