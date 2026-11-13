@@ -1,5 +1,4 @@
-import { Component, lazy, Suspense, useEffect, useMemo, useState, type ComponentType, type ReactNode } from "react";
-import type { Finding, Scene } from "@site/contracts";
+import { Component, lazy, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
 import { onChange } from "./api";
 import { elementById, findingKey, formatTime, frameAt, messageMap, resolvedFindingIds } from "./derive";
 import { FlatView } from "./FlatView";
@@ -7,30 +6,13 @@ import { AgentLog, Inspector, Learning, Measured, Queue, Record } from "./panels
 import { Phone } from "./Phone";
 import { useReveal } from "./reveal";
 import { Slider } from "./Slider";
-import { useSite, type Selection } from "./store";
+import { useSite } from "./store";
 
 // Owner: D. The model is the page. Flat SVG view always works; 3D is a second renderer (lane H).
 
-interface View3DProps {
-  scene: Scene;
-  findings: Finding[];
-  selectedId?: string;
-  onSelect: (id: string | undefined) => void;
-  revealFindingKey?: string;
-  onUnavailable: () => void;
-}
-
-// The 3D view lands separately; a missing file means no toggle, not a broken build.
-const loaders = import.meta.glob("./three/ModelView3D.tsx");
-const load3D = loaders["./three/ModelView3D.tsx"];
-const ModelView3D = load3D
-  ? lazy(async () => {
-      const m = (await load3D()) as { ModelView3D?: ComponentType<View3DProps>; default?: ComponentType<View3DProps> };
-      const C = m.ModelView3D ?? m.default;
-      if (!C) throw new Error("ModelView3D export not found");
-      return { default: C };
-    })
-  : undefined;
+// Lane H's 3D view, lazy so three.js stays out of the first bundle. findingKey in derive.ts is the
+// same `${id}:${trigger}` as the one ModelView3D exports; importing that one would pull three.js in eagerly.
+const ModelView3D = lazy(() => import("./three/ModelView3D").then((m) => ({ default: m.ModelView3D })));
 
 class Fallback extends Component<{ onError: () => void; children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
@@ -101,7 +83,7 @@ function Main() {
   const run = useSite((s) => s.run);
   const refresh = useSite((s) => s.refresh);
   const [view, setView] = useState<"flat" | "3d">("flat");
-  const [no3D, setNo3D] = useState(!ModelView3D);
+  const [no3D, setNo3D] = useState(false);
   const [phoneOpen, setPhoneOpen] = useState(false);
 
   const d = useMemo(() => {
@@ -129,12 +111,28 @@ function Main() {
   if (status === "loading") return <p className="boot">Loading the site record</p>;
   if (!state || !d) return <p className="boot">{error ?? "Server not reachable. Start it with npm run demo."}</p>;
 
-  const selectedId = selection?.kind === "element" ? selection.id : selection?.kind === "finding" ? selection.key : undefined;
-  const select3D = (id: string | undefined) => {
-    if (id === undefined) return select(undefined);
-    const f = d.all.find((x) => findingKey(x) === id || x.id === id);
-    const s: Selection = f && !elementById(state.scene, id) ? { kind: "finding", key: findingKey(f) } : { kind: "element", id };
-    select(s);
+  // 3D outlines elements only; a selected finding outlines its ghost's element.
+  const selectedFinding = selection?.kind === "finding" ? d.all.find((f) => findingKey(f) === selection.key) : undefined;
+  const selectedId = selection?.kind === "element" ? selection.id : (selectedFinding?.ghost?.elementId ?? selectedFinding?.elementIds[0]);
+  const select3D = (elementId: string, key?: string) =>
+    select(key ? { kind: "finding", key } : elementById(state.scene, elementId) ? { kind: "element", id: elementId } : undefined);
+  // The 3D view draws every finding with a ghost: pass one per incident, like the flat view.
+  const findings3D = [...d.visible.filter((f) => !f.ghost), ...d.ghosts];
+  const flat = (
+    <FlatView
+      scene={state.scene}
+      ghosts={d.ghosts}
+      conflictIds={d.conflictIds}
+      clearIds={d.clearIds}
+      activeTasks={d.activeTasks}
+      selection={selection}
+      onSelect={select}
+      reveal={reveal}
+    />
+  );
+  const backToFlat = () => {
+    setNo3D(true);
+    setView("flat");
   };
 
   return (
@@ -173,38 +171,23 @@ function Main() {
             {error && <span className="error">{error}</span>}
           </div>
         )}
-        {view === "3d" && ModelView3D && !no3D ? (
-          <Fallback
-            onError={() => {
-              setNo3D(true);
-              setView("flat");
-            }}
-          >
-            <Suspense fallback={<p className="meta">Loading the 3D view</p>}>
-              <ModelView3D
-                scene={state.scene}
-                findings={d.visible}
-                selectedId={selectedId}
-                onSelect={select3D}
-                revealFindingKey={reveal.key}
-                onUnavailable={() => {
-                  setNo3D(true);
-                  setView("flat");
-                }}
-              />
-            </Suspense>
-          </Fallback>
+        {view === "3d" && !no3D ? (
+          <div className="view3d">
+            <Fallback onError={backToFlat}>
+              <Suspense fallback={flat}>
+                <ModelView3D
+                  scene={state.scene}
+                  findings={findings3D}
+                  selectedId={selectedId}
+                  onSelect={select3D}
+                  revealFindingKey={reveal.key}
+                  onUnavailable={backToFlat}
+                />
+              </Suspense>
+            </Fallback>
+          </div>
         ) : (
-          <FlatView
-            scene={state.scene}
-            ghosts={d.ghosts}
-            conflictIds={d.conflictIds}
-            clearIds={d.clearIds}
-            activeTasks={d.activeTasks}
-            selection={selection}
-            onSelect={select}
-            reveal={reveal}
-          />
+          flat
         )}
         <Inspector scene={state.scene} selection={selection} findings={d.all} messages={msgMap} onClose={() => select(undefined)} />
         <div className="phone-inset">

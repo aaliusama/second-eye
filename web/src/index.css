@@ -216,6 +216,8 @@ input {
 
 /* ---------- Flat view ---------- */
 
+/* The 3D view fills its parent, so the parent must have a size. */
+.view3d,
 .flat {
   position: absolute;
   inset: 0;
