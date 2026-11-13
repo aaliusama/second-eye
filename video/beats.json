@@ -1,0 +1,14 @@
+{
+  "baseUrl": "http://localhost:5173",
+  "browserPath": "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
+  "totalSeconds": 178,
+  "sliderSteps": 19,
+  "wallName": "Unit 204 bathroom east wall",
+  "crews": { "plumbing": "Novak Plumbing" },
+  "blueRoomCrew": "Walsh Drywall",
+  "blueRoomPlace": "Unit 204",
+  "phone": {
+    "ghost": "[[from data/scenario.md Phone script: plumbing states tomorrow's rough-in in the 204 bath]]",
+    "blueRoom": "[[from data/scenario.md Phone script: a crew names \"the blue room\"]]"
+  }
+}
