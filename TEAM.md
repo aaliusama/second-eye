@@ -21,14 +21,14 @@ Shared: `docs/decisions.md`. Anyone appends one line per decision; on a merge co
 
 ## Status (updated on every merge to main)
 
-Last update: Fri 13 Nov, night. `main`: typecheck clean, 188 unit tests, e2e 14 pass / 5 todo (the 5 need lane B's data), eval 1/1 on slice 1 (full scenario pending B).
+Last update: Sat 14 Nov, after PR #1 (`must/integration`) merged. `main`: e2e 14 pass / 5 todo (the 5 need lane B's data). Live extraction code landed (Groq JSON mode, zod, one retry, cache write) but has not been run on real Groq yet. C and D MUST audits done. Lane B data (full chat, labels, phone script, real cache) still missing.
 
 | Lane | What | State |
 |---|---|---|
 | A | live chat cache ids, learned nicknames, approve clears ghost, agent + query routes wired | on main |
-| B | 6-unit scenario, ~200 messages, labels, Groq extraction + cache, phone script | building |
-| C | eval of live + rehearsal, planted-incident and false-alarm tests | on main |
-| D | flat drafting view, ghost reveal, approvals, slider, phone, panels, demo script | on main |
+| B | live Groq extraction code (prompt, validation, cache builder) on main; 6-unit scenario, ~200 messages, labels, real cache, phone script still missing | building |
+| C | eval of live + rehearsal, planted-incident and false-alarm tests; MUST audit done (unsure = warn, live listen step) | on main |
+| D | flat drafting view, ghost reveal, approvals, slider, phone, panels, demo script; MUST audit done (fixture fallback, sources as who/where/when) | on main |
 | E | crews ask questions, briefings, digest (`/api/ask`, `/api/briefing`, `/api/digest`) | on main |
 | F | MCP server for agents and robots, demo robot planner | on main |
 | G | autonomous site agent (`/api/agent/log`), crews on watch learned for run 2 | on main |
@@ -95,12 +95,12 @@ Work top to bottom. MUST before NICE. KILL items are listed in `AGENTS.md`.
 
 ### A - Spine (Hassan)
 MUST
-- [ ] Scaffold: npm workspaces (`contracts`, `server`, `web`, `eval`), vitest, scripts `demo`, `dev`, `test`, `eval`, `typecheck`, `.env.example`, `.gitignore`. Replace the FILL IN line in `AGENTS.md` with the real commands.
-- [ ] `contracts/`: zod schemas and types for ChatMessage, Operation, Element, Scene, CrewIntent, Plan, Finding (with ghost geometry for D), Fix, Correction, RehearsalFrame, API shapes. Plus `contracts/fixtures/`: one scene, a few operations, one intent, one finding with a ghost. **On main by 21:45.**
-- [ ] `server/model/`: apply operations, element history (every change keeps sourceMessageId and confidence), plan from `plan_task`, scene at replay time t.
-- [ ] Server runtime: replay clock, pipeline, one JSON log line per operation and finding, the API above.
-- [ ] `server/learning/`: store corrections (approved fixes, location nicknames, crews that misread) and feed them into the next run. `npm run demo` starts from a clean store.
-- [ ] `README.md` (setup, run, environment, architecture, assumptions) and `docs/architecture.md`.
+- [x] Scaffold: npm workspaces (`contracts`, `server`, `web`, `eval`), vitest, scripts `demo`, `dev`, `test`, `eval`, `typecheck`, `.env.example`, `.gitignore`. Replace the FILL IN line in `AGENTS.md` with the real commands.
+- [x] `contracts/`: zod schemas and types for ChatMessage, Operation, Element, Scene, CrewIntent, Plan, Finding (with ghost geometry for D), Fix, Correction, RehearsalFrame, API shapes. Plus `contracts/fixtures/`: one scene, a few operations, one intent, one finding with a ghost. **On main by 21:45.**
+- [x] `server/model/`: apply operations, element history (every change keeps sourceMessageId and confidence), plan from `plan_task`, scene at replay time t.
+- [x] Server runtime: replay clock, pipeline, one JSON log line per operation and finding, the API above.
+- [x] `server/learning/`: store corrections (approved fixes, location nicknames, crews that misread) and feed them into the next run. `npm run demo` starts from a clean store.
+- [x] `README.md` (setup, run, environment, architecture, assumptions) and `docs/architecture.md`.
 - [ ] Keep main green: revert any merge that breaks `npm run demo`.
 
 NICE
@@ -127,16 +127,16 @@ Done when: golden replay and full cache are on main and `npm run demo` makes no 
 
 ### C - Checks + eval (Hassan)
 MUST
-- [ ] `server/checks/`: four pure checks, each with unit tests built from fixture scenes:
+- [x] `server/checks/`: four pure checks, each with unit tests built from fixture scenes:
   - latest change: the crew's intent uses an element version older than its latest change.
   - space clash: two crews in the same place in the same plan slot.
   - order of work: a task starts before the task it depends on (close wall before inspection).
   - open decision: a task depends on an element still `proposed`.
-- [ ] Every finding has sourceMessageId(s), crew, elementIds, a one-line explanation and the ghost geometry D draws. Latest-change check first: it is the ghost wall.
-- [ ] Live check: one new intent -> findings for that crew. If a crew is at risk and has said nothing, produce a question to that crew instead of a finding.
-- [ ] `rehearse()`: step tomorrow's plan in order with findings per step, for D's slider.
-- [ ] `proposeFixes()`: for each finding a correction plus the message sent to the crew after approval.
-- [ ] `eval/`: `npm run eval` runs the golden replay against `data/labels.json`, prints caught / missed / false alarms per check, writes `eval/results.json` for the UI and README.
+- [x] Every finding has sourceMessageId(s), crew, elementIds, a one-line explanation and the ghost geometry D draws. Latest-change check first: it is the ghost wall.
+- [x] Live check: one new intent -> findings for that crew. If a crew is at risk and has said nothing, produce a question to that crew instead of a finding.
+- [x] `rehearse()`: step tomorrow's plan in order with findings per step, for D's slider.
+- [x] `proposeFixes()`: for each finding a correction plus the message sent to the crew after approval.
+- [x] `eval/`: `npm run eval` runs the golden replay against `data/labels.json`, prints caught / missed / false alarms per check, writes `eval/results.json` for the UI and README.
 
 NICE
 - [ ] Results at two or three confidence thresholds.
@@ -146,13 +146,13 @@ Done when: all planted demo incidents are caught on the golden replay and `npm r
 
 ### D - Web + story (<name>)
 MUST
-- [ ] `web/`: Vite + React app. Works from `contracts/fixtures/` until A's API is ready.
-- [ ] Flat top-down view: elements colored by state, ghost element in red at the conflicting position. Clicking it shows the finding and the source message.
+- [x] `web/`: Vite + React app. Works from `contracts/fixtures/` until A's API is ready.
+- [x] Flat top-down view: elements colored by state, ghost element in red at the conflicting position. Clicking it shows the finding and the source message.
 - [ ] Crew chat simulator: send a message as a crew -> live check -> ghost appears.
-- [ ] Rehearsal time slider over tomorrow's plan.
-- [ ] Approval queue: one tap approves a fix and shows the message sent to the crew.
-- [ ] "Simulated site data" label on every screen. Eval panel shows only `eval/results.json`.
-- [ ] `docs/demo-script.md`: 3 minutes, judge understands in 20 s, ghost wall visible within 90 s.
+- [x] Rehearsal time slider over tomorrow's plan.
+- [x] Approval queue: one tap approves a fix and shows the message sent to the crew.
+- [x] "Simulated site data" label on every screen. Eval panel shows only `eval/results.json`.
+- [x] `docs/demo-script.md`: 3 minutes, judge understands in 20 s, ghost wall visible within 90 s.
 - [ ] Written submission text and the 3-minute video **by 13:30**.
 
 NICE
