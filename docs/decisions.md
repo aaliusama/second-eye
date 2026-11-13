@@ -67,3 +67,7 @@ One line per decision: date, who, what, why. On a merge conflict keep both lines
 - 2026-11-13, C: evaluation matches the check and trigger message plus every labelled crew and element; empty crew/element lists are wildcards, and findings may include extra evidence elements. An alert about a different wall or crew cannot count as a catch.
 - 2026-11-13, C: clash fixes keep the earlier trade in the morning and move only the later trade to a free afternoon, checking both room and crew bookings. Full-day work, missing task details or no free afternoon require a revised slot from the superintendent; no guessed morning slot or shortened duration.
 - 2026-11-13, C: warning findings propose confirmation messages prefixed WARN, never HOLD or instructions to move or build. Existing silent-crew questions remain questions.
+
+- 2026-11-13, C: interior open decisions are inferred only for task-relevant material/fixture names; paint depends on proposed colour, installing a named fixture does not inherit unrelated fixtures or finishes. Unknown categories are not guessed; proposal confidence affects severity.
+- 2026-11-13, C: evaluation includes active and resolved live alerts. Repeat suppression requires matching nonempty risk evidence as well as check, crews and elements; distinct clash pairs count separately.
+- 2026-11-13, C: only human messages count as crew replies. Evening findings ask each silent crew individually; known replies prevent low-confidence-only questions. System DMs never silence the listen step.

@@ -210,15 +210,18 @@ describe("proposeFixes", () => {
       expect(proposeFixes([evening], fixtureScene, [before, change, other])[0]!.kind).toBe("ask_crew");
     });
 
-    it("multi-crew finding asks only if every crew is silent", () => {
+    it("multi-crew finding asks each silent crew, while a crew that spoke gets the normal fix", () => {
       const clash: Finding = { ...evening, crewIds: ["crew-drywall", "crew-plumbing"], evidenceMessageIds: ["m-001"] };
       expect(proposeFixes([clash], fixtureScene, [before, change])[0]!.kind).toBe("ask_crew");
       expect(proposeFixes([clash], fixtureScene, [before, change, plumbing])[0]!.kind).toBe("notify_crew");
+      const mixed = proposeFixes([clash], fixtureScene, [before, change, plumbing])[0]!;
+      expect(mixed.messages.find((m) => m.crewId === "crew-drywall")!.text).toMatch(/^Are you still planning/);
+      expect(mixed.messages.find((m) => m.crewId === "crew-plumbing")!.text).toMatch(/^HOLD:/);
     });
 
     it("no evidence in messages falls back to the source message time; none at all is not silent", () => {
       const noEvidence: Finding = { ...evening, evidenceMessageIds: ["m-404"] };
-      expect(proposeFixes([noEvidence], fixtureScene, [before])[0]!.kind).toBe("ask_crew");
+      expect(proposeFixes([noEvidence], fixtureScene, [before])[0]!.kind).toBe("notify_crew");
       expect(proposeFixes([noEvidence], fixtureScene, [])[0]!.kind).toBe("notify_crew");
     });
 
@@ -228,14 +231,19 @@ describe("proposeFixes", () => {
       expect(proposeFixes([fixtureFinding], sceneWith([unsure]), [change])[0]!.kind).toBe("notify_crew");
     });
 
-    it("undefined messages behaves as before; low confidence still asks with messages", () => {
+    it("undefined messages preserves the fallback; low confidence alone does not ask a crew that has replied", () => {
       const fs = [evening, fixtureFinding];
       expect(proposeFixes(fs, fixtureScene, undefined)).toEqual(proposeFixes(fs, fixtureScene));
       expect(proposeFixes(fs, fixtureScene).map((x) => x.kind)).toEqual(["notify_crew", "notify_crew"]);
       const unsure = task({ id: "task-001", confidence: 0.5 });
       const [fix] = proposeFixes([evening], sceneWith([unsure]), [before, change, plumbing]);
-      expect(fix!.kind).toBe("ask_crew");
+      expect(fix!.kind).toBe("notify_crew");
       expect(fix!.messages[0]!.text.endsWith("Reply before 07:00.")).toBe(false);
+    });
+
+    it("a system DM does not make a silent crew look like it replied", () => {
+      const system: ChatMessage = { ...plumbing, id: "agent-question", senderRole: "system", text: "Are you still planning?" };
+      expect(proposeFixes([evening], fixtureScene, [before, change, system])[0]!.kind).toBe("ask_crew");
     });
   });
 });

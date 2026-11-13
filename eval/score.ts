@@ -19,8 +19,9 @@ import {
 // 2. A labelled case is caught when an incident has the same check and its messages include the
 //    case's triggerMessageId, with every labelled crew and element present. Empty label lists are wildcards.
 //    An incident that matches no case is one false alarm, except a repeat:
-// 3. A repeat is an unmatched incident with the same check, crews and elements as a caught one (the crew
-//    restated the same plan in a later message). It is the same problem said again: listed, not counted.
+// 3. A repeat is an unmatched incident with the same check, crews, elements and nonempty risk evidence
+//    as a caught one. A new risk source (or no evidence) is not proof of a restatement: count it.
+//    Space clashes use the full message pair as their risk source; different pairs are different incidents.
 
 const zero = (): EvalCounts => ({ caught: 0, missed: 0, falseAlarms: 0 });
 const uniqSorted = (xs: string[]) => [...new Set(xs)].sort();
@@ -31,6 +32,7 @@ export interface Incident {
   key: string;
   check: CheckName;
   messageIds: string[];
+  evidenceMessageIds: string[];
   elementIds: string[];
   crewIds: string[];
   triggers: Trigger[];
@@ -105,6 +107,7 @@ export function toIncidents(findings: Finding[], tasks: PlanTask[] = []): Incide
         key,
         check: f.check,
         messageIds: incidentMessages(f),
+        evidenceMessageIds: uniqSorted(f.evidenceMessageIds),
         elementIds: uniqSorted(f.elementIds),
         crewIds: uniqSorted(f.crewIds),
         triggers: [f.trigger],
@@ -114,6 +117,7 @@ export function toIncidents(findings: Finding[], tasks: PlanTask[] = []): Incide
       continue;
     }
     prev.crewIds = uniqSorted([...prev.crewIds, ...f.crewIds]);
+    prev.evidenceMessageIds = uniqSorted([...prev.evidenceMessageIds, ...f.evidenceMessageIds]);
     prev.triggers = uniqSorted([...prev.triggers, f.trigger]) as Trigger[];
     prev.findingIds = uniqSorted([...prev.findingIds, f.id]);
     if (conf !== undefined) prev.confidence = prev.confidence === undefined ? conf : Math.min(prev.confidence, conf);
@@ -126,12 +130,13 @@ const matches = (i: Incident, c: LabelledCase) =>
   i.messageIds.includes(c.triggerMessageId) &&
   c.crewIds.every((id) => i.crewIds.includes(id)) &&
   c.elementIds.every((id) => i.elementIds.includes(id));
-const problem = (i: Incident) => `${i.check}|${i.crewIds.join(",")}|${i.elementIds.join(",")}`;
+const riskSources = (i: Incident) => i.check === "space_clash" ? i.messageIds : i.evidenceMessageIds;
+const problem = (i: Incident) => `${i.check}|${i.crewIds.join(",")}|${i.elementIds.join(",")}|${riskSources(i).join(",")}`;
 
 /** Unmatched incidents split into repeats of a caught incident (rule 3) and false alarms. */
 function unmatched(labels: LabelSet, incidents: Incident[]): { repeats: Incident[]; falseAlarms: Incident[] } {
   const isMatched = (i: Incident) => labels.cases.some((c) => matches(i, c));
-  const caught = new Set(incidents.filter(isMatched).map(problem));
+  const caught = new Set(incidents.filter((i) => isMatched(i) && riskSources(i).length > 0).map(problem));
   const rest = incidents.filter((i) => !isMatched(i));
   return { repeats: rest.filter((i) => caught.has(problem(i))), falseAlarms: rest.filter((i) => !caught.has(problem(i))) };
 }

@@ -18,14 +18,14 @@
       "falseAlarms": 0
     },
     "open_decision": {
-      "caught": 2,
-      "missed": 2,
-      "falseAlarms": 1
+      "caught": 3,
+      "missed": 1,
+      "falseAlarms": 0
     }
   },
   "total": {
-    "caught": 12,
-    "missed": 3,
-    "falseAlarms": 1
+    "caught": 13,
+    "missed": 2,
+    "falseAlarms": 0
   }
 }

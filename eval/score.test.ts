@@ -58,6 +58,29 @@ describe("score", () => {
     expect(d.falseAlarms).toEqual([]);
   });
 
+  it("counts a new risk source for the same crews and elements as a false alarm, not a repeat", () => {
+    const later: Finding = { ...fixtureFinding, id: "f-later", sourceMessageId: "m-090", evidenceMessageIds: ["m-new-change"] };
+    const d = scoreDetail("x", fixtureLabels, [fixtureFinding, later], [], []);
+    expect(d.repeats).toEqual([]);
+    expect(d.falseAlarms.map((i) => i.findingIds)).toEqual([["f-later"]]);
+    expect(score("x", fixtureLabels, [fixtureFinding, later]).total.falseAlarms).toBe(1);
+  });
+
+  it("does not infer a restatement without risk evidence", () => {
+    const caught: Finding = { ...fixtureFinding, evidenceMessageIds: [] };
+    const later = { ...caught, id: "f-later", sourceMessageId: "m-090" };
+    expect(score("x", fixtureLabels, [caught, later]).total).toEqual({ caught: 1, missed: 0, falseAlarms: 1 });
+  });
+
+  it("does not suppress another clash pair in the same room with the same crews", () => {
+    const clash: Finding = { ...fixtureFinding, check: "space_clash", elementIds: ["room-206"], crewIds: ["crew-electrical", "crew-painting"], sourceMessageId: "m-061", evidenceMessageIds: ["m-060"] };
+    const labels: LabelSet = { cases: [{ id: "clash", check: "space_clash", triggerMessageId: "m-061", crewIds: clash.crewIds, elementIds: clash.elementIds, note: "" }] };
+    const later = { ...clash, id: "f-later", sourceMessageId: "m-091", evidenceMessageIds: ["m-090"] };
+    const d = scoreDetail("x", labels, [clash, later], [], []);
+    expect(d.repeats).toEqual([]);
+    expect(d.falseAlarms).toHaveLength(1);
+  });
+
   it("lists all four checks even with no cases and no findings", () => {
     const r = score("x", { cases: [] }, []);
     expect(Object.keys(r.perCheck).sort()).toEqual(["latest_change", "open_decision", "order_of_work", "space_clash"]);
