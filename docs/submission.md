@@ -52,7 +52,7 @@ All site data is simulated: [[n]] messages over two days on one floor of six uni
 
 - TypeScript throughout, npm workspaces, zod schemas as the single contract between parts.
 - Node `node:http` server; Vite + React web app; flat SVG drafting view plus a three.js view of the same scene.
-- xAI Grok for extraction (live mode); a per-message cache so the demo runs offline.
+- Groq (groq.com, model `openai/gpt-oss-120b`) for extraction and for parsing crew questions (live mode only); a per-message cache so the demo runs offline.
 - Vitest unit tests and an HTTP end-to-end test of the demo story; `npm run eval` for the measured results.
 - [[MCP server, if lane F lands]]
 

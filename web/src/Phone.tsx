@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import type { ChatMessage, PostMessageResponse, Scene } from "@site/contracts";
 import { announceChange, api, isQuestion, type Answer, type Briefing } from "./api";
-import { formatTime } from "./derive";
+import { crewName, formatTime } from "./derive";
+import { describeSource, sourceLine } from "./sources";
 import { useSite } from "./store";
 
 // Owner: D. A crew lead's phone: a plain message thread. System replies lead with HOLD or CLEAR,
@@ -14,21 +15,24 @@ interface Line {
   time?: string;
 }
 
-function replyFor(r: PostMessageResponse): string {
+/** Source ids as words: "Lena Hofer · office · Thu 14:02", never a raw id. */
+type Cite = (ids: string[]) => string;
+
+function replyFor(r: PostMessageResponse, cite: Cite): string {
   const f = r.findings[0];
   if (f) {
-    const sources = (f.evidenceMessageIds.length ? f.evidenceMessageIds : [f.sourceMessageId]).join(", ");
+    const sources = cite(f.evidenceMessageIds.length ? f.evidenceMessageIds : [f.sourceMessageId]);
     const more = r.findings.length > 1 ? ` (${r.findings.length - 1} more held)` : "";
     return `HOLD: ${f.summary}${more} Source: ${sources}.`;
   }
   if (r.intents.length > 0) {
-    return `CLEAR: nothing on record conflicts with “${r.intents[0].description}”. Source: ${r.message.id}.`;
+    return `CLEAR: nothing on record conflicts with “${r.intents[0].description}”. Source: ${cite([r.message.id])}.`;
   }
-  return `Not found: no plan for tomorrow recognised in this message. Source: ${r.message.id}.`;
+  return `Not found: no plan for tomorrow recognised in this message. Source: ${cite([r.message.id])}.`;
 }
 
-function answerText(a: Answer): string {
-  const src = a.sourceMessageIds.length ? ` Source: ${a.sourceMessageIds.join(", ")}.` : "";
+function answerText(a: Answer, cite: Cite): string {
+  const src = a.sourceMessageIds.length ? ` Source: ${cite(a.sourceMessageIds)}.` : "";
   if (a.kind === "escalated") return `Sent to the superintendent: ${a.text}${src}`;
   if (a.kind === "not_found") return `Not found in the record. ${a.text}`.trim();
   return `${a.text}${src}`;
@@ -60,6 +64,10 @@ export function Phone({
   const [briefing, setBriefing] = useState<string[] | null | undefined>(undefined);
   const [showBriefing, setShowBriefing] = useState(false);
   const crew = scene.crews.find((c) => c.id === crewId);
+  const citeFrom =
+    (extra: ChatMessage[] = []): Cite =>
+    (ids) =>
+      ids.map((id) => sourceLine(describeSource(id, [...messages, ...extra], (c) => crewName(scene, c)))).join("; ");
 
   useEffect(() => {
     setBriefing(undefined);
@@ -101,7 +109,7 @@ export function Phone({
             ...s,
             [key]: [
               { id: `${key}-q`, from: "crew", text: body },
-              { id: `${key}-a`, from: "system", text: answerText(answer) },
+              { id: `${key}-a`, from: "system", text: answerText(answer, citeFrom()) },
             ],
           }));
           setText("");
@@ -118,7 +126,7 @@ export function Phone({
         text: body,
         kind: "text",
       });
-      setLocal((s) => ({ ...s, [r.message.id]: [{ id: `${r.message.id}-reply`, from: "system", text: replyFor(r) }] }));
+      setLocal((s) => ({ ...s, [r.message.id]: [{ id: `${r.message.id}-reply`, from: "system", text: replyFor(r, citeFrom([r.message])) }] }));
       setText("");
       announceChange();
       onPosted?.();
