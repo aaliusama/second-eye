@@ -202,7 +202,7 @@ export function Learning({ scene, items }: { scene: Scene; items: UnresolvedItem
   const runAgain = useSite((s) => s.runAgain);
   const busy = useSite((s) => s.busy);
   return (
-    <section className="panel">
+    <section className="panel" id="learning">
       <h2>Learning</h2>
       <p className="meta">Places crews named that the record could not place, and runs that reuse what was confirmed.</p>
       {items && items.length === 0 && <p className="meta">Every place in the record is resolved.</p>}
@@ -289,7 +289,7 @@ export function Record({ messages }: { messages: ChatMessage[] }) {
 export function Measured() {
   const results = useSite((s) => s.evalResults);
   return (
-    <section className="panel">
+    <section className="panel" id="measured">
       <h2>Measured</h2>
       {!results && <p className="meta">No eval results on record. Run npm run eval.</p>}
       {results && (
