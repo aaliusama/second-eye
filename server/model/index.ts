@@ -6,9 +6,25 @@ import { logLine } from "../log";
 /**
  * Apply operations in array order. Pure: the input scene is never mutated,
  * same scene + operations in, same scene out. Unknown element ids are skipped and logged.
+ * Copy-on-write: the result gets its own top level and element/task arrays, plus a deep copy of each
+ * element an operation changes; untouched elements are shared with the input (nothing mutates a scene
+ * in place). A full deep clone per message was most of the replay's CPU time.
  */
 export function applyOperations(scene: Scene, operations: Operation[]): Scene {
-  const next: Scene = structuredClone(scene);
+  const next: Scene = { ...scene, elements: [...scene.elements], tasks: [...scene.tasks] };
+  const owned = new Set<Element>();
+  /** The element with this id in `next`, deep-copied the first time this call changes it. */
+  const own = (id: string): Element | undefined => {
+    const i = next.elements.findIndex((e) => e.id === id);
+    if (i < 0) return undefined;
+    let el = next.elements[i]!;
+    if (!owned.has(el)) {
+      el = structuredClone(el);
+      next.elements[i] = el;
+      owned.add(el);
+    }
+    return el;
+  };
 
   for (const op of operations) {
     if (op.time > next.time) next.time = op.time;
@@ -24,7 +40,7 @@ export function applyOperations(scene: Scene, operations: Operation[]): Scene {
       }
       case "add": {
         const el = structuredClone(op.element);
-        const existing = next.elements.find((e) => e.id === el.id);
+        const existing = own(el.id);
         if (existing) {
           existing.geometry = el.geometry;
           existing.state = el.state;
@@ -55,7 +71,7 @@ export function applyOperations(scene: Scene, operations: Operation[]): Scene {
         break;
       }
       case "move": {
-        const el = next.elements.find((e) => e.id === op.elementId);
+        const el = own(op.elementId);
         if (!el) {
           notFound(op.id, op.elementId);
           break;
@@ -67,7 +83,7 @@ export function applyOperations(scene: Scene, operations: Operation[]): Scene {
         break;
       }
       case "set_status": {
-        const el = next.elements.find((e) => e.id === op.elementId);
+        const el = own(op.elementId);
         if (!el) {
           notFound(op.id, op.elementId);
           break;
