@@ -36,3 +36,4 @@ One line per decision: date, who, what, why. On a merge conflict keep both lines
 - 2026-11-13, E: any question asking to change the design, choose a material or decide is escalated to the superintendent, whatever the parser said. The system never decides.
 - 2026-11-13, E: "can I start" runs the four checks on a synthetic intent and answers HOLD or CLEAR. With no own task in that place, it checks the elements inside the place.
 - 2026-11-13, E: shapes (Question, StructuredQuery, Answer) live in `server/query/schema.ts` until A lifts them into contracts.
+- 2026-11-13, H: 3D view lives in web/src/three as `ModelView3D`, lazy-loaded by D; flat SVG stays default and fallback. Labels use drei Html portalled into one fixed overlay (drei Text needs a non-woff2 font; Html with a late-connecting target dropped the first label). Camera uses fitToSphere, not fitToBox, because fitToBox snaps the polar angle to 0 or 90 degrees.
