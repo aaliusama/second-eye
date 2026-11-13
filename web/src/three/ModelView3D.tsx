@@ -1,0 +1,607 @@
+import "@fontsource-variable/archivo/wdth.css";
+import { CameraControls, ContactShadows, Grid, Html, Line, useCursor } from "@react-three/drei";
+import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
+import { Component, createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
+import { Box3, ExtrudeGeometry, Shape, Sphere, Vector2, Vector3, type Group, type Mesh } from "three";
+import type { Line2, LineSegments2 } from "three-stdlib";
+import type { Element, Finding, Scene } from "@site/contracts";
+import { font } from "../tokens";
+import { elementToMesh, type MeshProps } from "./elementToMesh";
+import { boxEdges, planBounds, slabOutline, solidBounds, solidFor, elementSolid, type Solid } from "./geometry";
+import { color, ghostFill, ghostRevealFill, groundShadow, unitBox } from "./materials";
+
+// Owner: H. Second renderer of the same scene (web/AGENTS.md): a cut-away architectural model.
+// Reads only the scene and findings from contracts. Flat SVG stays the default and the fallback.
+
+export interface ModelView3DProps {
+  scene: Scene;
+  findings: Finding[];
+  /** Element id to outline as selected. */
+  selectedId?: string;
+  /** Called with an element id when an element or its ghost is clicked; findingKey is set for ghosts. */
+  onSelect?: (elementId: string, findingKey?: string) => void;
+  /** `${finding.id}:${finding.trigger}` (or a bare finding id). Each change plays the ghost reveal once. */
+  revealFindingKey?: string;
+  /** WebGL missing or lost: the view renders nothing; show the flat view instead. */
+  onUnavailable?: () => void;
+}
+
+export const findingKey = (f: Finding) => `${f.id}:${f.trigger}`;
+const matchesKey = (f: Finding, key: string | undefined) => key !== undefined && (findingKey(f) === key || f.id === key);
+
+// ---------- Timing (web/AGENTS.md motion spec) ----------
+
+const CAMERA_MS = 600;
+const OUTLINE_MS = 220;
+const GROW_MS = 500;
+const LABEL_MS = 160;
+const easeOut = (p: number) => 1 - Math.pow(1 - Math.min(Math.max(p, 0), 1), 3);
+
+type Phase = "idle" | "camera" | "play" | "done";
+interface RevealState {
+  key?: string;
+  phase: Phase;
+  /** Clock time (s) when the outline step starts. */
+  t0: number;
+}
+
+function prefersReducedMotion(): boolean {
+  return typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
+}
+
+function hasWebGL(): boolean {
+  try {
+    const c = document.createElement("canvas");
+    return !!(c.getContext("webgl2") ?? c.getContext("webgl"));
+  } catch {
+    return false;
+  }
+}
+
+// ---------- Outer shell ----------
+
+class Boundary extends Component<{ onError: () => void; children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  componentDidCatch() {
+    this.props.onError();
+  }
+  render() {
+    return this.state.failed ? null : this.props.children;
+  }
+}
+
+/**
+ * All drei <Html> labels portal into this layer. Without a fixed target, Html re-mounts when the
+ * canvas' event target connects after first render, and the first label is lost (seen in the harness).
+ */
+const LabelLayer = createContext<RefObject<HTMLDivElement | null> | undefined>(undefined);
+const useLabelLayer = () => useContext(LabelLayer) as RefObject<HTMLElement> | undefined;
+
+export function ModelView3D(props: ModelView3DProps) {
+  const [available] = useState(hasWebGL);
+  const labels = useRef<HTMLDivElement>(null);
+  const onUnavailable = props.onUnavailable;
+  useEffect(() => {
+    if (!available) onUnavailable?.();
+  }, [available, onUnavailable]);
+  if (!available) return null;
+
+  return (
+    <Boundary onError={() => onUnavailable?.()}>
+      <div style={{ position: "relative", width: "100%", height: "100%" }}>
+      <Canvas
+        shadows
+        dpr={[1, 2]}
+        frameloop="demand"
+        camera={{ fov: 30, near: 0.1, far: 600, position: [0, 80, 0.01] }}
+        gl={{ antialias: true }}
+        onCreated={({ gl }) => {
+          gl.domElement.addEventListener("webglcontextlost", () => onUnavailable?.(), { once: true });
+        }}
+        onPointerMissed={() => undefined}
+        style={{ width: "100%", height: "100%", display: "block" }}
+      >
+        <color attach="background" args={[color.paper]} />
+        <LabelLayer.Provider value={labels}>
+          <Model {...props} />
+        </LabelLayer.Provider>
+      </Canvas>
+      <div ref={labels} style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden" }} />
+      </div>
+    </Boundary>
+  );
+}
+
+// ---------- Scene ----------
+
+interface GhostItem {
+  key: string;
+  finding: Finding;
+  element: Element;
+}
+
+function Model({ scene, findings, selectedId, onSelect, revealFindingKey }: ModelView3DProps) {
+  const bounds = useMemo(() => planBounds(scene), [scene]);
+  // Root offset snapped to the 5 m structural grid so the floor grid lines up with plan metres.
+  const offset = useMemo<[number, number, number]>(() => {
+    const cx = Math.round((bounds.minX + bounds.maxX) / 2 / 5) * 5;
+    const cy = Math.round((bounds.minY + bounds.maxY) / 2 / 5) * 5;
+    return [-cx, 0, cy];
+  }, [bounds]);
+  const meshes = useMemo(() => scene.elements.map(elementToMesh), [scene]);
+
+  const ghosts = useMemo<GhostItem[]>(() => {
+    const seen = new Set<string>();
+    const out: GhostItem[] = [];
+    const ordered = [...findings].sort((a, b) => Number(matchesKey(b, revealFindingKey)) - Number(matchesKey(a, revealFindingKey)));
+    for (const f of ordered) {
+      if (!f.ghost) continue;
+      const element = scene.elements.find((e) => e.id === f.ghost!.elementId);
+      if (!element) continue;
+      const dedupe = `${f.ghost.elementId}|${JSON.stringify(f.ghost.geometry)}`;
+      if (seen.has(dedupe)) continue;
+      seen.add(dedupe);
+      out.push({ key: findingKey(f), finding: f, element });
+    }
+    return out;
+  }, [findings, scene, revealFindingKey]);
+
+  const reveal = useRef<RevealState>({ phase: "idle", t0: 0 });
+  const revealing = findings.find((f) => matchesKey(f, revealFindingKey));
+
+  const span = Math.max(bounds.maxX - bounds.minX, bounds.maxY - bounds.minY, 10);
+
+  return (
+    <>
+      <hemisphereLight args={[color.paper, color.inkSoft, 1.15]} />
+      <directionalLight
+        position={[span * 0.12, span * 0.85, span * 0.55]}
+        intensity={2.1}
+        castShadow
+        shadow-mapSize={[2048, 2048]}
+        shadow-bias={-0.0004}
+        shadow-normalBias={0.03}
+        shadow-radius={5}
+        shadow-camera-left={-span}
+        shadow-camera-right={span}
+        shadow-camera-top={span}
+        shadow-camera-bottom={-span}
+        shadow-camera-far={span * 4}
+      />
+      <CameraControls makeDefault minDistance={3} maxDistance={span * 4} maxPolarAngle={1.32} minPolarAngle={0.02} />
+      <CameraRig scene={scene} offset={offset} reveal={reveal} revealing={revealing} />
+
+      <mesh rotation-x={-Math.PI / 2} position-y={0} receiveShadow material={groundShadow}>
+        <planeGeometry args={[span * 6, span * 6]} />
+      </mesh>
+      <Grid
+        position-y={0.002}
+        args={[10, 10]}
+        cellSize={1}
+        cellThickness={0.55}
+        cellColor={color.inkSoft}
+        sectionSize={5}
+        sectionThickness={1}
+        sectionColor={color.inkSoft}
+        fadeDistance={span * 2.4}
+        fadeStrength={2.2}
+        infiniteGrid
+      />
+      <ContactShadows position-y={0.004} scale={span * 2.2} resolution={1024} blur={2.6} far={1.4} opacity={0.38} color={color.ink} />
+
+      <group position={offset}>
+        <GridBubbles bounds={bounds} />
+        {meshes.map((m) => (
+          <Element3D key={m.id} m={m} selected={selectedId === m.id} onSelect={onSelect} />
+        ))}
+        {ghosts.map((g) => (
+          <Ghost3D key={g.key} item={g} active={matchesKey(g.finding, revealFindingKey)} reveal={reveal} onSelect={onSelect} />
+        ))}
+      </group>
+    </>
+  );
+}
+
+// ---------- Camera: one opening move, then the reveal framing ----------
+
+const OPEN_AZIMUTH = 0.42;
+const OPEN_POLAR = 0.92;
+
+/** fitToBox snaps the polar angle to 0 or 90 degrees; a bounding sphere keeps the three-quarter view. */
+function worldSphere(solids: Solid[], offset: [number, number, number], pad: number, scale = 1): Sphere {
+  const sphere = worldBox(solids, offset, 0).getBoundingSphere(new Sphere());
+  sphere.radius = sphere.radius * scale + pad;
+  return sphere;
+}
+
+function worldBox(solids: Solid[], offset: [number, number, number], pad: number): Box3 {
+  const box = new Box3();
+  for (const s of solids) {
+    const [a, b, c, d, e, f] = solidBounds(s);
+    box.expandByPoint(new Vector3(a + offset[0], b, c + offset[2]));
+    box.expandByPoint(new Vector3(d + offset[0], e, f + offset[2]));
+  }
+  box.expandByVector(new Vector3(pad, 0.2, pad));
+  return box;
+}
+
+function CameraRig({
+  scene,
+  offset,
+  reveal,
+  revealing,
+}: {
+  scene: Scene;
+  offset: [number, number, number];
+  reveal: React.RefObject<RevealState>;
+  revealing?: Finding;
+}) {
+  const controls = useThree((s) => s.controls) as unknown as CameraControls | null;
+  const clock = useThree((s) => s.clock);
+  const invalidate = useThree((s) => s.invalidate);
+  const opening = useRef<Promise<unknown> | undefined>(undefined);
+
+  // Opening move: once per mount. Top-down plan, then settle into the three-quarter view.
+  useEffect(() => {
+    if (!controls || opening.current) return;
+    const all = worldSphere(scene.elements.map(elementSolid), offset, 0, 0.62);
+    const reduced = prefersReducedMotion();
+    controls.smoothTime = 0.5;
+    opening.current = (async () => {
+      await controls.rotateTo(0, 0.05, false);
+      await controls.fitToSphere(all, false);
+      if (reduced) {
+        await controls.rotateTo(OPEN_AZIMUTH, OPEN_POLAR, false);
+        await controls.fitToSphere(all, false);
+        return;
+      }
+      await settle(Promise.all([controls.rotateTo(OPEN_AZIMUTH, OPEN_POLAR, true), controls.fitToSphere(all, true)]), 1800);
+    })();
+    invalidate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [controls]);
+
+  // Reveal: frame the element (600 ms), then hand over to the ghost's own timeline.
+  const key = revealing ? findingKey(revealing) : undefined;
+  useEffect(() => {
+    if (!controls || !revealing || !key) return;
+    const state = reveal.current!;
+    state.key = key;
+    state.phase = "camera";
+    const reduced = prefersReducedMotion();
+    const target = revealing.ghost
+      ? scene.elements.find((e) => e.id === revealing.ghost!.elementId)
+      : scene.elements.find((e) => revealing.elementIds.includes(e.id) && e.type !== "room" && e.type !== "zone") ??
+        scene.elements.find((e) => revealing.elementIds.includes(e.id));
+    const solids: Solid[] = [];
+    if (target) solids.push(elementSolid(target));
+    if (revealing.ghost && target) solids.push(solidFor(revealing.ghost.geometry, target.type, target.height));
+    const box = solids.length ? worldSphere(solids, offset, 1.2) : undefined;
+
+    let cancelled = false;
+    void (async () => {
+      await opening.current;
+      if (cancelled) return;
+      if (box) {
+        controls.smoothTime = 0.18;
+        const move = Promise.all([controls.rotateTo(0.55, 0.82, !reduced), controls.fitToSphere(box, !reduced)]);
+        if (!reduced) await settle(move, CAMERA_MS + 250);
+      }
+      if (cancelled || state.key !== key) return;
+      state.phase = reduced ? "done" : "play";
+      state.t0 = clock.getElapsedTime();
+      invalidate();
+    })();
+    invalidate();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [controls, key]);
+
+  return null;
+}
+
+/** Wait for a camera transition, but never longer than `ms`: the reveal must not stall on a slow settle. */
+function settle(p: Promise<unknown>, ms: number): Promise<unknown> {
+  return Promise.race([p, new Promise((r) => setTimeout(r, ms))]);
+}
+
+// ---------- Elements ----------
+
+function useSlabGeometry(solid: Solid) {
+  const geo = useMemo(() => {
+    if (solid.kind !== "slab") return undefined;
+    const shape = new Shape(solid.points.map(([x, y]) => new Vector2(x, y)));
+    shape.autoClose = true;
+    return new ExtrudeGeometry(shape, { depth: solid.height, bevelEnabled: false });
+  }, [solid]);
+  useEffect(() => () => geo?.dispose(), [geo]);
+  return geo;
+}
+
+function Element3D({ m, selected, onSelect }: { m: MeshProps; selected: boolean; onSelect?: ModelView3DProps["onSelect"] }) {
+  const [hovered, setHovered] = useState(false);
+  useCursor(hovered);
+  const layer = useLabelLayer();
+  const slab = useSlabGeometry(m.solid);
+  const lit = hovered || selected;
+  const edgeColor = lit ? color.ink : m.edge.color;
+  const edgeWidth = m.edge.width + (selected ? 1.75 : hovered ? 1 : 0);
+
+  const events = {
+    onPointerOver: (e: ThreeEvent<PointerEvent>) => {
+      e.stopPropagation();
+      setHovered(true);
+    },
+    onPointerOut: () => setHovered(false),
+    onClick: (e: ThreeEvent<MouseEvent>) => {
+      e.stopPropagation();
+      onSelect?.(m.id);
+    },
+  };
+
+  if (m.solid.kind === "slab" && slab) {
+    const s = m.solid;
+    return (
+      <group>
+        <mesh geometry={slab} material={m.fill} rotation-x={-Math.PI / 2} receiveShadow {...events} />
+        <Line
+          points={slabOutline(s.points, s.height + 0.002)}
+          color={edgeColor}
+          lineWidth={edgeWidth}
+          dashed={m.edge.dashed}
+          dashSize={0.25}
+          gapSize={0.15}
+        />
+        {m.label && (
+          <Html portal={layer} position={[s.center[0], s.height + 0.02, s.center[2]]} center zIndexRange={[10, 0]} style={{ pointerEvents: "none" }}>
+            <div style={labelStyle(lit)}>{m.label}</div>
+          </Html>
+        )}
+      </group>
+    );
+  }
+
+  if (m.solid.kind !== "box") return null;
+  const s = m.solid;
+  return (
+    <group position={s.center} rotation-y={s.rotY}>
+      <mesh geometry={unitBox} material={m.fill} scale={s.size} castShadow={m.castShadow} receiveShadow {...events} />
+      <Line points={boxEdges(s.size)} segments color={edgeColor} lineWidth={edgeWidth} dashed={m.edge.dashed} dashSize={0.2} gapSize={0.12} />
+    </group>
+  );
+}
+
+function labelStyle(strong: boolean): React.CSSProperties {
+  return {
+    fontFamily: font.family,
+    fontStretch: "75%",
+    fontWeight: strong ? 600 : 500,
+    fontSize: 12,
+    lineHeight: 1,
+    letterSpacing: "0.01em",
+    color: strong ? color.ink : color.inkSoft,
+    whiteSpace: "nowrap",
+    userSelect: "none",
+  };
+}
+
+// ---------- Ghost: where the crew thinks the element is ----------
+
+function Ghost3D({
+  item,
+  active,
+  reveal,
+  onSelect,
+}: {
+  item: GhostItem;
+  active: boolean;
+  reveal: React.RefObject<RevealState>;
+  onSelect?: ModelView3DProps["onSelect"];
+}) {
+  const { finding, element } = item;
+  const ghost = finding.ghost!;
+  const trueSolid = useMemo(() => elementSolid(element), [element]);
+  const ghostSolid = useMemo(() => solidFor(ghost.geometry, element.type, element.height), [ghost.geometry, element]);
+
+  const group = useRef<Group>(null);
+  const fill = useRef<Mesh>(null);
+  const edges = useRef<Line2 | LineSegments2>(null);
+  const trueOutline = useRef<Line2 | LineSegments2>(null);
+  const dimension = useRef<Group>(null);
+  const label = useRef<HTMLDivElement>(null);
+  const layer = useLabelLayer();
+  const [hovered, setHovered] = useState(false);
+  useCursor(hovered);
+
+  const from = trueSolid.center;
+  const to = ghostSolid.center;
+  const size: [number, number, number] = ghostSolid.kind === "box" ? ghostSolid.size : [1, 0.02, 1];
+  const rotY = ghostSolid.kind === "box" ? ghostSolid.rotY : 0;
+  const trueSize: [number, number, number] = trueSolid.kind === "box" ? trueSolid.size : size;
+  const trueRot = trueSolid.kind === "box" ? trueSolid.rotY : 0;
+  const top = Math.max(size[1], trueSize[1]) + 0.45;
+  const dimPoints = useMemo<[number, number, number][]>(
+    () => [
+      [to[0], top, to[2]],
+      [from[0], top, from[2]],
+    ],
+    [from, to, top],
+  );
+  const ticks = useMemo<[number, number, number][]>(
+    () => [
+      [to[0], top - 0.18, to[2]],
+      [to[0], top + 0.18, to[2]],
+      [from[0], top - 0.18, from[2]],
+      [from[0], top + 0.18, from[2]],
+    ],
+    [from, to, top],
+  );
+
+  // Pose for progress values. Pure numbers in, object mutation out: no allocation per frame.
+  const pose = (outline: number, grow: number, labelIn: number, isReveal: boolean) => {
+    const g = group.current;
+    if (g) g.position.set(from[0] + (to[0] - from[0]) * grow, to[1], from[2] + (to[2] - from[2]) * grow);
+    if (fill.current) fill.current.material = isReveal ? ghostRevealFill : ghostFill;
+    if (isReveal) ghostRevealFill.opacity = 0.24 * Math.max(grow, 0.15 * Math.min(outline, 1));
+    if (edges.current) {
+      edges.current.material.opacity = isReveal ? Math.max(grow, 0.0001) : 1;
+      edges.current.visible = !isReveal || outline >= 1;
+    }
+    if (trueOutline.current) {
+      trueOutline.current.material.opacity = outline;
+      trueOutline.current.visible = outline > 0;
+    }
+    if (dimension.current) dimension.current.visible = labelIn > 0;
+    if (label.current) label.current.style.opacity = String(labelIn);
+  };
+
+  // Static ghosts sit at the end state. The active one follows the reveal timeline.
+  useEffect(() => {
+    if (!active) pose(1, 1, 1, false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active, to[0], to[2]]);
+
+  useFrame((state) => {
+    if (!active) return;
+    const r = reveal.current!;
+    if (r.key !== item.key) return;
+    if (r.phase === "camera") {
+      pose(0, 0, 0, true);
+      return;
+    }
+    if (r.phase === "done") {
+      pose(1, 1, 1, true);
+      return;
+    }
+    if (r.phase !== "play") return;
+    const ms = (state.clock.getElapsedTime() - r.t0) * 1000;
+    const outline = easeOut(ms / OUTLINE_MS);
+    const grow = easeOut((ms - OUTLINE_MS) / GROW_MS);
+    const labelIn = easeOut((ms - OUTLINE_MS - GROW_MS) / LABEL_MS);
+    pose(outline, grow, labelIn, true);
+    if (ms >= OUTLINE_MS + GROW_MS + LABEL_MS) {
+      r.phase = "done";
+      pose(1, 1, 1, true);
+    }
+    state.invalidate();
+  });
+
+  const events = {
+    onPointerOver: (e: ThreeEvent<PointerEvent>) => {
+      e.stopPropagation();
+      setHovered(true);
+    },
+    onPointerOut: () => setHovered(false),
+    onClick: (e: ThreeEvent<MouseEvent>) => {
+      e.stopPropagation();
+      onSelect?.(element.id, item.key);
+    },
+  };
+
+  return (
+    <group>
+      {/* True element: drawn in ink as the reveal starts, then holds. */}
+      <group position={from} rotation-y={trueRot}>
+        <Line ref={trueOutline} points={boxEdges(trueSize)} segments color={color.ink} lineWidth={2.5} transparent />
+      </group>
+
+      <group ref={group} position={to} rotation-y={rotY}>
+        <mesh ref={fill} geometry={unitBox} material={ghostFill} scale={size} renderOrder={2} {...events} />
+        <Line
+          ref={edges}
+          points={boxEdges(size)}
+          segments
+          color={color.redline}
+          lineWidth={hovered ? 2.5 : 1.75}
+          dashed
+          dashSize={0.16}
+          gapSize={0.1}
+          transparent
+        />
+      </group>
+
+      <group ref={dimension}>
+        <Line points={dimPoints} color={color.redline} lineWidth={1.25} />
+        <Line points={ticks} segments color={color.redline} lineWidth={1.25} />
+        <Html
+          portal={layer}
+          position={[(from[0] + to[0]) / 2, top + 0.05, (from[2] + to[2]) / 2]}
+          center
+          zIndexRange={[20, 10]}
+          style={{ pointerEvents: "none" }}
+        >
+          <div
+            ref={label}
+            style={{
+              fontFamily: font.family,
+              fontStretch: "80%",
+              fontWeight: 600,
+              fontSize: 13,
+              color: color.redline,
+              background: color.paper,
+              padding: "2px 5px",
+              transform: "translateY(-14px)",
+              whiteSpace: "nowrap",
+              userSelect: "none",
+            }}
+          >
+            {ghost.label}
+          </div>
+        </Html>
+      </group>
+    </group>
+  );
+}
+
+// ---------- Drafting grid bubbles: lettered columns (x), numbered rows (y), every 5 m ----------
+
+const BUBBLE_R = 0.42;
+const circle = (r: number): [number, number, number][] =>
+  Array.from({ length: 41 }, (_, i) => {
+    const a = (i / 40) * Math.PI * 2;
+    return [Math.cos(a) * r, 0, Math.sin(a) * r];
+  });
+const BUBBLE = circle(BUBBLE_R);
+
+function GridBubbles({ bounds }: { bounds: ReturnType<typeof planBounds> }) {
+  const layer = useLabelLayer();
+  const lines = useMemo(() => {
+    const x0 = Math.floor(bounds.minX / 5) * 5;
+    const x1 = Math.ceil(bounds.maxX / 5) * 5;
+    const y0 = Math.floor(bounds.minY / 5) * 5;
+    const y1 = Math.ceil(bounds.maxY / 5) * 5;
+    const out: { id: string; label: string; from: [number, number, number]; to: [number, number, number]; at: [number, number, number] }[] = [];
+    let i = 0;
+    for (let x = x0; x <= x1; x += 5, i++) {
+      const south = -(y0 - 1.6);
+      out.push({ id: `x${x}`, label: String.fromCharCode(65 + i), from: [x, 0.003, south], to: [x, 0.003, -(y1 + 0.8)], at: [x, 0.003, south + BUBBLE_R] });
+    }
+    i = 1;
+    for (let y = y0; y <= y1; y += 5, i++) {
+      const west = x0 - 1.6;
+      out.push({ id: `y${y}`, label: String(i), from: [west, 0.003, -y], to: [x1 + 0.8, 0.003, -y], at: [west - BUBBLE_R, 0.003, -y] });
+    }
+    return out;
+  }, [bounds]);
+
+  return (
+    <group>
+      {lines.map((l) => (
+        <group key={l.id}>
+          <Line points={[l.from, l.to]} color={color.inkSoft} lineWidth={0.8} dashed dashSize={0.6} gapSize={0.25} transparent opacity={0.7} />
+          <group position={l.at}>
+            <Line points={BUBBLE} color={color.inkSoft} lineWidth={1} />
+          </group>
+          <Html portal={layer} position={l.at} center zIndexRange={[5, 0]} style={{ pointerEvents: "none" }}>
+            <div style={{ ...labelStyle(false), fontSize: 11, fontWeight: 600 }}>{l.label}</div>
+          </Html>
+        </group>
+      ))}
+    </group>
+  );
+}
