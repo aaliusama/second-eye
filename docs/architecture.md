@@ -46,6 +46,7 @@ chat message -> server/extract -> operations + intents -> server/model -> scene 
 | Package | Where | Licence |
 |---|---|---|
 | zod | contracts | MIT |
+| @modelcontextprotocol/sdk | mcp | MIT |
 | react, react-dom | web | MIT |
 | three, @react-three/fiber, @react-three/drei | web | MIT |
 | zustand | web | MIT |
