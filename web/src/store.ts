@@ -1,0 +1,117 @@
+import type { ChatMessage, EvalResults, Rehearsal, StateResponse } from "@site/contracts";
+import { create } from "zustand";
+import { announceChange, api, type AgentLogEntry, type UnresolvedItem } from "./api";
+
+// Owner: D. One store for what the server said. Components select narrowly.
+
+export type Selection = { kind: "element"; id: string } | { kind: "finding"; key: string } | undefined;
+
+interface SiteStore {
+  status: "loading" | "ok" | "error";
+  error?: string;
+  state?: StateResponse;
+  messages: ChatMessage[];
+  rehearsal?: Rehearsal;
+  evalResults?: EvalResults | null;
+  /** null = the server has no such route yet (hide the panel). */
+  unresolved?: UnresolvedItem[] | null;
+  agentLog?: AgentLogEntry[] | null;
+  /** Show the model as it stood at this replay time (from the record list). Undefined = now. */
+  asOf?: string;
+  slider: number;
+  selection: Selection;
+  /** Bumped by "Run again", so the ghost reveal plays again. */
+  run: number;
+  busy?: string;
+
+  refresh: () => Promise<void>;
+  setAsOf: (t: string | undefined) => Promise<void>;
+  setSlider: (step: number) => void;
+  select: (s: Selection) => void;
+  approve: (fixId: string) => Promise<void>;
+  runAgain: (keepLearning: boolean) => Promise<void>;
+  teach: (item: UnresolvedItem, alias: string, elementId: string) => Promise<void>;
+}
+
+const settle = <T,>(p: Promise<T | undefined>): Promise<T | null> => p.then((v) => v ?? null).catch(() => null);
+
+export const useSite = create<SiteStore>((set, get) => ({
+  status: "loading",
+  messages: [],
+  slider: 0,
+  selection: undefined,
+  run: 0,
+
+  refresh: async () => {
+    try {
+      const [state, messages, rehearsal, evalResults, unresolved, agentLog] = await Promise.all([
+        api.state(get().asOf),
+        api.messages(),
+        api.rehearsal().catch(() => undefined),
+        settle(api.eval()),
+        settle(api.unresolved()),
+        settle(api.agentLog()),
+      ]);
+      set({ status: "ok", error: undefined, state, messages, rehearsal, evalResults, unresolved, agentLog });
+    } catch (err) {
+      set({ status: get().state ? "ok" : "error", error: `Server not reachable (${String(err)}). Start it with npm run demo.` });
+    }
+  },
+
+  setAsOf: async (t) => {
+    set({ asOf: t, selection: undefined });
+    await get().refresh();
+  },
+
+  setSlider: (step) => set({ slider: step }),
+  select: (selection) => set({ selection }),
+
+  approve: async (fixId) => {
+    set({ busy: fixId });
+    try {
+      await api.approve(fixId);
+      announceChange();
+      await get().refresh();
+    } catch (err) {
+      set({ error: `Fix not sent: ${String(err)}` });
+    } finally {
+      set({ busy: undefined });
+    }
+  },
+
+  runAgain: async (keepLearning) => {
+    set({ busy: "reset" });
+    try {
+      await api.reset(keepLearning);
+      set({ asOf: undefined, selection: undefined, run: get().run + 1 });
+      announceChange();
+      await get().refresh();
+    } catch (err) {
+      set({ error: `Run did not restart: ${String(err)}` });
+    } finally {
+      set({ busy: undefined });
+    }
+  },
+
+  teach: async (item, alias, elementId) => {
+    const t = get().state?.t;
+    if (!t) return;
+    set({ busy: item.messageId });
+    try {
+      await api.correction({
+        kind: "location_alias",
+        id: `corr-alias-${item.messageId}`,
+        time: t,
+        sourceMessageId: item.messageId,
+        alias,
+        elementId,
+      });
+      announceChange();
+      await get().refresh();
+    } catch (err) {
+      set({ error: `Not stored: ${String(err)}` });
+    } finally {
+      set({ busy: undefined });
+    }
+  },
+}));
