@@ -29,7 +29,7 @@ chat message -> server/extract -> operations + intents -> server/model -> scene 
 - Unsure means warn, not hold: a finding resting on a confidence below 0.7 (`UNSURE_BELOW` in `rules.ts`) or on an element in state `unconfirmed` is a `warn` with a note asking to confirm.
 - A place id that is not an element on record gives no space clash or order-of-work finding.
 - `rehearse.ts` steps one day's plan in order for the slider. `fixes.ts` proposes one fix per finding with the crew message.
-- Listen step (`fixes.ts`): on a live finding, every other crew on it that has posted nothing since the statement gets a question (reply before 07:00) instead of a HOLD. In the evening, a finding whose crews have all been silent since the change, or whose plan tasks are all low confidence, becomes an `ask_crew` question.
+- Listen step (`fixes.ts`): each silent crew gets a question instead of a HOLD; system DMs are not crew replies. If every crew is silent in the evening, the fix becomes `ask_crew`. Without chat history, low-confidence tasks retain the confirmation fallback. A warning never becomes a work instruction.
 
 ## Session and learning
 
@@ -42,6 +42,8 @@ chat message -> server/extract -> operations + intents -> server/model -> scene 
 - Live messages get a word-based id, `live-<10 hex of sha256(normalised text + crewId)>` (`server/api/live-id.ts`), and extraction reads `data/llm-cache/<that id>.json`. A repeat in one session is stored as `<id>-2` but reads the same cache entry.
 - Approving a `notify_crew` fix for a `latest_change` finding applies a `move` to the element's current geometry, sourced from the sent DM in thread `dm:<crewId>`. The crew has then heard the latest version, so checks and rehearsal stop flagging it. Other fix kinds do not change the model.
 - Live findings re-check themselves after every message (`server/model/resolve.ts`, replay and live posts): a finding the checks no longer reproduce, or whose crew tasks are all cancelled, leaves `findings` together with its pending fix and logs `finding.resolved`. Findings with an approved or rejected fix are left alone. Resolved items stay in server-only lists so the site agent can still send CLEAR.
+- Approving a confirmed latest-change HOLD records that the crew heard the current position. Approving a WARN only sends the confirmation request; it does not create a confidence-1 geometry operation or hide the unresolved warning in the UI.
+- Evaluation measures active and resolved live alerts together with rehearsal alerts. A successful correction cannot erase a catch or an earlier false alarm from the measured history.
 
 ## Crew questions (`server/query/`, lanes E and J)
 
@@ -73,7 +75,7 @@ chat message -> server/extract -> operations + intents -> server/model -> scene 
 ## Tests, e2e, video (lane M)
 
 - `npm test`: unit tests in `contracts`, `server`, `eval` (root `vitest.config.ts`); `mcp` has its own.
-- `e2e/`: `npm run e2e` spawns a real server (`node --import tsx server/index.ts`, port 8790, `LIVE_LLM=0`) and the MCP robot, and walks the demo beats in order over HTTP. Imports no server code. Beats waiting on lane B's data are `it.todo`.
+- `e2e/`: `npm run e2e` spawns a real server (`node --import tsx server/index.ts`, port 8790, `LIVE_LLM=0`) and the MCP robot, and walks the demo beats in order over HTTP. Imports no server code. Live ghost intent, nickname learning across reset and the other planted demo checks now have assertions.
 - `video/record.mjs`: standalone (not a workspace), drives the real UI with playwright-core and Edge against a running `npm run demo`; placeholder phone texts are skipped.
 
 ## Rules that shape the code

@@ -35,7 +35,7 @@ Every beat calls the same code as the buttons (store actions, the phone's own se
 | 0:45 | 3 Ghost wall | Back to now. The phone (as Novak Plumbing) sends `PHONE.plumbingIntent`; the phone answers HOLD with one reason and the source. The plan frames unit 204, draws the true wall, grows the red ghost to where plumbing thinks the wall is, then "0.4 m east". Everything holds still. | "Plumbing says what it does tomorrow. Red is where plumbing thinks the wall is: 40 cm off." | **Crew phone**, pick Novak Plumbing, type the text, Send. |
 | 1:20 | 4 Why | Inspector on the ghost: what was said, and "What Novak Plumbing did not hear" quoting the office-thread change. | "The change was said in a thread plumbing does not read." | Click the ghost. |
 | 1:35 | 5 Rehearse | Slider jumps to the first clash on tomorrow's track; held rooms outline in redline. | "Tomorrow, played forward the evening before." | Drag the slider to the redline mark. |
-| 2:00 | 6 Fix | Top fix approved: "Fix sent" with the exact text, the wall turns green, the ghost is gone, the phone shows the HOLD message from the system. | "One tap. The crew gets the message, the model knows they heard it." | **Send fix to Novak Plumbing**. |
+| 2:00 | 6 Fix | The current W-12 ghost's fix is approved: "Fix sent" with the exact text, the wall turns green, the ghost is gone, the phone shows the HOLD message from the system. | "One tap. The crew gets the message, the model knows they heard it." | **Send fix to Novak Plumbing** for the W-12 ghost. |
 | 2:10 | 7 Ask | The phone asks `PHONE.question`; the answer comes from the record with sources (CLEAR now that the fix reached them). | "Crews text a question and get an answer from the record. Decisions still go to the superintendent." | Type the question in the phone. |
 | 2:20 | 8 Learn | The phone sends `PHONE.blueRoom`; run 1 cannot place "the blue room", it appears under **Learning**. | "Crews have nicknames. The record does not guess." | Type the text in the phone. |
 | 2:35 | 9 Run 2 | "The blue room" is mapped to Unit 204, the run starts again with what was learned, and the same words are sent again: resolved on its own. The agent log shows the crew on watch warned as soon as the wall moved. | "The superintendent answered once. The next run knows." | **Remember this place**, **Run again with what we learned**, send the text again. |
@@ -47,13 +47,15 @@ Every beat calls the same code as the buttons (store actions, the phone's own se
 - A text has no cache entry: the phone answers "Not found: no plan for tomorrow recognised in this message" and cites the crew's own message. Keep going; the ghost from the golden replay is already on the plan and beat 3 replays its reveal. Say "the plan was already checked the evening before".
 - Server down: the plan draws the contract fixtures (the same ghost-wall case) with a banner saying so. Restart with `npm run demo`; do not present from the fixtures.
 
-## Status on main (audit Sat 14 Nov)
+## Full-data rehearsal (Sat 14 Nov)
 
-Checked against the running app (server + web, golden replay of 2 messages, 1 labelled case):
+The full synthetic replay and both phone-message caches are available. Presenter text now matches `data/scenario.md`, including `tmrw afternoon we start boarding the blue room, ceiling first` for Walsh Drywall. The blue-room nickname is not preset in the floor.
 
-- Plays as written: beats 1, 2, 4, 5, 6, 7, 10. The ghost wall is on screen from 0:00 (golden replay) and its reveal replays at 0:45. Beat 10 shows only `eval/results.json` (today: 1 case).
-- Beat 3 live: the phone text has no cache entry yet (`live-9aa884fec0`), so the phone answers "Not found" instead of HOLD. Needs lane B's cache entry.
-- Beats 8 and 9: the blue-room text in `web/src/present/beats.ts` is still a `[[...]]` placeholder; the bar says so and nothing is sent. Needs lane B's phone script.
+- Run `npm run eval` after the final data merge. Beat 10 shows the generated `eval/results.json`; read those results exactly and state any misses or false alarms.
+- The ghost wall is already on the golden record at load. Beat 3 sends the cached plumbing intent and replays its reveal. It must show the W-12 ghost at the old line with the 0.4 m east label.
+- Beat 6 must approve the pending fix for that W-12 ghost, not the first fix in the full-floor queue. Check that the W-12 ghost disappears before asking whether plumbing can start.
+- Beats 8 and 9 use the same cached blue-room text. Start clean first: run 1 must list the place as unresolved; map it to Unit 204, reset with learning retained, and send the same words again. Run 2 must resolve the place.
+- Before recording, rehearse every beat from a clean run and review the resulting phone replies, source inspector and learning panel. A successful HTTP test does not replace this visual rehearsal.
 - A route not on the server yet: its panel hides or says so; the flat plan and the ghost never depend on it.
 - 3D: the **Flat | 3D** toggle is optional. Stay on flat for the reveal; it is the one that always works.
 - Reduced motion on the presenting machine: the reveal jumps to its end state. Say "here is where plumbing thinks the wall is" and point.

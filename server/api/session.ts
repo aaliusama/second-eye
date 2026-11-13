@@ -254,13 +254,14 @@ function findingOf(s: Session, id: string): Finding | undefined {
 /**
  * An approved notify_crew fix for a latest_change finding tells the crew where the element is now:
  * one move per element and sent DM, to its current geometry, sourced from the DM. The crew has then
- * heard the latest version, so the checks and the rehearsal stop flagging it. Other fix kinds change
- * nothing in the model.
+ * heard the latest version, so the checks and the rehearsal stop flagging it. A WARN draft requests
+ * confirmation of an uncertain record: sending that question cannot confirm geometry. Other fix kinds
+ * and warning findings change nothing in the model.
  */
 function heardOperations(s: Session, fix: Fix, sent: ChatMessage[]): Operation[] {
   if (fix.kind !== "notify_crew") return [];
   const finding = findingOf(s, fix.findingId);
-  if (!finding || finding.check !== "latest_change") return [];
+  if (!finding || finding.check !== "latest_change" || finding.severity !== "hold") return [];
   const ids = finding.ghost ? [finding.ghost.elementId] : finding.elementIds;
   const ops: Operation[] = [];
   for (const m of sent) {

@@ -42,7 +42,7 @@ The demo needs none of this. Copy `.env.example` to `.env` to use the LLM; never
 | `npm run eval` | golden replay vs `data/labels.json`: caught / missed / false alarms per check, written to `eval/results.json` |
 | `npm run typecheck` | all workspaces and `e2e/` |
 | `npm run cache-id -- "<text>" <crewId>` | the cache id a live phone message gets |
-| `node --import tsx server/extract/build-cache.ts [--force] [--phone <file>]` | extract every replay message (and scripted phone texts) with Groq into `data/llm-cache/`; same as `npx tsx server/extract/build-cache.ts` |
+| `node --import tsx server/extract/build-cache.ts [--force] [--only=id,other-id]` | extract replay messages and scripted phone texts with Groq into `data/llm-cache/`; optionally refresh only the named messages |
 | `node --import tsx server/query/build-cache.ts [--force]` | parse the demo crew questions with Groq into `server/query/cache/` |
 | `npm run start -w @site/mcp` | MCP server on stdio for agents and robots (see `mcp/README.md`) |
 | `npm run robot -w @site/mcp` | demo robot planner that knows the site only through MCP |
@@ -50,6 +50,20 @@ The demo needs none of this. Copy `.env.example` to `.env` to use the LLM; never
 Both cache builders need `GROQ_API_KEY` and keep existing entries unless `--force`. On Windows `npx` is slow (30-45 s per call); `node --import tsx` starts at once.
 
 The demo video recorder lives in `video/` (standalone, see `video/README.md`).
+
+## Measured results
+
+`npm run eval` on the simulated `golden` replay: 190 messages and 15 independent labelled cases.
+
+| Check | Caught | Missed | False alarms |
+|---|---:|---:|---:|
+| Latest change | 4 | 0 | 0 |
+| Space clash | 4 | 0 | 0 |
+| Order of work | 3 | 0 | 0 |
+| Open decision | 4 | 0 | 0 |
+| Total | 15 | 0 | 0 |
+
+These are synthetic-set results, not field performance or extraction accuracy. The results pool live and evening checks and retain alerts resolved later. See `eval/results.json`, `eval/results.detail.json` and `eval/README.md` for matching rules and limitations.
 
 ## How the LLM is used
 
@@ -98,8 +112,8 @@ npm run cache-id -- "tomorrow morning we close up the blue room" crew-drywall
 
 - One floor, one building. Input is chat text only (no photos, voice, drawings or BIM files).
 - All site data is simulated. The model reflects what was said in the record, not what was built.
-- The full simulated chat and its labels are still being written; the golden replay on main is a short slice.
-- Live extraction (`LIVE_LLM=1`) is built and unit-tested with a mocked Groq, but has not yet been run against real Groq; the cache entries on main are hand-written for the first slice.
+- The full simulated chat, independent labels and real Groq caches are included. Cache provenance and raw facts are retained; `data/extraction-report.json` records extraction mismatches separately from check results.
+- Open-decision inference uses conservative material/fixture words in recorded element names because the contract has no decision category. Unknown categories are not inferred; explicit dependencies remain supported.
 - Learning is kept in server memory unless `LEARNING_FILE` is set; without it a server restart forgets it. Use `POST /api/reset {keepLearning:true}` for run 2, `{keepLearning:false}` to start clean (also clears the file).
 
 ## More

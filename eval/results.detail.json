@@ -2,31 +2,31 @@
   "replayId": "golden",
   "rule": "live + rehearsal pooled; one count per incident (check, source message or clash pair, elements)",
   "findings": {
-    "live": 12,
-    "rehearsal": 13,
-    "incidents": 13
+    "live": 14,
+    "rehearsal": 15,
+    "incidents": 15
   },
   "perTrigger": {
     "live": {
-      "caught": 12,
-      "missed": 3,
+      "caught": 14,
+      "missed": 1,
       "falseAlarms": 0
     },
     "rehearsal": {
-      "caught": 13,
-      "missed": 2,
+      "caught": 15,
+      "missed": 0,
       "falseAlarms": 0
     }
   },
   "perCrew": {
     "crew-drywall": {
-      "caught": 4,
-      "missed": 1,
+      "caught": 5,
+      "missed": 0,
       "falseAlarms": 0
     },
     "crew-electrical": {
-      "caught": 3,
-      "missed": 2,
+      "caught": 5,
+      "missed": 0,
       "falseAlarms": 0
     },
     "crew-painting": {
@@ -130,10 +130,15 @@
       "id": "SC3",
       "check": "space_clash",
       "triggerMessageId": "m-181",
-      "caught": false,
-      "caughtBy": "none",
-      "incidentKeys": [],
-      "findingIds": []
+      "caught": true,
+      "caughtBy": "both",
+      "incidentKeys": [
+        "space_clash|m-177,m-181|room-201"
+      ],
+      "findingIds": [
+        "f-space_clash-m-177-task-m-181-1",
+        "f-space_clash-m-181-task-m-177-1"
+      ]
     },
     {
       "id": "SC4",
@@ -207,10 +212,14 @@
       "id": "OD2",
       "check": "open_decision",
       "triggerMessageId": "m-166",
-      "caught": false,
-      "caughtBy": "none",
-      "incidentKeys": [],
-      "findingIds": []
+      "caught": true,
+      "caughtBy": "both",
+      "incidentKeys": [
+        "open_decision|m-166|light-202-kitchen"
+      ],
+      "findingIds": [
+        "f-open_decision-m-166-light-202-kitchen"
+      ]
     },
     {
       "id": "OD3",
@@ -252,8 +261,8 @@
     {
       "threshold": 0.5,
       "total": {
-        "caught": 13,
-        "missed": 2,
+        "caught": 15,
+        "missed": 0,
         "falseAlarms": 0
       },
       "perCheck": {
@@ -263,8 +272,8 @@
           "falseAlarms": 0
         },
         "space_clash": {
-          "caught": 3,
-          "missed": 1,
+          "caught": 4,
+          "missed": 0,
           "falseAlarms": 0
         },
         "order_of_work": {
@@ -273,8 +282,8 @@
           "falseAlarms": 0
         },
         "open_decision": {
-          "caught": 3,
-          "missed": 1,
+          "caught": 4,
+          "missed": 0,
           "falseAlarms": 0
         }
       }
@@ -282,8 +291,8 @@
     {
       "threshold": 0.7,
       "total": {
-        "caught": 13,
-        "missed": 2,
+        "caught": 15,
+        "missed": 0,
         "falseAlarms": 0
       },
       "perCheck": {
@@ -293,8 +302,8 @@
           "falseAlarms": 0
         },
         "space_clash": {
-          "caught": 3,
-          "missed": 1,
+          "caught": 4,
+          "missed": 0,
           "falseAlarms": 0
         },
         "order_of_work": {
@@ -303,8 +312,8 @@
           "falseAlarms": 0
         },
         "open_decision": {
-          "caught": 3,
-          "missed": 1,
+          "caught": 4,
+          "missed": 0,
           "falseAlarms": 0
         }
       }
@@ -312,8 +321,8 @@
     {
       "threshold": 0.9,
       "total": {
-        "caught": 13,
-        "missed": 2,
+        "caught": 15,
+        "missed": 0,
         "falseAlarms": 0
       },
       "perCheck": {
@@ -323,8 +332,8 @@
           "falseAlarms": 0
         },
         "space_clash": {
-          "caught": 3,
-          "missed": 1,
+          "caught": 4,
+          "missed": 0,
           "falseAlarms": 0
         },
         "order_of_work": {
@@ -333,8 +342,8 @@
           "falseAlarms": 0
         },
         "open_decision": {
-          "caught": 3,
-          "missed": 1,
+          "caught": 4,
+          "missed": 0,
           "falseAlarms": 0
         }
       }

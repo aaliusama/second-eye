@@ -7,7 +7,7 @@ export const PHONE = {
   /** Plumbing states tomorrow's rough-in in the 204 bath: the ghost-wall beat. */
   plumbingIntent: {
     crewId: "crew-plumbing",
-    // Same words as the slice-1 statement (m-002). Lane B's data/scenario.md "Phone script" may replace it.
+    // Cached offline under the text-based live id; matches data/scenario.md's phone script.
     text: "tomorrow morning we rough in the 204 bath along the east wall",
   },
   /** A crew question answered from the record (POST /api/ask). */
@@ -18,7 +18,7 @@ export const PHONE = {
   /** A crew names "the blue room": run 1 cannot place it, the superintendent maps it once. */
   blueRoom: {
     crewId: "crew-drywall",
-    text: "[[from data/scenario.md Phone script: a crew names \"the blue room\"]]",
+    text: "tmrw afternoon we start boarding the blue room, ceiling first",
   },
 } as const;
 

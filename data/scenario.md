@@ -105,4 +105,6 @@ The presenter types only these texts (exact words; the cache key comes from the 
 1. `npx tsx data/build/build.ts` writes `floor.json`, `chat.json`, `replay.golden.json`, `labels.json` and the hand-written expected extraction `expected/<id>.json` from `data/build/source.ts`. It fills `llm-cache/` with the expectation only where no LLM entry exists yet, so the demo runs offline before the live run.
 2. `npx tsx server/extract/build-cache.ts [--force]` (needs `GROQ_API_KEY` in `.env`) sends every replay message and phone text to Groq in batches of 8, in time order, and writes `llm-cache/<id>.json`. Each entry keeps `provenance` ("llm: groq <model>") and the model's raw `facts`. It then compares the LLM output with `expected/` and writes `extraction-report.json`.
 
+To refresh specific omissions without rerunning the whole chat, use `node --import tsx server/extract/build-cache.ts --force --only=m-043,m-177`. Only those entries are sent to Groq and rewritten; the builder still advances the scene through the existing record and regenerates the comparison report. Unknown requested ids fail before any model call. Never copy `expected/` into an LLM-labelled cache entry.
+
 The demo reads only `llm-cache/`. Check `provenance` in any entry to see whether it came from the LLM or by hand.

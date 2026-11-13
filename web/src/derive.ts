@@ -40,9 +40,10 @@ export function sourceLabel(id: string): string | undefined {
   return `Drawing ${id.slice("drawing:".length).replace(/-/g, " ")}`;
 }
 
-/** Finding ids whose fix the superintendent approved. */
-export function resolvedFindingIds(fixes: Fix[]): Set<string> {
-  return new Set(fixes.filter((f) => f.status === "approved").map((f) => f.findingId));
+/** Sending a confirmation request does not resolve the uncertainty it asks about. */
+export function resolvedFindingIds(fixes: Fix[], findings: Finding[]): Set<string> {
+  const warnings = new Set(findings.filter((f) => f.severity === "warn").map((f) => f.id));
+  return new Set(fixes.filter((f) => f.status === "approved" && f.kind !== "ask_crew" && !warnings.has(f.findingId)).map((f) => f.findingId));
 }
 
 // ---------- Rehearsal slider ----------

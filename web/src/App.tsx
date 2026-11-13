@@ -97,9 +97,9 @@ function Main() {
     // leave it out, or the plan view would show findings from messages not yet said.
     const plan = asOf ? undefined : rehearsal;
     const frame = frameAt(plan, slider);
-    const resolved = resolvedFindingIds(state.fixes);
     const rehearsalFindings = plan?.frames.flatMap((f) => f.findings) ?? [];
     const all = [...state.findings, ...rehearsalFindings];
+    const resolved = resolvedFindingIds(state.fixes, all);
     const visible = [...state.findings, ...(frame?.findings ?? [])].filter((f) => !resolved.has(f.id));
     // One ghost per finding id; the live one wins so the reveal key stays stable.
     const ghosts = [...new Map(visible.filter((f) => f.ghost).reverse().map((f) => [f.id, f])).values()].sort((a, b) =>

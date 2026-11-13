@@ -21,31 +21,19 @@ The full simulated dataset is now available: replay `golden`, 190 messages, 15 l
 | Check | Caught | Missed | False alarms |
 |---|---:|---:|---:|
 | Latest change | 4 | 0 | 0 |
-| Space clash | 3 | 1 | 0 |
+| Space clash | 4 | 0 | 0 |
 | Order of work | 3 | 0 | 0 |
-| Open decision | 3 | 1 | 0 |
-| Total | 13 | 2 | 0 |
+| Open decision | 4 | 0 | 0 |
+| Total | 15 | 0 | 0 |
 
 All four core demo cases (LC1, SC1, OW1, OD1) are caught. `demo-checks.test.ts` protects them on the real cached replay, including the W-12 ghost geometry and sourced fixes. These results measure this synthetic labelled set, not field performance or extraction accuracy. Confidence threshold diagnostics use final recorded task confidence, not immutable confidence snapshots for each alert.
 
-Remaining full-set misses are missing extracted facts, not licence to invent a finding:
+The earlier OD2 and SC3 misses were missing extracted facts. B refreshed `m-043` (kitchen-light proposal) and `m-177` (drywall layout plan) through real Groq calls after adding general prompt guidance. The cache entries retain genuine provenance and raw facts; independent labels are unchanged. The final evaluation catches both cases without a hand-written cache substitution.
 
-```text
-CHANGE REQUEST -> B
-Where: data/llm-cache/m-043.json, server/extract/
-What and why: OD2 is missed because the proposed light-202-kitchen decision in m-043 has no cached change/operation. Correct extraction and regenerate the cache with honest provenance; retain the independent labels.
-Blocking me: yes for full labelled-set sign-off. Meanwhile C's rule and demo regressions pass.
+A integration now guards warning approvals from generating confidence-1 geometry, while preserving the HOLD ghost-wall approval. All five former HTTP e2e TODOs have real assertions, including live phone intent and nickname learning across runs. D's presenter now has the cached blue-room text and targets the W-12 source and fix instead of arbitrary first entries in the full dataset. The UI retains warning findings after sending a confirmation request.
 
-CHANGE REQUEST -> B
-Where: data/llm-cache/m-177.json, server/extract/
-What and why: SC3 is missed because m-177's drywall layout plan for Unit 201 Saturday afternoon is absent from cached plans/operations/intents. The electrical plan in m-181 is present. Correct extraction and regenerate the cache with honest provenance; retain the independent labels.
-Blocking me: yes for full labelled-set sign-off. Meanwhile C's clash fixtures pass.
-```
-
-For A: merge C's branch and consume the generated results for the README. `server/api/session.ts` currently applies a confidence-1 heard-position operation for any approved `notify_crew` latest-change fix; ensure approving a WARN confirmation cannot promote an uncertain position to confirmed reality. The C warning draft asks for confirmation rather than instructing work. Update the root README's obsolete slice-only/data-missing status. Turn the five full-data e2e TODOs into assertions when integrating; C's acceptance tests cover the four check outcomes but do not replace the phone/learning HTTP lifecycle.
-
-For D: consume `eval/results.json` for numbers, refresh the obsolete slice-only demo/judging notes, and replace `PHONE.blueRoom`'s placeholder in `web/src/present/beats.ts` with B's cached script: `tmrw afternoon we start boarding the blue room, ceiling first` (Walsh Drywall). Finish the written submission placeholders and demo video, then rehearse all beats. No changes to D's files were made by C.
+Remaining release work: review and integrate this branch, visually rehearse every presenter beat and record/verify the submission video. Browser inspection was blocked when Computer Use could not verify the current Edge URL. No visual QA or completed recording is claimed from that attempt. Submission identity fields and final upload/form actions require the team's real information and human completion.
 
 Rule limitation: the frozen element contract has no decision-category field. Interior dependency inference therefore uses conservative whole-word material/fixture categories in recorded element names; unfamiliar names are not inferred. Explicitly named proposed dependencies always count. Only a person's messages count as crew replies, not system DMs. Mixed-crew fixes ask each silent crew while retaining the responding crew's correction.
 
-Repository visibility was checked with GitHub CLI and is private. Confirmation of Talona's required submission location with organizers on Discord is still a human handoff; it was not established by the code audit. Once B's corrected extraction lands, rerun the commands above and review every remaining miss and false alarm before making a full-set claim.
+Repository visibility was checked with GitHub CLI and is private. Confirmation of Talona's required submission location with organizers on Discord is still a human handoff; it was not established by the code audit. Rerun the commands above whenever data, extraction, model or checks change.
