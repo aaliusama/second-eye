@@ -18,8 +18,6 @@ import { rehearse } from "../checks/index";
 import * as learning from "../learning/index";
 import { logLine } from "../log";
 import { getPlan } from "../model/index";
-import { loadGoldenReplay, loadStartScene } from "../model/load";
-import { runReplay } from "../model/replay";
 import { evalPath } from "../paths";
 import { handleQueryRoute } from "../query/index";
 import {
@@ -34,6 +32,7 @@ import {
   resetSession,
   sessionNow,
 } from "./session";
+import { clearStateAt, stateAt } from "./state-at";
 
 // Owner: A. HTTP API. Shapes come from contracts/. The web dev server proxies /api here.
 
@@ -104,13 +103,11 @@ export async function handle(req: IncomingMessage, res: ServerResponse): Promise
     if (route === "GET /api/state") {
       const t = url.searchParams.get("t");
       if (t !== null) {
-        // Time slider: a fresh replay up to t, independent of the live session.
+        // Time slider: a replay up to t, independent of the live session, memoised (state-at.ts).
         if (!ReplayTime.safeParse(t).success) {
           return send(res, 400, { error: "t must look like 2026-11-13T17:40:00" });
         }
-        const state = await runReplay(await loadGoldenReplay(), learning.applyToScene(await loadStartScene()), t);
-        const body: StateResponse = { t: state.t, scene: state.scene, findings: state.findings, fixes: state.fixes };
-        return send(res, 200, body);
+        return send(res, 200, await stateAt(t));
       }
       const s = await getSession();
       const body: StateResponse = { t: sessionNow(s), scene: s.scene, findings: s.findings, fixes: s.fixes };
@@ -169,7 +166,9 @@ export async function handle(req: IncomingMessage, res: ServerResponse): Promise
 
     if (route === "POST /api/corrections") {
       const body = parseBody(Correction, await readJson(req));
-      return send(res, 200, { correction: recordCorrection(body) });
+      const correction = recordCorrection(body);
+      clearStateAt();
+      return send(res, 200, { correction });
     }
 
     if (route === "POST /api/reset") {
@@ -182,6 +181,7 @@ export async function handle(req: IncomingMessage, res: ServerResponse): Promise
       // Run 2 learns from run 1: crews the agent put on watch are stored before the session drops.
       const learnedCrews = keepLearning ? await learnFromRun() : 0;
       resetSession({ keepLearning });
+      clearStateAt();
       const s = await getSession();
       logLine({ kind: "api.reset", keepLearning, learnedCrews, findings: s.findings.length });
       const body: ResetResponse = { ok: true, keepLearning, learnedCrews, t: sessionNow(s) };

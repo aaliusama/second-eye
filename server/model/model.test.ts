@@ -48,6 +48,22 @@ describe("applyOperations", () => {
     expect(a).toEqual(b);
   });
 
+  it("copy-on-write: changed elements are new objects, untouched ones shared, input unchanged", () => {
+    const scene = startScene();
+    const before = structuredClone(scene);
+    const move = fixtureOperations.find((o) => o.type === "move")!;
+    const twice = [move, { ...move, id: "op-again", time: "2026-11-12T15:00:00" }];
+    const out = applyOperations(scene, twice);
+    expect(scene).toEqual(before);
+    expect(w12(out)).not.toBe(w12(scene));
+    expect(w12(out).version).toBe(3);
+    expect(w12(out).history).toHaveLength(3);
+    const other = scene.elements.find((e) => e.id !== "W-12")!;
+    expect(out.elements.find((e) => e.id === other.id)).toBe(other);
+    expect(out.elements).not.toBe(scene.elements);
+    expect(out.tasks).not.toBe(scene.tasks);
+  });
+
   it("plan_task upserts by task id", () => {
     const op = (desc: string, id: string): Operation => ({
       id,

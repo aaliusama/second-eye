@@ -104,6 +104,21 @@ export function getSession(): Promise<Session> {
 }
 
 /**
+ * Builds the session at server start, so the first request does not wait for the replay. Requests
+ * during the warm-up await the same promise (getSession), so the replay plays once. Logs one JSON line;
+ * the duration is for the log only, never for logic. A failure is logged, the next request retries.
+ */
+export async function warmUp(): Promise<void> {
+  const started = performance.now();
+  try {
+    const s = await getSession();
+    logLine({ kind: "server.warmup", ms: Math.round(performance.now() - started), messages: s.messages.length, findings: s.findings.length });
+  } catch (err) {
+    logLine({ kind: "server.warmup_error", ms: Math.round(performance.now() - started), error: String(err) });
+  }
+}
+
+/**
  * End-of-run learning: crews the agent put on watch (missed changes, unanswered questions) are stored
  * as crew_misread corrections, so the next run's agent warns them as soon as a change lands.
  * Same correction id is stored once.
