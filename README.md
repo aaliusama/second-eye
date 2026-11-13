@@ -17,7 +17,15 @@ Open http://localhost:5173. The demo plays `data/replay.golden.json` with cached
 
 ## Environment
 
-Copy `.env.example` to `.env`. `LIVE_LLM=1` calls the extraction model live and needs its key. Never commit `.env`.
+Copy `.env.example` to `.env` and paste your Groq key after `GROQ_API_KEY=` (key from https://console.groq.com/keys). Never commit `.env`; it is gitignored.
+
+The demo does not need a key: it reads the cached LLM output. The key is used to build or refresh the caches:
+
+| Command | What |
+|---|---|
+| `npx tsx server/extract/build-cache.ts` | extract every replay message with Groq into `data/llm-cache/` |
+| `npx tsx server/query/build-cache.ts` | parse the demo crew questions with Groq into `server/query/cache/` |
+| `LIVE_LLM=1` in `.env` | the server calls Groq for messages and questions that have no cache entry |
 
 ## Commands
 
