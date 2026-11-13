@@ -17,7 +17,9 @@ import {
 //    (sourced from the second crew) and the rehearsal finding (sourced from the smaller task id) are one incident.
 //    Repeated alerts for one incident count once.
 // 2. A labelled case is caught when an incident has the same check and its messages include the
-//    case's triggerMessageId. An incident that matches no case is one false alarm.
+//    case's triggerMessageId. An incident that matches no case is one false alarm, except a repeat:
+// 3. A repeat is an unmatched incident with the same check, crews and elements as a caught one (the crew
+//    restated the same plan in a later message). It is the same problem said again: listed, not counted.
 
 const zero = (): EvalCounts => ({ caught: 0, missed: 0, falseAlarms: 0 });
 const uniqSorted = (xs: string[]) => [...new Set(xs)].sort();
@@ -55,6 +57,12 @@ export interface EvalDetail {
   perCrew: Record<string, EvalCounts>;
   cases: CaseResult[];
   falseAlarms: Incident[];
+  /** Unmatched incidents that restate a caught one (rule 3). Not counted as false alarms. */
+  repeats: Incident[];
+  /** Messages in the replay, and how many with no label raised a false alarm. */
+  messages: { total: number; labelled: number; unlabelled: number; unlabelledWithFalseAlarm: number };
+  /** Labelled trigger messages that are not in the replay (a label or replay mistake). */
+  labelsNotInReplay: string[];
   thresholds: { threshold: number; total: EvalCounts; perCheck: Record<CheckName, EvalCounts> }[];
 }
 
@@ -113,16 +121,24 @@ export function toIncidents(findings: Finding[], tasks: PlanTask[] = []): Incide
 }
 
 const matches = (i: Incident, c: LabelledCase) => i.check === c.check && i.messageIds.includes(c.triggerMessageId);
+const problem = (i: Incident) => `${i.check}|${i.crewIds.join(",")}|${i.elementIds.join(",")}`;
+
+/** Unmatched incidents split into repeats of a caught incident (rule 3) and false alarms. */
+function unmatched(labels: LabelSet, incidents: Incident[]): { repeats: Incident[]; falseAlarms: Incident[] } {
+  const isMatched = (i: Incident) => labels.cases.some((c) => matches(i, c));
+  const caught = new Set(incidents.filter(isMatched).map(problem));
+  const rest = incidents.filter((i) => !isMatched(i));
+  return { repeats: rest.filter((i) => caught.has(problem(i))), falseAlarms: rest.filter((i) => !caught.has(problem(i))) };
+}
 
 function countIncidents(labels: LabelSet, incidents: Incident[]): { perCheck: EvalResults["perCheck"]; total: EvalCounts } {
+  // Every check is listed, also one with no cases and no findings.
   const perCheck = Object.fromEntries(CheckName.options.map((c) => [c, zero()])) as EvalResults["perCheck"];
   for (const c of labels.cases) {
     if (incidents.some((i) => matches(i, c))) perCheck[c.check].caught++;
     else perCheck[c.check].missed++;
   }
-  for (const i of incidents) {
-    if (!labels.cases.some((c) => matches(i, c))) perCheck[i.check].falseAlarms++;
-  }
+  for (const i of unmatched(labels, incidents).falseAlarms) perCheck[i.check].falseAlarms++;
   const total = zero();
   for (const counts of Object.values(perCheck)) {
     total.caught += counts.caught;
@@ -151,6 +167,8 @@ export function scoreDetail(
   live: Finding[],
   rehearsal: Finding[],
   tasks: PlanTask[],
+  /** Ids of every message in the replay, for the no-label counts. */
+  messageIds: string[] = [],
 ): EvalDetail {
   const incidents = toIncidents([...live, ...rehearsal], tasks);
 
@@ -169,7 +187,17 @@ export function scoreDetail(
     };
   });
 
-  const falseAlarms = incidents.filter((i) => !labels.cases.some((c) => matches(i, c)));
+  const { repeats, falseAlarms } = unmatched(labels, incidents);
+  const labelled = new Set(labels.cases.map((c) => c.triggerMessageId));
+  const unlabelled = messageIds.filter((id) => !labelled.has(id));
+  const alarmed = new Set(falseAlarms.flatMap((i) => i.messageIds));
+  const messages = {
+    total: messageIds.length,
+    labelled: messageIds.filter((id) => labelled.has(id)).length,
+    unlabelled: unlabelled.length,
+    unlabelledWithFalseAlarm: unlabelled.filter((id) => alarmed.has(id)).length,
+  };
+  const labelsNotInReplay = messageIds.length === 0 ? [] : uniqSorted([...labelled].filter((id) => !messageIds.includes(id)));
 
   const perCrew: Record<string, EvalCounts> = {};
   const crew = (id: string) => (perCrew[id] ??= zero());
@@ -197,6 +225,9 @@ export function scoreDetail(
     perCrew: Object.fromEntries(Object.entries(perCrew).sort(([a], [b]) => (a < b ? -1 : 1))),
     cases,
     falseAlarms,
+    repeats,
+    messages,
+    labelsNotInReplay,
     thresholds,
   };
 }
