@@ -167,7 +167,7 @@ export function postMessage(req: PostMessageRequest): Promise<PostMessageRespons
     const message: ChatMessage = { ...body, id: uniqueId(cacheId, s.messages), time: addMinutes(s.t, n) };
 
     const ctx = learning.getContext();
-    const extracted = resource(await extract({ ...message, id: cacheId }, ctx), cacheId, message.id);
+    const extracted = resource(await extract({ ...message, id: cacheId }, ctx, s.scene), cacheId, message.id);
     const resolved = learning.resolvePlaces(extracted, message, s.scene, ctx);
     const result = resolved.result;
     for (const u of resolved.unresolved) logLine({ kind: "learning.unresolved", ...u });

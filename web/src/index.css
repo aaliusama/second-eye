@@ -112,6 +112,10 @@ input {
 
 .boot {
   padding: var(--pad);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
 }
 
 /* ---------- Layout: the model is the page ---------- */

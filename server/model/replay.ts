@@ -31,7 +31,7 @@ export async function runReplay(replay: GoldenReplay, start: Scene, until?: stri
       const message = event.message;
       state.messages.push(message);
       const ctx = learning.getContext();
-      const resolved = learning.resolvePlaces(await extract(message, ctx), message, state.scene, ctx);
+      const resolved = learning.resolvePlaces(await extract(message, ctx, state.scene), message, state.scene, ctx);
       const result = resolved.result;
       for (const u of resolved.unresolved) logLine({ kind: "learning.unresolved", ...u });
       state.unresolved.push(...resolved.unresolved);

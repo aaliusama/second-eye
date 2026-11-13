@@ -9,7 +9,7 @@ Every number on screen or in the pitch comes from `npm run eval`. Status column:
 | Feature that proves it | Lane | Demo moment | Evidence | Status |
 |---|---|---|---|---|
 | Chat → operations on a JSON scene, each with `sourceMessageId` and confidence | A, B | 0:20 "Build" | `server/model/model.test.ts`, element history in the inspector | on main |
-| Real LLM extraction (xAI Grok), zod-validated, cached; demo runs offline from cache | B | mention at 0:20 | `server/extract/` tests; `data/llm-cache/`; `LIVE_LLM=1` path | building |
+| Real LLM extraction (Groq, model `openai/gpt-oss-120b`), zod-validated, cached; demo runs offline from cache | B | mention at 0:20 | `server/extract/` tests; `data/llm-cache/`; `LIVE_LLM=1` path | building |
 | Four deterministic checks, no LLM inside (`server/checks/`) | C | 0:45–1:45 | `server/checks/checks.test.ts`, `rehearse-fixes.test.ts` | on main |
 | "Who heard which change" from chat threads → ghost geometry + dimension label | A, C | 0:45 ghost wall | `GET /api/state` finding `f-latest_change-m-002-W-12`, label "0.4 m east"; `e2e/demo-story.e2e.test.ts` | on main |
 | Same input, same output (replay clock, no wall time, no randomness) | all | not shown; say it once | replay tests; e2e run is repeatable | on main |
@@ -52,7 +52,7 @@ Every number on screen or in the pitch comes from `npm run eval`. Status column:
 
 | Risk | Mitigation |
 |---|---|
-| Venue Wi-Fi down or xAI slow | Demo runs from `data/llm-cache/` with `LIVE_LLM=0`. Never demo live extraction. |
+| Venue Wi-Fi down or Groq slow | Demo runs from `data/llm-cache/` with `LIVE_LLM=0`. Never demo live extraction. |
 | A phone text typed differently misses the cache | Presenter types only the scripted texts in `data/scenario.md` "Phone script"; keep them pasted in a notes app. Fallback: a "send scripted message" button in `/phone`. |
 | A late merge breaks `npm run demo` | Feature freeze Sat 09:00. `npm run typecheck`, `npm test` and the e2e run before every merge; A reverts any breaking merge. Tag the last good commit `demo-ok` and demo from it. |
 | Ports 5173/8787 taken on the demo laptop | Close other dev servers; `PORT` and the Vite proxy read from env. |
