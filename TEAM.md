@@ -21,7 +21,7 @@ Shared: `docs/decisions.md`. Anyone appends one line per decision; on a merge co
 
 ## Status (updated on every merge to main)
 
-Last update: Fri 13 Nov, night. `main`: typecheck clean, 167 unit tests, e2e 6 pass / 6 todo, eval 1/1 on slice 1 (full scenario pending B).
+Last update: Fri 13 Nov, night. `main`: typecheck clean, 174 unit tests, e2e 6 pass / 6 todo, eval 1/1 on slice 1 (full scenario pending B).
 
 | Lane | What | State |
 |---|---|---|
@@ -35,9 +35,13 @@ Last update: Fri 13 Nov, night. `main`: typecheck clean, 167 unit tests, e2e 6 p
 | H | 3D cut-away view with ghost reveal | on main |
 | I | judging map, submission draft, pitch, e2e test | on main |
 | J | question parser matches walls by name ("where is the 204 east wall?") | building |
-| K | new shapes lifted into `contracts/` | building |
+| K | new shapes lifted into `contracts/` | on main |
 | L | presenter mode: one key per demo beat | building |
 | M | e2e covers everything on main; scripted demo video recorder | building |
+| N | premium pass: evening-rehearsal header with status strip, rail as tabs, plain-word approval cards, agent timeline | building |
+| O | premium pass: "Site chat" feed showing each message becoming operations with confidence (the Build step) | building |
+| P | premium pass: crew phone like a real site thread, human sources, briefing card; multi-crew slider | building |
+| Q | premium pass: plan as an architect's drawing (wall poché, doors, areas, north arrow, scale), crew presence, clash hatch | building |
 
 Groq key: put it in `.env` after `GROQ_API_KEY=` (see README, Environment).
 
