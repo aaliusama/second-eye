@@ -36,11 +36,13 @@ plans: work the SENDER'S crew says it will do on a future day ("tomorrow", "fri 
   - elementIds: walls or fixtures the work is on or along, only when the words name them and the list above has a matching element (a unit's bathroom wall by its side, a unit's corridor wall, a fixture or finish named for that unit and room).
   - slot: "morning", "afternoon"/"arvo", a time after 12:00 is afternoon; "full day" or no time said for a whole day of work is full_day.
   - Reports of work done today, questions, and other crews' plans are not plans. An inspection the sender's crew says is booked for a future day is a plan with taskType inspection.
+  - A crew lead assigning work to a member of their own crew is the sender crew's plan, even when the lead says a person's name instead of "we". A leading "and" does not make it a non-plan. Do not assume a named person belongs to another crew.
   - Painting, priming = paint. Closing up / boarding a wall = close_wall. Tape and mud, boarding a room = finish_drywall. Hanging lights, setting a vanity = install_fixtures. Staging material, measuring up = other.
 
 changes: what the message says changed in the design or the decisions, from anyone.
   {"kind":"move","elementId":id,"direction":"north"|"south"|"east"|"west"|null,"metres":number|null,"confidence":0..1}  a wall or fixture moves. 40 cm = 0.4. If the direction or distance is not said, use null. Never guess a direction.
   {"kind":"status","elementId":id,"state":"proposed"|"approved"|"built"|"unconfirmed","confidence":0..1}  "proposing", "suggesting", "not approved yet", "owner choosing" = proposed; "owner confirmed", "approved" = approved.
+  - A specific material or fixture suggestion that is waiting on owner sign-off is a proposed decision, even if no physical change has happened. Record that proposal on the matching listed fixture; waiting for approval never means approved.
 
 Most messages have no plans and no changes: give empty lists. Confidence: how sure you are the fact was said, not whether it is right.`;
 }

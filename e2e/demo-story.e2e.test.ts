@@ -202,10 +202,60 @@ describe("demo story (golden replay, cached extraction)", () => {
     expect((await get("/api/health")).status).toBe(200);
   });
 
-  // Beats that need lane B's full scenario (data/). Turn each into a real test when it lands on main.
-  it.todo("beat 3 live: a scripted phone message from plumbing (cached by text) produces the ghost");
-  it.todo("beat 6: 'the blue room' is unresolved on run 1, superintendent maps it, run 2 resolves it on its own");
-  it.todo("incident 2: electrical and painting both in unit 206 Saturday morning -> space_clash");
-  it.todo("incident 3: drywall closes the 203 wall before the plumbing inspection -> order_of_work");
-  it.todo("incident 4: tiling 205 while the tile choice is still proposed -> open_decision");
+  it("beat 3 live: a scripted phone message from plumbing produces a newly sourced ghost", async () => {
+    expect((await post("/api/reset", { keepLearning: false })).status).toBe(200);
+    const live = await post("/api/message", {
+      thread: "site-group", senderName: "Marek (Novak Plumbing)", senderRole: "crew_lead", crewId: "crew-plumbing",
+      text: "tomorrow morning we rough in the 204 bath along the east wall", kind: "text",
+    });
+    expect(live.status).toBe(200);
+    expect(live.body.message.id).toBe("live-9aa884fec0");
+    const ghost = live.body.findings.find((f: any) => f.check === "latest_change");
+    expect(ghost).toMatchObject({ sourceMessageId: live.body.message.id, severity: "hold", ghost: { elementId: "W-12", label: "0.4 m east" } });
+    expect(ghost.evidenceMessageIds).toContain("m-001");
+    expect(live.body.fixes.some((f: any) => f.findingId === ghost.id && f.messages.some((m: any) => m.text.startsWith("HOLD:")))).toBe(true);
+  });
+
+  it("beat 6: the blue room is unresolved, mapped once, then resolved on run 2", async () => {
+    expect((await post("/api/reset", { keepLearning: false })).status).toBe(200);
+    const message = {
+      thread: "site-group", senderName: "Sean (Walsh Drywall)", senderRole: "crew_lead", crewId: "crew-drywall",
+      text: "tmrw afternoon we start boarding the blue room, ceiling first", kind: "text",
+    };
+    const first = await post("/api/message", message);
+    expect(first.status).toBe(200);
+    expect(first.body.intents).toHaveLength(1);
+    expect(first.body.intents[0].placeId).toBeUndefined();
+    expect((await get("/api/unresolved")).body.items.some((u: any) => u.messageId === first.body.message.id)).toBe(true);
+    const correction = await post("/api/corrections", {
+      id: "e2e-blue-room", kind: "location_alias", time: first.body.message.time,
+      sourceMessageId: first.body.message.id, alias: "the blue room", elementId: "room-204",
+    });
+    expect(correction.status).toBe(200);
+    expect((await post("/api/reset", { keepLearning: true })).status).toBe(200);
+    const second = await post("/api/message", message);
+    expect(second.status).toBe(200);
+    expect(second.body.intents[0]).toMatchObject({ placeId: "room-204", sourceMessageId: second.body.message.id });
+    expect((await get("/api/unresolved")).body.items.some((u: any) => u.messageId === second.body.message.id)).toBe(false);
+  });
+
+  it.each([
+    ["space_clash", "m-170", "room-206", "hold"],
+    ["order_of_work", "m-175", "W-08", "hold"],
+    ["open_decision", "m-172", "tile-205-bath", "hold"],
+  ])("full scenario: %s reaches the HTTP record and rehearsal with evidence", async (check, source, element, severity) => {
+    expect((await post("/api/reset", { keepLearning: false })).status).toBe(200);
+    const state = await get("/api/state");
+    expect(state.status).toBe(200);
+    const hit = state.body.findings.find((f: any) => f.check === check &&
+      [f.sourceMessageId, ...f.evidenceMessageIds].includes(source) && f.elementIds.includes(element));
+    expect(hit).toBeDefined();
+    expect(hit.severity).toBe(severity);
+    expect(hit.evidenceMessageIds.length).toBeGreaterThan(0);
+    expect(hit.summary).toMatch(/^Per the record/);
+    const rehearsal = await get("/api/rehearsal?day=2026-11-14");
+    expect(rehearsal.status).toBe(200);
+    expect(rehearsal.body.frames.flatMap((fr: any) => fr.findings).some((f: any) =>
+      f.check === check && f.elementIds.includes(element) && f.trigger === "rehearsal")).toBe(true);
+  });
 });

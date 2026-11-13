@@ -14,9 +14,10 @@ const presentFromUrl = () => new URLSearchParams(window.location.search).get("pr
 function currentGhost(): Finding | undefined {
   const { state, rehearsal } = useSite.getState();
   if (!state) return undefined;
-  const resolved = resolvedFindingIds(state.fixes);
-  const open = [...state.findings, ...(rehearsal?.frames.flatMap((f) => f.findings) ?? [])].filter(
-    (f) => f.ghost && !resolved.has(f.id),
+  const findings = [...state.findings, ...(rehearsal?.frames.flatMap((f) => f.findings) ?? [])];
+  const resolved = resolvedFindingIds(state.fixes, findings);
+  const open = findings.filter(
+    (f) => f.ghost?.elementId === "W-12" && !resolved.has(f.id),
   );
   const live = open.filter((f) => f.trigger === "live");
   const pool = live.length > 0 ? live : open;
@@ -42,7 +43,7 @@ async function view(id: BeatId): Promise<string | undefined> {
       s.setPhoneOpen(false);
       return;
     case "build": {
-      const m = s.messages.find((x) => x.senderRole === "architect") ?? s.messages[0];
+      const m = s.messages.find((x) => x.id === "m-001");
       if (!m) return "No message on record yet.";
       await s.setAsOf(m.time);
       const el = useSite.getState().state?.scene.elements.find((e) => e.history.some((h) => h.sourceMessageId === m.id));
@@ -63,7 +64,7 @@ async function view(id: BeatId): Promise<string | undefined> {
     case "rehearse": {
       s.select(undefined);
       const st = useSite.getState();
-      const resolved = st.state ? resolvedFindingIds(st.state.fixes) : new Set<string>();
+      const resolved = st.state ? resolvedFindingIds(st.state.fixes, [...st.state.findings, ...(st.rehearsal?.frames.flatMap((f) => f.findings) ?? [])]) : new Set<string>();
       const first = [...troubleSteps(st.rehearsal, resolved)].sort((a, b) => a - b)[0];
       st.setSlider(first ?? 0);
       return first === undefined ? "No clash on tomorrow's track." : undefined;
@@ -99,8 +100,9 @@ async function act(id: BeatId): Promise<string | undefined> {
       return;
     }
     case "fix": {
-      const fix = s.state?.fixes.find((f) => f.status === "pending");
-      if (!fix) return "No fix waiting.";
+      const ghost = currentGhost();
+      const fix = s.state?.fixes.find((f) => f.status === "pending" && f.findingId === ghost?.id);
+      if (!fix) return "No pending W-12 ghost-wall fix found.";
       await s.approve(fix.id);
       return;
     }

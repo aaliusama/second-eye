@@ -1,11 +1,29 @@
 {
   "provenance": "llm: groq openai/gpt-oss-120b",
   "messageId": "m-043",
-  "operations": [],
+  "operations": [
+    {
+      "id": "op-m-043-1",
+      "time": "2026-11-12T10:45:00",
+      "sourceMessageId": "m-043",
+      "thread": "office",
+      "confidence": 1,
+      "type": "set_status",
+      "elementId": "light-202-kitchen",
+      "state": "proposed"
+    }
+  ],
   "intents": [],
   "facts": {
     "id": "m-043",
     "plans": [],
-    "changes": []
+    "changes": [
+      {
+        "kind": "status",
+        "elementId": "light-202-kitchen",
+        "state": "proposed",
+        "confidence": 1
+      }
+    ]
   }
 }

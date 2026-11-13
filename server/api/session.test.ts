@@ -95,4 +95,24 @@ describe("session", () => {
     expect(second.findings.every((f) => f.sourceMessageId === `${cacheId}-2`)).toBe(true);
     expect(second.findings.map((f) => f.check)).toContain("latest_change");
   });
+
+  it("approving a warning sends the confirmation request without confirming uncertain geometry", async () => {
+    const s = await getSession();
+    const wall = s.scene.elements.find((e) => e.id === "W-12")!;
+    wall.history.at(-1)!.confidence = 0.4;
+    const result = await postMessage({
+      thread: "site-group", senderName: "Marek (Novak Plumbing)", senderRole: "crew_lead",
+      crewId: "crew-plumbing", text: fixtureMessages[1]!.text, kind: "text",
+    });
+    const warning = result.findings.find((f) => f.check === "latest_change")!;
+    expect(warning.severity).toBe("warn");
+    const fix = result.fixes.find((f) => f.findingId === warning.id)!;
+    expect(fix.kind).toBe("notify_crew");
+    expect(fix.messages[0]!.text).toMatch(/^WARN:/);
+    const before = structuredClone(wall);
+    const { sent } = await approveFix(fix.id);
+    expect(sent[0]!.text).toMatch(/^WARN:/);
+    expect((await getSession()).scene.elements.find((e) => e.id === "W-12")).toEqual(before);
+    expect(latestChangeIn((await getSession()).scene)[0]!.severity).toBe("warn");
+  });
 });
