@@ -1,0 +1,17 @@
+{
+  "provenance": "hand-written expected extraction (lane B), not LLM output; see data/scenario.md",
+  "messageId": "m-061",
+  "operations": [
+    {
+      "id": "op-m-061-1",
+      "time": "2026-11-12T13:50:00",
+      "sourceMessageId": "m-061",
+      "thread": "office",
+      "confidence": 0.88,
+      "type": "set_status",
+      "elementId": "light-206-bath",
+      "state": "proposed"
+    }
+  ],
+  "intents": []
+}

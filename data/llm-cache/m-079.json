@@ -1,0 +1,59 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "m-079",
+  "operations": [
+    {
+      "id": "op-m-079-1",
+      "time": "2026-11-12T16:05:00",
+      "sourceMessageId": "m-079",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-m-079-1",
+        "crewId": "crew-electrical",
+        "day": "2026-11-13",
+        "slot": "morning",
+        "order": 0,
+        "taskType": "rough_in_electrical",
+        "description": "electrical rough in 202, whole unit",
+        "placeId": "room-202",
+        "elementIds": [],
+        "status": "planned",
+        "sourceMessageId": "m-079",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-m-079-1",
+      "crewId": "crew-electrical",
+      "time": "2026-11-12T16:05:00",
+      "sourceMessageId": "m-079",
+      "confidence": 1,
+      "day": "2026-11-13",
+      "slot": "morning",
+      "taskType": "rough_in_electrical",
+      "description": "electrical rough in 202, whole unit",
+      "placeId": "room-202",
+      "elementIds": []
+    }
+  ],
+  "facts": {
+    "id": "m-079",
+    "plans": [
+      {
+        "day": "2026-11-13",
+        "slot": "morning",
+        "taskType": "rough_in_electrical",
+        "placeId": "room-202",
+        "placeSaid": null,
+        "elementIds": [],
+        "description": "electrical rough in 202, whole unit",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

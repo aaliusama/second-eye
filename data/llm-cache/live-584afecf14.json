@@ -1,0 +1,35 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "live-584afecf14",
+  "operations": [],
+  "intents": [
+    {
+      "id": "intent-live-584afecf14-1",
+      "crewId": "crew-drywall",
+      "time": "2026-11-13T20:02:00",
+      "sourceMessageId": "live-584afecf14",
+      "confidence": 1,
+      "day": "2026-11-14",
+      "slot": "afternoon",
+      "taskType": "finish_drywall",
+      "description": "start boarding the blue room, ceiling first",
+      "elementIds": []
+    }
+  ],
+  "facts": {
+    "id": "live-584afecf14",
+    "plans": [
+      {
+        "day": "2026-11-14",
+        "slot": "afternoon",
+        "taskType": "finish_drywall",
+        "placeId": null,
+        "placeSaid": "blue room",
+        "elementIds": [],
+        "description": "start boarding the blue room, ceiling first",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

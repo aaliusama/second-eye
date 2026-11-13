@@ -1,0 +1,65 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "m-086",
+  "operations": [
+    {
+      "id": "op-m-086-1",
+      "time": "2026-11-12T16:45:00",
+      "sourceMessageId": "m-086",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-m-086-1",
+        "crewId": "crew-drywall",
+        "day": "2026-11-13",
+        "slot": "afternoon",
+        "order": 0,
+        "taskType": "close_wall",
+        "description": "close up the 202 corridor wall",
+        "placeId": "room-202",
+        "elementIds": [
+          "W-05"
+        ],
+        "status": "planned",
+        "sourceMessageId": "m-086",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-m-086-1",
+      "crewId": "crew-drywall",
+      "time": "2026-11-12T16:45:00",
+      "sourceMessageId": "m-086",
+      "confidence": 1,
+      "day": "2026-11-13",
+      "slot": "afternoon",
+      "taskType": "close_wall",
+      "description": "close up the 202 corridor wall",
+      "placeId": "room-202",
+      "elementIds": [
+        "W-05"
+      ]
+    }
+  ],
+  "facts": {
+    "id": "m-086",
+    "plans": [
+      {
+        "day": "2026-11-13",
+        "slot": "afternoon",
+        "taskType": "close_wall",
+        "placeId": "room-202",
+        "placeSaid": null,
+        "elementIds": [
+          "W-05"
+        ],
+        "description": "close up the 202 corridor wall",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

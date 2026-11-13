@@ -1,0 +1,22 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "m-151",
+  "operations": [],
+  "intents": [],
+  "facts": {
+    "id": "m-151",
+    "plans": [
+      {
+        "day": "2026-11-16",
+        "slot": "morning",
+        "taskType": "other",
+        "placeId": "room-202",
+        "placeSaid": null,
+        "elementIds": [],
+        "description": "finishing",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

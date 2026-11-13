@@ -1,0 +1,42 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "m-045",
+  "operations": [
+    {
+      "id": "op-m-045-1",
+      "time": "2026-11-12T11:00:00",
+      "sourceMessageId": "m-045",
+      "thread": "dm:crew-drywall",
+      "confidence": 1,
+      "type": "move",
+      "elementId": "W-03",
+      "to": {
+        "kind": "segment",
+        "from": [
+          2.75,
+          2
+        ],
+        "to": [
+          2.75,
+          5
+        ],
+        "thickness": 0.12
+      },
+      "note": "25 cm west"
+    }
+  ],
+  "intents": [],
+  "facts": {
+    "id": "m-045",
+    "plans": [],
+    "changes": [
+      {
+        "kind": "move",
+        "elementId": "W-03",
+        "direction": "west",
+        "metres": 0.25,
+        "confidence": 1
+      }
+    ]
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "m-179",
+  "operations": [
+    {
+      "id": "op-m-179-1",
+      "time": "2026-11-13T16:55:00",
+      "sourceMessageId": "m-179",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-m-179-1",
+        "crewId": "crew-tiling",
+        "day": "2026-11-14",
+        "slot": "morning",
+        "order": 0,
+        "taskType": "tile",
+        "description": "starts the 201 bath walls",
+        "placeId": "room-201",
+        "elementIds": [],
+        "status": "planned",
+        "sourceMessageId": "m-179",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-m-179-1",
+      "crewId": "crew-tiling",
+      "time": "2026-11-13T16:55:00",
+      "sourceMessageId": "m-179",
+      "confidence": 1,
+      "day": "2026-11-14",
+      "slot": "morning",
+      "taskType": "tile",
+      "description": "starts the 201 bath walls",
+      "placeId": "room-201",
+      "elementIds": []
+    }
+  ],
+  "facts": {
+    "id": "m-179",
+    "plans": [
+      {
+        "day": "2026-11-14",
+        "slot": "morning",
+        "taskType": "tile",
+        "placeId": "room-201",
+        "placeSaid": null,
+        "elementIds": [],
+        "description": "starts the 201 bath walls",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

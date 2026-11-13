@@ -1,7 +1,7 @@
 {
   "cases": [
     {
-      "id": "case-001",
+      "id": "LC1",
       "check": "latest_change",
       "triggerMessageId": "m-002",
       "crewIds": [
@@ -10,7 +10,183 @@
       "elementIds": [
         "W-12"
       ],
-      "note": "Ghost wall demo case: W-12 moved in the office thread, plumbing never heard."
+      "note": "Ghost wall: W-12 moved 40 cm east in the office thread; plumbing plans the 204 bath on the old line."
+    },
+    {
+      "id": "LC2",
+      "check": "latest_change",
+      "triggerMessageId": "m-080",
+      "crewIds": [
+        "crew-electrical"
+      ],
+      "elementIds": [
+        "W-21"
+      ],
+      "note": "W-21 moved 30 cm north in the office thread; electrical runs the 206 kitchen circuits on it."
+    },
+    {
+      "id": "LC3",
+      "check": "latest_change",
+      "triggerMessageId": "m-089",
+      "crewIds": [
+        "crew-plumbing"
+      ],
+      "elementIds": [
+        "W-03"
+      ],
+      "note": "W-03 moved 25 cm west in a DM to drywall; plumbing runs the 201 supply lines along it."
+    },
+    {
+      "id": "LC4",
+      "check": "latest_change",
+      "triggerMessageId": "m-086",
+      "crewIds": [
+        "crew-drywall"
+      ],
+      "elementIds": [
+        "W-05"
+      ],
+      "note": "W-05 moved 10 cm north in the office thread; drywall closes it Friday."
+    },
+    {
+      "id": "SC1",
+      "check": "space_clash",
+      "triggerMessageId": "m-170",
+      "crewIds": [
+        "crew-electrical",
+        "crew-painting"
+      ],
+      "elementIds": [
+        "room-206"
+      ],
+      "note": "Electrical and painting both in 206 Saturday morning."
+    },
+    {
+      "id": "SC2",
+      "check": "space_clash",
+      "triggerMessageId": "m-079",
+      "crewIds": [
+        "crew-plumbing",
+        "crew-electrical"
+      ],
+      "elementIds": [
+        "room-202"
+      ],
+      "note": "Plumbing and electrical rough-in both in 202 Friday morning."
+    },
+    {
+      "id": "SC3",
+      "check": "space_clash",
+      "triggerMessageId": "m-181",
+      "crewIds": [
+        "crew-drywall",
+        "crew-electrical"
+      ],
+      "elementIds": [
+        "room-201"
+      ],
+      "note": "Drywall layout and electrical rough-in both in 201 Saturday afternoon."
+    },
+    {
+      "id": "SC4",
+      "check": "space_clash",
+      "triggerMessageId": "m-096",
+      "crewIds": [
+        "crew-painting",
+        "crew-tiling"
+      ],
+      "elementIds": [
+        "room-203"
+      ],
+      "note": "Painting and tiling both in 203 Friday afternoon."
+    },
+    {
+      "id": "OW1",
+      "check": "order_of_work",
+      "triggerMessageId": "m-175",
+      "crewIds": [
+        "crew-drywall",
+        "crew-plumbing"
+      ],
+      "elementIds": [
+        "room-203",
+        "W-08"
+      ],
+      "note": "Drywall closes the 203 corridor wall Saturday morning; the 203 inspection is Saturday afternoon."
+    },
+    {
+      "id": "OW2",
+      "check": "order_of_work",
+      "triggerMessageId": "m-086",
+      "crewIds": [
+        "crew-drywall"
+      ],
+      "elementIds": [
+        "room-202",
+        "W-05"
+      ],
+      "note": "Drywall closes the 202 corridor wall with no inspection on record."
+    },
+    {
+      "id": "OW3",
+      "check": "order_of_work",
+      "triggerMessageId": "m-082",
+      "crewIds": [
+        "crew-painting",
+        "crew-drywall"
+      ],
+      "elementIds": [
+        "room-205"
+      ],
+      "note": "Painting primes 205 Friday morning; drywall finishes 205 Friday afternoon."
+    },
+    {
+      "id": "OD1",
+      "check": "open_decision",
+      "triggerMessageId": "m-172",
+      "crewIds": [
+        "crew-tiling"
+      ],
+      "elementIds": [
+        "tile-205-bath"
+      ],
+      "note": "Tiling starts the 205 bath floor while the tile is only proposed."
+    },
+    {
+      "id": "OD2",
+      "check": "open_decision",
+      "triggerMessageId": "m-166",
+      "crewIds": [
+        "crew-electrical"
+      ],
+      "elementIds": [
+        "light-202-kitchen"
+      ],
+      "note": "Electrical hangs the 202 kitchen lights while they are only proposed."
+    },
+    {
+      "id": "OD3",
+      "check": "open_decision",
+      "triggerMessageId": "m-088",
+      "crewIds": [
+        "crew-plumbing"
+      ],
+      "elementIds": [
+        "vanity-203"
+      ],
+      "note": "Plumbing sets the 203 vanity while it is only proposed."
+    },
+    {
+      "id": "OD4",
+      "check": "open_decision",
+      "triggerMessageId": "m-170",
+      "crewIds": [
+        "crew-painting"
+      ],
+      "elementIds": [
+        "paint-206-living"
+      ],
+      "note": "Painting paints the 206 living room while the colour is only proposed."
     }
   ]
 }

@@ -1,0 +1,59 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "m-087",
+  "operations": [
+    {
+      "id": "op-m-087-1",
+      "time": "2026-11-12T16:50:00",
+      "sourceMessageId": "m-087",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-m-087-1",
+        "crewId": "crew-drywall",
+        "day": "2026-11-13",
+        "slot": "afternoon",
+        "order": 0,
+        "taskType": "finish_drywall",
+        "description": "finish the 205 drywall, tape and mud",
+        "placeId": "room-205",
+        "elementIds": [],
+        "status": "planned",
+        "sourceMessageId": "m-087",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-m-087-1",
+      "crewId": "crew-drywall",
+      "time": "2026-11-12T16:50:00",
+      "sourceMessageId": "m-087",
+      "confidence": 1,
+      "day": "2026-11-13",
+      "slot": "afternoon",
+      "taskType": "finish_drywall",
+      "description": "finish the 205 drywall, tape and mud",
+      "placeId": "room-205",
+      "elementIds": []
+    }
+  ],
+  "facts": {
+    "id": "m-087",
+    "plans": [
+      {
+        "day": "2026-11-13",
+        "slot": "afternoon",
+        "taskType": "finish_drywall",
+        "placeId": "room-205",
+        "placeSaid": null,
+        "elementIds": [],
+        "description": "finish the 205 drywall, tape and mud",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

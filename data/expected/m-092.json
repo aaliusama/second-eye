@@ -1,0 +1,43 @@
+{
+  "provenance": "hand-written expected extraction (lane B), not LLM output; see data/scenario.md",
+  "messageId": "m-092",
+  "operations": [
+    {
+      "id": "op-m-092-1",
+      "time": "2026-11-12T17:20:00",
+      "sourceMessageId": "m-092",
+      "thread": "site-group",
+      "confidence": 0.85,
+      "type": "plan_task",
+      "task": {
+        "id": "task-m-092-1",
+        "crewId": "crew-tiling",
+        "day": "2026-11-13",
+        "slot": "morning",
+        "order": 0,
+        "taskType": "other",
+        "description": "Stage tile in the corridor",
+        "placeId": "corridor",
+        "elementIds": [],
+        "status": "planned",
+        "sourceMessageId": "m-092",
+        "confidence": 0.85
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-m-092-1",
+      "crewId": "crew-tiling",
+      "time": "2026-11-12T17:20:00",
+      "sourceMessageId": "m-092",
+      "confidence": 0.85,
+      "day": "2026-11-13",
+      "slot": "morning",
+      "taskType": "other",
+      "description": "Stage tile in the corridor",
+      "placeId": "corridor",
+      "elementIds": []
+    }
+  ]
+}

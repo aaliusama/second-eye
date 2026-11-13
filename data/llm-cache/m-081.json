@@ -1,0 +1,65 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "m-081",
+  "operations": [
+    {
+      "id": "op-m-081-1",
+      "time": "2026-11-12T16:12:00",
+      "sourceMessageId": "m-081",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-m-081-1",
+        "crewId": "crew-electrical",
+        "day": "2026-11-13",
+        "slot": "afternoon",
+        "order": 0,
+        "taskType": "install_fixtures",
+        "description": "hang the 206 bath light",
+        "placeId": "room-206",
+        "elementIds": [
+          "light-206-bath"
+        ],
+        "status": "planned",
+        "sourceMessageId": "m-081",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-m-081-1",
+      "crewId": "crew-electrical",
+      "time": "2026-11-12T16:12:00",
+      "sourceMessageId": "m-081",
+      "confidence": 1,
+      "day": "2026-11-13",
+      "slot": "afternoon",
+      "taskType": "install_fixtures",
+      "description": "hang the 206 bath light",
+      "placeId": "room-206",
+      "elementIds": [
+        "light-206-bath"
+      ]
+    }
+  ],
+  "facts": {
+    "id": "m-081",
+    "plans": [
+      {
+        "day": "2026-11-13",
+        "slot": "afternoon",
+        "taskType": "install_fixtures",
+        "placeId": "room-206",
+        "placeSaid": null,
+        "elementIds": [
+          "light-206-bath"
+        ],
+        "description": "hang the 206 bath light",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

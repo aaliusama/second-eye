@@ -1,0 +1,59 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "m-094",
+  "operations": [
+    {
+      "id": "op-m-094-1",
+      "time": "2026-11-12T17:30:00",
+      "sourceMessageId": "m-094",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-m-094-1",
+        "crewId": "crew-painting",
+        "day": "2026-11-13",
+        "slot": "afternoon",
+        "order": 0,
+        "taskType": "finish_drywall",
+        "description": "start the 203 walls",
+        "placeId": "room-203",
+        "elementIds": [],
+        "status": "planned",
+        "sourceMessageId": "m-094",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-m-094-1",
+      "crewId": "crew-painting",
+      "time": "2026-11-12T17:30:00",
+      "sourceMessageId": "m-094",
+      "confidence": 1,
+      "day": "2026-11-13",
+      "slot": "afternoon",
+      "taskType": "finish_drywall",
+      "description": "start the 203 walls",
+      "placeId": "room-203",
+      "elementIds": []
+    }
+  ],
+  "facts": {
+    "id": "m-094",
+    "plans": [
+      {
+        "day": "2026-11-13",
+        "slot": "afternoon",
+        "taskType": "finish_drywall",
+        "placeId": "room-203",
+        "placeSaid": null,
+        "elementIds": [],
+        "description": "start the 203 walls",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

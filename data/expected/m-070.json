@@ -1,0 +1,17 @@
+{
+  "provenance": "hand-written expected extraction (lane B), not LLM output; see data/scenario.md",
+  "messageId": "m-070",
+  "operations": [
+    {
+      "id": "op-m-070-1",
+      "time": "2026-11-12T15:00:00",
+      "sourceMessageId": "m-070",
+      "thread": "office",
+      "confidence": 0.86,
+      "type": "set_status",
+      "elementId": "paint-206-living",
+      "state": "proposed"
+    }
+  ],
+  "intents": []
+}

@@ -1,0 +1,47 @@
+{
+  "provenance": "hand-written expected extraction (lane B), not LLM output; see data/scenario.md",
+  "messageId": "m-166",
+  "operations": [
+    {
+      "id": "op-m-166-1",
+      "time": "2026-11-13T15:35:00",
+      "sourceMessageId": "m-166",
+      "thread": "site-group",
+      "confidence": 0.87,
+      "type": "plan_task",
+      "task": {
+        "id": "task-m-166-1",
+        "crewId": "crew-electrical",
+        "day": "2026-11-14",
+        "slot": "morning",
+        "order": 1,
+        "taskType": "install_fixtures",
+        "description": "Hang the 202 kitchen lights",
+        "placeId": "room-202",
+        "elementIds": [
+          "light-202-kitchen"
+        ],
+        "status": "planned",
+        "sourceMessageId": "m-166",
+        "confidence": 0.87
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-m-166-1",
+      "crewId": "crew-electrical",
+      "time": "2026-11-13T15:35:00",
+      "sourceMessageId": "m-166",
+      "confidence": 0.87,
+      "day": "2026-11-14",
+      "slot": "morning",
+      "taskType": "install_fixtures",
+      "description": "Hang the 202 kitchen lights",
+      "placeId": "room-202",
+      "elementIds": [
+        "light-202-kitchen"
+      ]
+    }
+  ]
+}

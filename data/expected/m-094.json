@@ -1,0 +1,43 @@
+{
+  "provenance": "hand-written expected extraction (lane B), not LLM output; see data/scenario.md",
+  "messageId": "m-094",
+  "operations": [
+    {
+      "id": "op-m-094-1",
+      "time": "2026-11-12T17:30:00",
+      "sourceMessageId": "m-094",
+      "thread": "site-group",
+      "confidence": 0.87,
+      "type": "plan_task",
+      "task": {
+        "id": "task-m-094-1",
+        "crewId": "crew-painting",
+        "day": "2026-11-13",
+        "slot": "afternoon",
+        "order": 1,
+        "taskType": "paint",
+        "description": "Paint the 203 walls",
+        "placeId": "room-203",
+        "elementIds": [],
+        "status": "planned",
+        "sourceMessageId": "m-094",
+        "confidence": 0.87
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-m-094-1",
+      "crewId": "crew-painting",
+      "time": "2026-11-12T17:30:00",
+      "sourceMessageId": "m-094",
+      "confidence": 0.87,
+      "day": "2026-11-13",
+      "slot": "afternoon",
+      "taskType": "paint",
+      "description": "Paint the 203 walls",
+      "placeId": "room-203",
+      "elementIds": []
+    }
+  ]
+}
