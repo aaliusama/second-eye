@@ -29,6 +29,7 @@ The demo needs none of this. Copy `.env.example` to `.env` to use the LLM; never
 | `LIVE_LLM` | `0` (default): read the caches only. `1`: call Groq for any message or question with no cache entry, and write the result to the cache |
 | `PORT` | site server port, default 8787 |
 | `SITE_API` | where the MCP server finds the site API, default `http://127.0.0.1:8787` |
+| `LEARNING_FILE` | optional, e.g. `.learning/store.json`: learning is saved there and survives a server restart. Unset (default): in memory, every `npm run demo` starts clean |
 
 ## Commands
 
@@ -99,7 +100,7 @@ npm run cache-id -- "tomorrow morning we close up the blue room" crew-drywall
 - All site data is simulated. The model reflects what was said in the record, not what was built.
 - The full simulated chat and its labels are still being written; the golden replay on main is a short slice.
 - Live extraction (`LIVE_LLM=1`) is built and unit-tested with a mocked Groq, but has not yet been run against real Groq; the cache entries on main are hand-written for the first slice.
-- Learning is kept in server memory: a server restart forgets it. Use `POST /api/reset {keepLearning:true}` for run 2.
+- Learning is kept in server memory unless `LEARNING_FILE` is set; without it a server restart forgets it. Use `POST /api/reset {keepLearning:true}` for run 2, `{keepLearning:false}` to start clean (also clears the file).
 
 ## More
 

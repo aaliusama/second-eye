@@ -9,35 +9,35 @@ Every number on screen or in the pitch comes from `npm run eval`. Status column:
 | Feature that proves it | Lane | Demo moment | Evidence | Status |
 |---|---|---|---|---|
 | Chat → operations on a JSON scene, each with `sourceMessageId` and confidence | A, B | 0:20 "Build" | `server/model/model.test.ts`, element history in the inspector | on main |
-| Real LLM extraction (Groq, model `openai/gpt-oss-120b`), zod-validated, cached; demo runs offline from cache | B | mention at 0:20 | `server/extract/` tests; `data/llm-cache/`; `LIVE_LLM=1` path | building |
+| Real LLM extraction (Groq, model `openai/gpt-oss-120b`), zod-validated, cached; demo runs offline from cache | B | mention at 0:20 | `server/extract/` tests; `data/llm-cache/`; `LIVE_LLM=1` path | on main (code + mocked tests; not yet run on real Groq) |
 | Four deterministic checks, no LLM inside (`server/checks/`) | C | 0:45–1:45 | `server/checks/checks.test.ts`, `rehearse-fixes.test.ts` | on main |
 | "Who heard which change" from chat threads → ghost geometry + dimension label | A, C | 0:45 ghost wall | `GET /api/state` finding `f-latest_change-m-002-W-12`, label "0.4 m east"; `e2e/demo-story.e2e.test.ts` | on main |
 | Same input, same output (replay clock, no wall time, no randomness) | all | not shown; say it once | replay tests; e2e run is repeatable | on main |
 | One JSON log line per operation and finding | A | open the server log if asked | `server/log.ts`, server stdout | on main |
-| Flat SVG view + 3D cut-away as a second renderer of the same scene | D, H | 0:45 / 2:20 | `web/`; one scene JSON drives both | building |
-| MCP server: agents and robots query the live record | F | 2:30 | `is_place_clear` tool, demo robot planner | building |
+| Flat SVG view + 3D cut-away as a second renderer of the same scene | D, H | 0:45 / 2:20 | `web/`; one scene JSON drives both | on main |
+| MCP server: agents and robots query the live record | F | 2:30 | `is_place_clear` tool, demo robot planner | on main (e2e robot tests pass) |
 
 ## Autonomous operation & impact (30)
 
 | Feature that proves it | Lane | Demo moment | Evidence | Status |
 |---|---|---|---|---|
-| Live check: every crew statement of intent is checked as it is said | A, C | 0:45 phone message → ghost | `POST /api/message` returns findings; e2e todo "beat 3 live" | building |
+| Live check: every crew statement of intent is checked as it is said | A, C | 0:45 phone message → ghost | `POST /api/message` returns findings; e2e todo "beat 3 live" | on main (API); live phone text needs its cache entry (B) |
 | Evening rehearsal of tomorrow with no one asking | C | 1:15 time slider | `GET /api/rehearsal?day=2026-11-14`; e2e "beat 4" | on main |
 | Listen step: a crew at risk that has gone silent gets a question, not an order | C, G | 1:45 queue item reads as a question | `ask_crew` fixes in `rehearse-fixes.test.ts` | on main |
 | One-tap approval sends the crew the HOLD message with its source | A, D | 1:50 | `POST /api/fixes/:id/approve`; e2e "beat 5" | on main (API) |
-| Approval clears the problem in the model | A | 1:55 ghost disappears | e2e todo "approve clears ghost" | building |
-| Crews text a question, get an answer from the record; decisions escalate to the superintendent | E | 2:10 | `/api/ask`; e2e todo "E" | building |
-| Agent policy: escalate, follow up silent crews, auto-resolve, quiet hours, morning briefing | E, G | 2:10 briefing card | policy tests in lane G | building |
+| Approval clears the problem in the model | A | 1:55 ghost disappears | e2e "beat 5: approving the W-12 fix clears the ghost" | on main (e2e beat 5 passes) |
+| Crews text a question, get an answer from the record; decisions escalate to the superintendent | E | 2:10 | `/api/ask`; e2e todo "E" | on main |
+| Agent policy: escalate, follow up silent crews, auto-resolve, quiet hours, morning briefing | E, G | 2:10 briefing card | policy tests in lane G | on main |
 | Impact: problems caught before work starts, false alarms measured on normal chat | C | 2:40 eval panel | `npm run eval` → `eval/results.json` (caught / missed / false alarms per check) | on main (1 case) |
 
 ## Learning loop & vision (15)
 
 | Feature that proves it | Lane | Demo moment | Evidence | Status |
 |---|---|---|---|---|
-| Run 1: "the blue room" is unresolved; superintendent maps it once | A, D | 2:00 | `GET /api/unresolved`, `POST /api/corrections` | building |
-| Run 2 resolves it on its own | A | 2:05 "Run again with what we learned" | `POST /api/reset {keepLearning:true}`; e2e todo "beat 6" | building |
-| Crew reliability profiles from past misreads change who gets asked first | G | mention 2:10 | lane G tests | building |
-| Vision: the same live record answers robots and agents (MCP) | F | 2:30 | MCP demo | building |
+| Run 1: "the blue room" is unresolved; superintendent maps it once | A, D | 2:00 | `GET /api/unresolved`, `POST /api/corrections` | code on main; needs the blue-room phone text + cache (B) |
+| Run 2 resolves it on its own | A | 2:05 "Run again with what we learned" | `POST /api/reset {keepLearning:true}`; e2e todo "beat 6" | code on main; e2e "beat 6" todo until B data |
+| Crew reliability profiles from past misreads change who gets asked first | G | mention 2:10 | lane G tests | on main |
+| Vision: the same live record answers robots and agents (MCP) | F | 2:30 | MCP demo | on main |
 
 ## Demo & presentation (20)
 
@@ -56,7 +56,7 @@ Every number on screen or in the pitch comes from `npm run eval`. Status column:
 | A phone text typed differently misses the cache | Presenter types only the scripted texts in `data/scenario.md` "Phone script"; keep them pasted in a notes app. Fallback: a "send scripted message" button in `/phone`. |
 | A late merge breaks `npm run demo` | Feature freeze Sat 09:00. `npm run typecheck`, `npm test` and the e2e run before every merge; A reverts any breaking merge. Tag the last good commit `demo-ok` and demo from it. |
 | Ports 5173/8787 taken on the demo laptop | Close other dev servers; `PORT` and the Vite proxy read from env. |
-| Learning state lost (store is in memory) | Do the blue-room beat in one server session; `POST /api/reset {keepLearning:true}`, never restart the server mid-demo. |
+| Learning state lost (store is in memory) | Set `LEARNING_FILE=.learning/store.json` in `.env` on the demo laptop so a restart keeps it; press R (reset clean) before presenting. Still do the blue-room beat in one server session where possible. |
 | WebGL fails on the projector laptop | Flat SVG view is the default and does not need WebGL. |
 | Eval numbers look weak or change late | Show only `eval/results.json` from the final run; say "on 200 simulated messages". Never round up or quote a number from memory. |
 | Judge asks "is this real data?" | It is simulated, labelled on every screen. Say so first. |
