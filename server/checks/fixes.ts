@@ -1,4 +1,5 @@
 import type { ChatMessage, Finding, Fix, PlanTask, Scene, Slot, TaskType } from "@site/contracts";
+import { slotsOverlap } from "./rules";
 
 // Owner: C. One proposed fix per finding. Pure and deterministic, same order as findings.
 
@@ -109,23 +110,41 @@ export function proposeFixes(findings: Finding[], scene: Scene, messages?: ChatM
       }
       case "space_clash": {
         const place = elementName(tasks[0]?.placeId ?? f.elementIds[0]);
+        // Keep the earlier trade in place; move only the later trade, and only into a free afternoon.
+        // Full-day work cannot be squeezed into a half-day. Otherwise ask for a revised slot.
+        const ordered = [...tasks].sort(
+          (a, b) => WORK_ORDER.indexOf(a.taskType) - WORK_ORDER.indexOf(b.taskType) || a.id.localeCompare(b.id),
+        );
+        const [stay, move] = ordered;
+        const canMove =
+          ordered.length === 2 && f.crewIds.length === 2 && stay.crewId !== move.crewId &&
+          stay.day === move.day && stay.placeId === move.placeId && stay.slot === "morning" && move.slot === "morning" &&
+          !scene.tasks.some((t) =>
+            t.id !== move.id && t.status === "planned" && t.day === move.day && slotsOverlap(t.slot, "afternoon") &&
+            (t.placeId === move.placeId || t.crewId === move.crewId),
+          );
         const messages = f.crewIds.map((crewId) => {
           const own = tasks.find((t) => t.crewId === crewId);
           const others = joinNames(f.crewIds.filter((c) => c !== crewId).map(crewName)) || "another crew";
-          const slot = own?.slot ?? "morning";
-          const move =
-            slot === "morning"
-              ? "Move to the afternoon."
-              : slot === "afternoon"
-                ? "Move to the morning."
-                : "Split the day or move to another day.";
+          const when = own ? SLOT_TEXT[own.slot] : "in an overlapping slot";
+          const correction = canMove
+            ? crewId === move.crewId
+              ? `Move to the afternoon. ${crewName(stay.crewId)} keeps the morning slot.`
+              : `Keep your morning slot. ${crewName(move.crewId)} moves to the afternoon.`
+            : "Confirm a revised slot with the superintendent.";
           return {
             crewId,
-            text: `HOLD: ${others} is also in ${place} ${SLOT_TEXT[slot]} per the record (${sources}). ${move}`,
+            text: `HOLD: ${others} is also in ${place} ${when} per the record (${sources}). ${correction}`,
           };
         });
         reason = `${place} is booked twice in the same slot per the record (${sources}).`;
-        fix = { kind: "reorder", description: `Move one crew to the other slot so ${place} is clear.`, messages };
+        fix = {
+          kind: "reorder",
+          description: canMove
+            ? `Keep ${crewName(stay.crewId)} in the morning; move ${crewName(move.crewId)} to the afternoon in ${place}.`
+            : `Agree a revised slot with ${crews} so ${place} is clear.`,
+          messages,
+        };
         break;
       }
       case "order_of_work": {
@@ -148,6 +167,16 @@ export function proposeFixes(findings: Finding[], scene: Scene, messages?: ChatM
         };
         break;
       }
+    }
+
+    // An unsure record can request confirmation; it must not turn a warning into a work order.
+    if (f.severity === "warn") {
+      reason = `${f.summary} Sources: ${sources}.`;
+      fix = {
+        kind: "notify_crew",
+        description: `Ask ${crews} to confirm the record before changing the plan.`,
+        messages: toAll(`WARN: ${reason} Please confirm the record before changing the plan.`),
+      };
     }
 
     const question = (crewId: string) => {

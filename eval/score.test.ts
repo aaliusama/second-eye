@@ -15,6 +15,34 @@ describe("score", () => {
     expect(score("fixture", fixtureLabels, []).total).toEqual({ caught: 0, missed: 1, falseAlarms: 0 });
   });
 
+  it.each([
+    { elementIds: ["W-08"] },
+    { crewIds: ["crew-drywall"] },
+  ])("does not credit the right message and check on the wrong crew or element: %j", (over) => {
+    const wrong: Finding = { ...fixtureFinding, ...over };
+    expect(score("fixture", fixtureLabels, [wrong]).total).toEqual({ caught: 0, missed: 1, falseAlarms: 1 });
+    const detail = scoreDetail("fixture", fixtureLabels, [wrong], [], []);
+    expect(detail.cases[0]!.caughtBy).toBe("none");
+    expect(detail.perTrigger.live).toEqual({ caught: 0, missed: 1, falseAlarms: 1 });
+  });
+
+  it("matches all labelled crews and elements while allowing extra evidence elements", () => {
+    const extra: Finding = { ...fixtureFinding, elementIds: ["room-204", "W-12"], crewIds: ["crew-drywall", "crew-plumbing"] };
+    expect(score("fixture", fixtureLabels, [extra]).total).toEqual({ caught: 1, missed: 0, falseAlarms: 0 });
+    const labels: LabelSet = { cases: [{ ...fixtureLabels.cases[0]!, elementIds: ["W-12", "W-08"] }] };
+    expect(score("fixture", labels, [extra]).total).toEqual({ caught: 0, missed: 1, falseAlarms: 1 });
+    const twoCrews: LabelSet = { cases: [{ ...fixtureLabels.cases[0]!, crewIds: ["crew-plumbing", "crew-drywall"] }] };
+    expect(score("fixture", twoCrews, [fixtureFinding]).total).toEqual({ caught: 0, missed: 1, falseAlarms: 1 });
+    expect(score("fixture", twoCrews, [extra]).total).toEqual({ caught: 1, missed: 0, falseAlarms: 0 });
+  });
+
+  it("two cases from one message require findings for each labelled element", () => {
+    const labels: LabelSet = {
+      cases: [...fixtureLabels.cases, { ...fixtureLabels.cases[0]!, id: "case-002", elementIds: ["W-08"] }],
+    };
+    expect(score("fixture", labels, [fixtureFinding]).total).toEqual({ caught: 1, missed: 1, falseAlarms: 0 });
+  });
+
   it("counts an unlabelled finding as a false alarm", () => {
     const stray = { ...fixtureFinding, id: "f-x", sourceMessageId: "m-999", elementIds: ["W-08"] };
     expect(score("fixture", fixtureLabels, [fixtureFinding, stray]).total.falseAlarms).toBe(1);

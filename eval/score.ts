@@ -17,7 +17,8 @@ import {
 //    (sourced from the second crew) and the rehearsal finding (sourced from the smaller task id) are one incident.
 //    Repeated alerts for one incident count once.
 // 2. A labelled case is caught when an incident has the same check and its messages include the
-//    case's triggerMessageId. An incident that matches no case is one false alarm, except a repeat:
+//    case's triggerMessageId, with every labelled crew and element present. Empty label lists are wildcards.
+//    An incident that matches no case is one false alarm, except a repeat:
 // 3. A repeat is an unmatched incident with the same check, crews and elements as a caught one (the crew
 //    restated the same plan in a later message). It is the same problem said again: listed, not counted.
 
@@ -120,7 +121,11 @@ export function toIncidents(findings: Finding[], tasks: PlanTask[] = []): Incide
   return [...byKey.values()].sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
 }
 
-const matches = (i: Incident, c: LabelledCase) => i.check === c.check && i.messageIds.includes(c.triggerMessageId);
+const matches = (i: Incident, c: LabelledCase) =>
+  i.check === c.check &&
+  i.messageIds.includes(c.triggerMessageId) &&
+  c.crewIds.every((id) => i.crewIds.includes(id)) &&
+  c.elementIds.every((id) => i.elementIds.includes(id));
 const problem = (i: Incident) => `${i.check}|${i.crewIds.join(",")}|${i.elementIds.join(",")}`;
 
 /** Unmatched incidents split into repeats of a caught incident (rule 3) and false alarms. */
