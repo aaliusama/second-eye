@@ -12,7 +12,7 @@ Code freeze: **Sat 14 Nov, 15:00 sharp**. Submit by 14:30.
 
 | Workstream | Person | Writes only in |
 |---|---|---|
-| A - Spine | <name> | `contracts/`, `server/model/`, `server/learning/`, `server/index.ts`, `server/api/`, repo root config (`package.json`, `tsconfig*.json`, `.env.example`, `.gitignore`), `README.md`, `docs/architecture.md` |
+| A - Spine | Hassan | `contracts/`, `server/model/`, `server/learning/`, `server/index.ts`, `server/api/`, repo root config (`package.json`, `tsconfig*.json`, `.env.example`, `.gitignore`), `README.md`, `docs/architecture.md` |
 | B - Data + extraction | <name> | `data/`, `server/extract/` |
 | C - Checks + eval | Hassan | `server/checks/`, `eval/` |
 | D - Web + story | <name> | `web/`, `docs/demo-script.md` |
@@ -66,7 +66,7 @@ Beyond the demo, the labelled set needs 15-20 cases (at least 3 per check) and m
 
 Work top to bottom. MUST before NICE. KILL items are listed in `AGENTS.md`.
 
-### A - Spine (<name>)
+### A - Spine (Hassan)
 MUST
 - [ ] Scaffold: npm workspaces (`contracts`, `server`, `web`, `eval`), vitest, scripts `demo`, `dev`, `test`, `eval`, `typecheck`, `.env.example`, `.gitignore`. Replace the FILL IN line in `AGENTS.md` with the real commands.
 - [ ] `contracts/`: zod schemas and types for ChatMessage, Operation, Element, Scene, CrewIntent, Plan, Finding (with ghost geometry for D), Fix, Correction, RehearsalFrame, API shapes. Plus `contracts/fixtures/`: one scene, a few operations, one intent, one finding with a ghost. **On main by 21:45.**
