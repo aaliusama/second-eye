@@ -1,0 +1,16 @@
+{
+  "cases": [
+    {
+      "id": "case-001",
+      "check": "latest_change",
+      "triggerMessageId": "m-002",
+      "crewIds": [
+        "crew-plumbing"
+      ],
+      "elementIds": [
+        "W-12"
+      ],
+      "note": "Ghost wall demo case: W-12 moved in the office thread, plumbing never heard."
+    }
+  ]
+}

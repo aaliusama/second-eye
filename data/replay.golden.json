@@ -1,4 +1,35 @@
 {
-  "id": "golden",
-  "events": []
+  "id": "golden-slice-1",
+  "events": [
+    {
+      "kind": "message",
+      "message": {
+        "id": "m-001",
+        "time": "2026-11-12T14:02:00",
+        "thread": "office",
+        "senderName": "Lena Hofer",
+        "senderRole": "architect",
+        "text": "Rev C: W-12 in the 204 bathroom moves 40 cm east so the vanity fits. Updated sheet A-201 attached.",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "m-002",
+        "time": "2026-11-13T17:40:00",
+        "thread": "site-group",
+        "senderName": "Marek (Novak Plumbing)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-plumbing",
+        "text": "tomorrow morning we rough in the 204 bath along the east wall",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "rehearse",
+      "time": "2026-11-13T20:00:00",
+      "day": "2026-11-14"
+    }
+  ]
 }

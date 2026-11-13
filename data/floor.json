@@ -1,0 +1,226 @@
+{
+  "floorId": "level-2",
+  "name": "Level 2, units 201-206",
+  "time": "2026-11-10T08:00:00",
+  "elements": [
+    {
+      "id": "corridor",
+      "type": "zone",
+      "name": "Level 2 corridor",
+      "aliases": [],
+      "geometry": {
+        "kind": "polygon",
+        "points": [
+          [
+            0,
+            0
+          ],
+          [
+            30,
+            0
+          ],
+          [
+            30,
+            2
+          ],
+          [
+            0,
+            2
+          ]
+        ]
+      },
+      "state": "built",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "state": "built",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "room-203",
+      "type": "room",
+      "name": "Unit 203",
+      "aliases": [],
+      "geometry": {
+        "kind": "polygon",
+        "points": [
+          [
+            10,
+            2
+          ],
+          [
+            15,
+            2
+          ],
+          [
+            15,
+            10
+          ],
+          [
+            10,
+            10
+          ]
+        ]
+      },
+      "state": "approved",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "state": "approved",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "room-204",
+      "type": "room",
+      "name": "Unit 204",
+      "aliases": [
+        "the blue room"
+      ],
+      "geometry": {
+        "kind": "polygon",
+        "points": [
+          [
+            15,
+            2
+          ],
+          [
+            20,
+            2
+          ],
+          [
+            20,
+            10
+          ],
+          [
+            15,
+            10
+          ]
+        ]
+      },
+      "state": "approved",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "state": "approved",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "W-08",
+      "type": "wall",
+      "name": "Unit 203 corridor wall",
+      "aliases": [],
+      "geometry": {
+        "kind": "segment",
+        "from": [
+          10,
+          2
+        ],
+        "to": [
+          15,
+          2
+        ],
+        "thickness": 0.2
+      },
+      "height": 2.7,
+      "state": "planned",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "state": "planned",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "W-12",
+      "type": "wall",
+      "name": "Unit 204 bathroom east wall",
+      "aliases": [],
+      "geometry": {
+        "kind": "segment",
+        "from": [
+          18,
+          2
+        ],
+        "to": [
+          18,
+          5
+        ],
+        "thickness": 0.12
+      },
+      "height": 2.7,
+      "state": "approved",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "segment",
+            "from": [
+              18,
+              2
+            ],
+            "to": [
+              18,
+              5
+            ],
+            "thickness": 0.12
+          },
+          "state": "approved",
+          "confidence": 1
+        }
+      ]
+    }
+  ],
+  "crews": [
+    {
+      "id": "crew-plumbing",
+      "name": "Novak Plumbing",
+      "trade": "plumbing",
+      "letter": "P",
+      "threads": [
+        "site-group"
+      ]
+    },
+    {
+      "id": "crew-drywall",
+      "name": "Walsh Drywall",
+      "trade": "drywall",
+      "letter": "D",
+      "threads": [
+        "site-group"
+      ]
+    }
+  ],
+  "tasks": []
+}
