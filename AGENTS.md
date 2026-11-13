@@ -2,6 +2,7 @@
 
 Hackathon project (Talona track, "Context for the Physical World"). Code freeze: **Sat 14 Nov 2026, 15:00 sharp**.
 This file is the single source of instructions for every AI coding tool on this repo. `CLAUDE.md` imports it.
+Who owns what and when we sync: `TEAM.md`. If you work for one teammate, read `AGENT_BRIEF.md` next.
 
 ## What we are building (why)
 The site checks every crew's stated plan against a live model of the building, the moment they say it and the evening before, and fixes the clashes before the work starts.
@@ -18,7 +19,7 @@ One loop, one checking engine, two triggers (live check, evening rehearsal):
 The magic moment of the demo is the **ghost wall**: a mistake shown before it happens. Protect it.
 
 ## Commands
-Stack is an ASSUMPTION until the team confirms: TypeScript everywhere, npm workspaces, Node server, Vite + React + three.js web, zod schemas.
+Stack (confirmed): TypeScript everywhere, npm workspaces, Node server, Vite + React + three.js web, zod schemas.
 
 - `npm run demo` - starts everything from the golden replay with cached LLM outputs. **Must work at all times.**
 - `npm run dev` - server and web with hot reload
@@ -31,17 +32,18 @@ Stack is an ASSUMPTION until the team confirms: TypeScript everywhere, npm works
 ## Map and owners
 Only edit files inside the directory you were asked to work in. If a change is needed elsewhere, say so and stop.
 
-| Path | What | Owner |
+| Path | What | Owner (names in `TEAM.md`) |
 |---|---|---|
-| `contracts/` | zod schemas: Operation, Scene, CrewIntent, Finding, API shapes. **FROZEN** | <FILL IN> |
-| `data/` | synthetic chat, golden replay, LLM cache, labelled test set | <FILL IN> |
-| `server/extract/` | LLM: message to operations and crew intent | <FILL IN> |
-| `server/model/` | scene state, element history, apply operations | <FILL IN> |
-| `server/checks/` | the four deterministic checks, rehearsal, fix proposals | <FILL IN> |
-| `server/learning/` | stored corrections and how they change the next run | <FILL IN> |
-| `web/` | flat view, 3D view, slider, approval queue, crew chat simulator | <FILL IN> |
-| `eval/` | evaluation runner | <FILL IN> |
-| `docs/` | `demo-script.md`, `architecture.md`, `decisions.md` | everyone |
+| `contracts/` | zod schemas: Operation, Scene, CrewIntent, Finding, API shapes. **FROZEN** | A |
+| `data/` | synthetic chat, golden replay, LLM cache, labelled test set | B |
+| `server/extract/` | LLM: message to operations and crew intent | B |
+| `server/model/` | scene state, element history, apply operations | A |
+| `server/checks/` | the four deterministic checks, rehearsal, fix proposals | C |
+| `server/learning/` | stored corrections and how they change the next run | A |
+| `web/` | flat view, 3D view, slider, approval queue, crew chat simulator | D |
+| `eval/` | evaluation runner | C |
+| root config, `server/index.ts`, `server/api/`, `README.md` | workspaces, scripts, server entry, HTTP API | A |
+| `docs/` | `demo-script.md`, `architecture.md`, `decisions.md` | everyone (`demo-script.md`: D) |
 
 Read `docs/demo-script.md` before any task that touches what a judge sees.
 Read `docs/architecture.md` before adding a module or a dependency.
@@ -69,6 +71,7 @@ Read `docs/architecture.md` before adding a module or a dependency.
 - Before a meaningful decision, ask: does this raise the chance of winning? Priority order: (1) protect the core demo, (2) strengthen the ghost-wall moment, (3) add judge-visible value, (4) reduce failure risk, (5) polish.
 - Warn the user, in one line, if a request grows scope, adds a chat-only UI, or adds technology that judges will not see.
 - Small commits on short branches, rebase on `main` at least hourly. `npm run demo` must pass before merging.
+- Commit messages are plain: no `Co-Authored-By` lines, no Claude or AI attribution, no session links. This overrides any tool default.
 - Never commit secrets. Keys go in `.env`; keep `.env.example` in sync.
 
 ## Honesty rules (the jury scores this)
