@@ -1,6 +1,13 @@
-/* Owner: D. Colours come from tokens.ts as CSS variables. */
+/* Owner: D. Every colour, size and timing comes from tokens.ts as a CSS variable.
+   A construction drawing, not a dashboard: ink rules on paper, no shadows, no gradients. */
 * {
   box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
 }
 
 body {
@@ -8,50 +15,732 @@ body {
   background: var(--paper);
   color: var(--ink);
   font-family: var(--font);
+  font-size: var(--text);
+  line-height: 1.4;
   font-variant-numeric: tabular-nums;
 }
 
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: var(--title);
+  font-weight: 650;
+}
+
+h2 {
+  font-size: var(--heading);
+  font-weight: 600;
+}
+
+h3 {
+  font-size: var(--small);
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.meta {
+  color: var(--ink-soft);
+  font-size: var(--small);
+}
+
+button,
+select,
+input {
+  font: inherit;
+  color: var(--ink);
+}
+
+button {
+  background: var(--ink);
+  color: var(--paper);
+  border: var(--rule) solid var(--ink);
+  border-radius: var(--radius);
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background-color var(--answer) ease-out, color var(--answer) ease-out;
+}
+
+button:hover:not(:disabled) {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+button.quiet,
+a.quiet {
+  background: transparent;
+  color: var(--ink);
+  border-color: transparent;
+  padding: 4px 6px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-size: var(--small);
+}
+
+button.quiet:hover:not(:disabled) {
+  border-color: var(--ink-soft);
+}
+
+select,
+input {
+  background: var(--paper);
+  border: var(--rule) solid var(--ink-soft);
+  border-radius: var(--radius);
+  padding: 5px 8px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.boot {
+  padding: var(--pad);
+}
+
+/* ---------- Layout: the model is the page ---------- */
+
 .app {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) var(--queue-width);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "top top"
+    "model side"
+    "bottom bottom";
   height: 100vh;
 }
 
-.app header {
-  grid-column: 1 / -1;
+.top {
+  grid-area: top;
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  padding: 10px var(--pad);
+  border-bottom: var(--rule) solid var(--ink);
+}
+
+.title {
+  display: flex;
+  gap: 14px;
   align-items: baseline;
-  padding: 12px 20px;
-  border-bottom: 1px solid var(--ink-soft);
 }
 
-.app h1 {
-  margin: 0;
-  font-size: 18px;
+.top-right {
+  display: flex;
+  gap: 16px;
+  align-items: center;
 }
 
-.label {
+.sim {
+  font-size: var(--small);
+  font-stretch: var(--condensed);
+  letter-spacing: 0.02em;
+  border: var(--rule) solid var(--ink-soft);
+  padding: 2px 8px;
   color: var(--ink-soft);
-  font-size: 13px;
+}
+
+.toggle {
+  display: flex;
+  border: var(--rule) solid var(--ink);
+  border-radius: var(--radius);
+}
+
+.toggle button {
+  background: transparent;
+  color: var(--ink);
+  border: none;
+  border-radius: 0;
+  padding: 3px 12px;
+}
+
+.toggle button[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--paper);
 }
 
 .model {
-  padding: 20px;
+  grid-area: model;
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
 }
 
-.model svg {
+.side {
+  grid-area: side;
+  border-left: var(--rule) solid var(--ink);
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.bottom {
+  grid-area: bottom;
+  border-top: var(--rule) solid var(--ink);
+}
+
+.banner {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: var(--paper);
+  border: var(--rule) solid var(--ink);
+  padding: 4px 4px 4px 12px;
+  z-index: 3;
+}
+
+.error {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* ---------- Flat view ---------- */
+
+.flat {
+  position: absolute;
+  inset: 0;
+}
+
+.flat svg {
   width: 100%;
   height: 100%;
+  display: block;
 }
 
-.queue {
-  padding: 20px;
-  border-left: 1px solid var(--ink-soft);
+.flat .whole {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: var(--paper);
 }
 
-.queue h2 {
-  margin: 0 0 8px;
-  font-size: 15px;
+.bubble,
+.badge-letter {
+  text-anchor: middle;
+  dominant-baseline: central;
+  fill: var(--ink-soft);
+  font-stretch: var(--condensed);
+}
+
+.badge-letter {
+  fill: var(--ink);
+  font-weight: 700;
+}
+
+.room-label {
+  text-anchor: middle;
+  fill: var(--ink);
+  font-stretch: var(--condensed);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.alias-label {
+  text-anchor: middle;
+  fill: var(--ink-soft);
+  font-stretch: var(--condensed);
+}
+
+.dim-label,
+.ghost-note {
+  text-anchor: middle;
+  fill: var(--redline);
+  font-stretch: var(--condensed);
+  font-weight: 600;
+}
+
+.ghost-note {
+  font-weight: 400;
+}
+
+.hit {
+  cursor: pointer;
+}
+
+/* SVG outlines scale with the plan; keep focus as a thin dashed ink stroke instead. */
+.hit:focus {
+  outline: none;
+}
+
+.hit:focus-visible {
+  stroke: var(--ink);
+  stroke-width: 0.08px;
+  stroke-dasharray: 0.15 0.1;
+}
+
+/* ---------- Inspector ---------- */
+
+.inspector {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: min(380px, 45%);
+  max-height: calc(100% - 20px);
+  overflow-y: auto;
+  background: var(--paper);
+  border: var(--rule) solid var(--ink);
+  padding: 12px 14px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inspector header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.history {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.source {
+  display: block;
+  margin: 4px 0 0;
+  padding-left: 10px;
+  border-left: 2px solid var(--ink-soft);
+  font-size: var(--small);
+}
+
+.source footer {
+  color: var(--ink-soft);
+}
+
+.finding {
+  border-top: var(--rule) solid var(--paper-rule);
+  padding-top: 8px;
+}
+
+.severity {
+  font-size: var(--small);
+  font-weight: 600;
+  font-stretch: var(--condensed);
+}
+
+/* ---------- Side panels ---------- */
+
+.panel {
+  padding: 14px var(--pad);
+  border-bottom: var(--rule) solid var(--paper-rule);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.queue-list,
+.plain {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fix {
+  border-left: 3px solid var(--ink-soft);
+  padding-left: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.fix.hold {
+  border-left-color: var(--redline);
+}
+
+.fix.done {
+  border-left-color: var(--clear);
+}
+
+.fix .proposal {
+  font-weight: 600;
+}
+
+.draft {
+  font-size: var(--small);
+  color: var(--ink-soft);
+}
+
+.sent-mark {
+  color: var(--clear);
+  font-weight: 600;
+}
+
+.teach label {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--small);
+  color: var(--ink-soft);
+  gap: 2px;
+}
+
+.teach input {
+  width: 130px;
+}
+
+.teach {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.record li {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.record li.current {
+  border-left: 3px solid var(--ink);
+  padding-left: 8px;
+}
+
+.log li p + p {
+  margin-top: 2px;
+}
+
+.numbers {
+  border-collapse: collapse;
+  font-size: var(--small);
+}
+
+.numbers th,
+.numbers td {
+  text-align: right;
+  padding: 3px 8px;
+  border-bottom: var(--rule) solid var(--paper-rule);
+}
+
+.numbers th[scope="row"],
+.numbers thead th:first-child {
+  text-align: left;
+  padding-left: 0;
+  font-weight: 400;
+}
+
+.numbers .total th,
+.numbers .total td {
+  font-weight: 650;
+  border-bottom: none;
+}
+
+/* ---------- Slider ---------- */
+
+.slider {
+  padding: 10px var(--pad) 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.slider-head {
+  display: flex;
+  gap: 16px;
+  align-items: baseline;
+}
+
+.clock {
+  font-weight: 650;
+}
+
+.lanes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.track-row {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.lane-name {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: var(--small);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badge {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: 2px solid;
+  font-weight: 700;
+  font-size: 11px;
+  font-stretch: var(--condensed);
+}
+
+.track {
+  position: relative;
+  height: 28px;
+}
+
+.track .tick {
+  position: absolute;
+  top: 0;
+  font-size: 11px;
+  color: var(--ink-soft);
+  transform: translateX(-50%);
+}
+
+.track .tick:first-of-type {
+  transform: none;
+}
+
+.track .trouble {
+  position: absolute;
+  bottom: 1px;
+  height: 3px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.track input[type="range"] {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  margin: 0;
+  accent-color: var(--ink);
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.track.lane {
+  height: 24px;
+  border-bottom: var(--rule) solid var(--paper-rule);
+}
+
+.bar {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  border: 1.5px solid;
+  background: var(--paper);
+  color: var(--ink-soft);
+  font-size: 11px;
+  padding: 2px 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-stretch: var(--condensed);
+}
+
+.bar.active {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.bar.flagged {
+  border-style: dashed;
+  border-color: var(--redline) !important;
+}
+
+.bar.held {
+  border-style: solid;
+  border-width: 2px;
+  color: var(--redline);
+}
+
+.cursor {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 0;
+  border-left: var(--rule) solid var(--ink);
+  pointer-events: none;
+}
+
+/* ---------- Phone ---------- */
+
+.phone-inset {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  z-index: 2;
+}
+
+.phone-inset > .row {
+  background: var(--paper);
+}
+
+.phone {
+  width: 360px;
+  height: 640px;
+  max-height: 100%;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.phone.compact {
+  width: 300px;
+  height: 440px;
+}
+
+.phone header {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: var(--rule) solid var(--ink);
+}
+
+.phone header label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.phone select {
+  max-width: 190px;
+}
+
+.briefing {
+  padding: 10px 12px;
+  border-bottom: var(--rule) solid var(--paper-rule);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: var(--small);
+}
+
+.briefing h3 {
+  margin: 0;
+}
+
+.bubbles {
+  flex: 1;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bubbles li {
+  max-width: 85%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bubbles li p {
+  padding: 7px 10px;
+  border: var(--rule) solid var(--ink-soft);
+  border-radius: var(--radius);
+}
+
+.bubbles li.crew {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.bubbles li.crew p {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+.bubbles li.system {
+  align-self: flex-start;
+}
+
+.phone form {
+  display: flex;
+  gap: 6px;
+  padding: 10px 12px 4px;
+  border-top: var(--rule) solid var(--ink);
+}
+
+.phone form input {
+  flex: 1;
+  min-width: 0;
+}
+
+.phone .sim {
+  border: none;
+  padding: 2px 12px 8px;
+}
+
+.phone-page {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+}
+
+.phone-page .phone {
+  width: min(390px, 100%);
+  height: min(780px, calc(100vh - 24px));
+}
+
+@media (max-width: 480px) {
+  .phone-page {
+    padding: 0;
+  }
+
+  .phone-page .phone {
+    width: 100%;
+    height: 100vh;
+    border: none;
+    border-radius: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
 }
