@@ -16,8 +16,40 @@ describe("score", () => {
   });
 
   it("counts an unlabelled finding as a false alarm", () => {
-    const stray = { ...fixtureFinding, id: "f-x", sourceMessageId: "m-999" };
+    const stray = { ...fixtureFinding, id: "f-x", sourceMessageId: "m-999", elementIds: ["W-08"] };
     expect(score("fixture", fixtureLabels, [fixtureFinding, stray]).total.falseAlarms).toBe(1);
+  });
+
+  it("a later restatement of a caught incident (same check, crews, elements) is a repeat, not a false alarm", () => {
+    const again = { ...fixtureFinding, id: "f-again", sourceMessageId: "m-090" };
+    expect(score("fixture", fixtureLabels, [fixtureFinding, again]).total).toEqual({ caught: 1, missed: 0, falseAlarms: 0 });
+    // Without the caught one it is just an unlabelled alarm.
+    expect(score("fixture", fixtureLabels, [again]).total).toEqual({ caught: 0, missed: 1, falseAlarms: 1 });
+    const d = scoreDetail("x", fixtureLabels, [fixtureFinding, again], [], []);
+    expect(d.repeats.map((i) => i.messageIds)).toEqual([["m-090"]]);
+    expect(d.falseAlarms).toEqual([]);
+  });
+
+  it("lists all four checks even with no cases and no findings", () => {
+    const r = score("x", { cases: [] }, []);
+    expect(Object.keys(r.perCheck).sort()).toEqual(["latest_change", "open_decision", "order_of_work", "space_clash"]);
+    expect(r.total).toEqual({ caught: 0, missed: 0, falseAlarms: 0 });
+    expect(scoreDetail("x", { cases: [] }, [], [], []).thresholds.every((t) => Object.keys(t.perCheck).length === 4)).toBe(true);
+  });
+
+  it("a finding of another check on a labelled message is still a false alarm, under its own check", () => {
+    const wrong: Finding = { ...fixtureFinding, id: "f-w", check: "open_decision", ghost: undefined };
+    const r = score("x", fixtureLabels, [fixtureFinding, wrong]);
+    expect(r.perCheck.open_decision.falseAlarms).toBe(1);
+    expect(r.perCheck.latest_change).toEqual({ caught: 1, missed: 0, falseAlarms: 0 });
+  });
+
+  it("counts false alarms on messages with no label, and flags labels missing from the replay", () => {
+    const stray: Finding = { ...fixtureFinding, id: "f-x", sourceMessageId: "m-050", elementIds: ["W-08"] };
+    const labels: LabelSet = { cases: [...fixtureLabels.cases, { ...fixtureLabels.cases[0]!, id: "c2", triggerMessageId: "m-404" }] };
+    const d = scoreDetail("x", labels, [fixtureFinding, stray], [], [], ["m-001", "m-002", "m-050", "m-051"]);
+    expect(d.messages).toEqual({ total: 4, labelled: 1, unlabelled: 3, unlabelledWithFalseAlarm: 1 });
+    expect(d.labelsNotInReplay).toEqual(["m-404"]);
   });
 
   it("live and rehearsal alerts for one incident count once", () => {

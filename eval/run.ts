@@ -23,7 +23,14 @@ async function main(): Promise<void> {
   const live = state.findings;
   const rehearsal = rehearsalFindings(state.rehearsals);
   const results = score(replay.id, labels, [...live, ...rehearsal]);
-  const detail = scoreDetail(replay.id, labels, live, rehearsal, state.scene.tasks);
+  const detail = scoreDetail(
+    replay.id,
+    labels,
+    live,
+    rehearsal,
+    state.scene.tasks,
+    state.messages.map((m) => m.id),
+  );
 
   const row = (name: string, c: EvalCounts) =>
     `${name.padEnd(17)} ${String(c.caught).padStart(6)} ${String(c.missed).padStart(6)} ${String(c.falseAlarms).padStart(12)}`;
@@ -49,9 +56,20 @@ async function main(): Promise<void> {
 
   console.log("\ncase              check            caught by");
   for (const c of detail.cases) console.log(`${c.id.padEnd(17)} ${c.check.padEnd(16)} ${c.caughtBy}`);
+  const m = detail.messages;
+  console.log(
+    `\nMessages: ${m.total} in the replay, ${m.labelled} labelled, ${m.unlabelled} with no label, ${m.unlabelledWithFalseAlarm} of those raised a false alarm`,
+  );
+  if (detail.labelsNotInReplay.length > 0) {
+    console.log(`Labelled trigger messages not in the replay (counted as missed): ${detail.labelsNotInReplay.join(", ")}`);
+  }
   if (detail.falseAlarms.length > 0) {
     console.log("\nfalse alarms");
     for (const i of detail.falseAlarms) console.log(`  ${i.key}  (${i.triggers.join("+")})`);
+  }
+  if (detail.repeats.length > 0) {
+    console.log("\nrepeats of a caught incident (not counted)");
+    for (const i of detail.repeats) console.log(`  ${i.key}  (${i.triggers.join("+")})`);
   }
 
   await writeFile(evalPath("results.json"), JSON.stringify(results, null, 2) + "\n");

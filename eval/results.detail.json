@@ -41,6 +41,14 @@
     }
   ],
   "falseAlarms": [],
+  "repeats": [],
+  "messages": {
+    "total": 2,
+    "labelled": 1,
+    "unlabelled": 1,
+    "unlabelledWithFalseAlarm": 0
+  },
+  "labelsNotInReplay": [],
   "thresholds": [
     {
       "threshold": 0.5,

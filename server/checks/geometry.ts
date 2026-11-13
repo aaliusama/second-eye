@@ -57,6 +57,19 @@ export function midpoint(g: Geometry): Point {
   return [g.points.reduce((s, p) => s + p[0], 0) / n, g.points.reduce((s, p) => s + p[1], 0) / n];
 }
 
+/** Whether a point lies inside a polygon (ray casting). Only polygons contain anything. */
+export function inside(p: Point, area: Geometry): boolean {
+  if (area.kind !== "polygon") return false;
+  let hit = false;
+  const pts = area.points;
+  for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+    const [xi, yi] = pts[i];
+    const [xj, yj] = pts[j];
+    if (yi > p[1] !== yj > p[1] && p[0] < ((xj - xi) * (p[1] - yi)) / (yj - yi) + xi) hit = !hit;
+  }
+  return hit;
+}
+
 const fmt = (v: number) => (Math.round(Math.abs(v) * 10) / 10).toFixed(1);
 
 /**
