@@ -41,6 +41,7 @@ chat message -> server/extract -> operations + intents -> server/model -> scene 
 - `GET /api/state?t=` replays from the start scene with stored corrections applied, like a new run.
 - Live messages get a word-based id, `live-<10 hex of sha256(normalised text + crewId)>` (`server/api/live-id.ts`), and extraction reads `data/llm-cache/<that id>.json`. A repeat in one session is stored as `<id>-2` but reads the same cache entry.
 - Approving a `notify_crew` fix for a `latest_change` finding applies a `move` to the element's current geometry, sourced from the sent DM in thread `dm:<crewId>`. The crew has then heard the latest version, so checks and rehearsal stop flagging it. Other fix kinds do not change the model.
+- Live findings re-check themselves after every message (`server/model/resolve.ts`, replay and live posts): a finding the checks no longer reproduce, or whose crew tasks are all cancelled, leaves `findings` together with its pending fix and logs `finding.resolved`. Findings with an approved or rejected fix are left alone. Resolved items stay in server-only lists so the site agent can still send CLEAR.
 
 ## Crew questions (`server/query/`, lanes E and J)
 
