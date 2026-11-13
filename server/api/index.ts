@@ -21,6 +21,7 @@ import { evalPath } from "../paths";
 import {
   approveFix,
   getSession,
+  getUnresolved,
   latestDay,
   NotFoundError,
   postMessage,
@@ -142,6 +143,11 @@ export async function handle(req: IncomingMessage, res: ServerResponse): Promise
       const findings = body.frames.reduce((n, f) => n + f.findings.length, 0);
       if (findings > 0) logLine({ kind: "api.rehearsal", day, findings });
       return send(res, 200, body);
+    }
+
+    if (route === "GET /api/unresolved") {
+      // Not a contract shape yet: places the superintendent still has to map.
+      return send(res, 200, { items: await getUnresolved() });
     }
 
     if (route === "GET /api/fixes") {

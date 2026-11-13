@@ -14,6 +14,7 @@ import { fixtureExtractResults, fixtureFinding, fixtureFix, fixtureMessages } fr
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as learning from "../learning/index";
 import { handle } from "./index";
+import { liveCacheId } from "./live-id";
 import { addMinutes, resetSession } from "./session";
 
 // Extraction: the fixture result whose message has the same text (live ids are live-n).
@@ -101,13 +102,13 @@ describe("api", () => {
     const r1 = await call("POST", "/api/message", plumberSays);
     expect(r1.status).toBe(200);
     const p1 = PostMessageResponse.parse(r1.body);
-    expect(p1.message.id).toBe("live-1");
+    expect(p1.message.id).toBe(liveCacheId(plumberSays.text, "crew-plumbing"));
     expect(p1.message.time).toBe(addMinutes(t0, 1));
     expect(p1.findings).toHaveLength(1);
     expect(p1.fixes[0]!.id).toBe("fix-001");
 
     const p2 = PostMessageResponse.parse((await call("POST", "/api/message", { ...plumberSays, text: "ok" })).body);
-    expect(p2.message.id).toBe("live-2");
+    expect(p2.message.id).toBe(liveCacheId("ok", "crew-plumbing"));
     expect(p2.message.time).toBe(addMinutes(t0, 2));
 
     const state = StateResponse.parse((await call("GET", "/api/state")).body);
@@ -200,6 +201,7 @@ describe("api", () => {
     await call("POST", "/api/message", plumberSays);
     await call("POST", "/api/reset", {});
     const p = PostMessageResponse.parse((await call("POST", "/api/message", plumberSays)).body);
-    expect(p.message.id).toBe("live-1");
+    expect(p.message.id).toBe(liveCacheId(plumberSays.text, "crew-plumbing"));
+    expect(p.message.time).toBe(addMinutes(StateResponse.parse((await call("GET", "/api/state")).body).t, 0));
   });
 });

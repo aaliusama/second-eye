@@ -3,8 +3,10 @@ import {
   PostMessageRequest,
   type ApproveFixResponse,
   type ChatMessage,
+  type ExtractResult,
   type Finding,
   type Fix,
+  type Operation,
   type PostMessageResponse,
   type Rehearsal,
   type Scene,
@@ -16,9 +18,11 @@ import { logLine } from "../log";
 import { applyOperations, getPlan } from "../model/index";
 import { loadGoldenReplay, loadStartScene } from "../model/load";
 import { runReplay } from "../model/replay";
+import { liveCacheId } from "./live-id";
 
 // Owner: A. The live session: golden replay once, then crew chat posted from the web on top.
-// Deterministic: live message n is stamped replay end + n minutes. No wall clock, no randomness.
+// Deterministic: live message n is stamped replay end + n minutes, and its id comes from its words
+// (live-id.ts), so scripted phone messages hit data/llm-cache. No wall clock, no randomness.
 
 export interface Session {
   /** Replay time at the end of the golden replay. Live messages count from here. */
@@ -28,6 +32,8 @@ export interface Session {
   findings: Finding[];
   fixes: Fix[];
   rehearsals: Rehearsal[];
+  /** Messages whose place could not be told; the superintendent maps the nickname. */
+  unresolved: learning.Unresolved[];
   liveCount: number;
 }
 
@@ -81,14 +87,42 @@ export function sessionNow(s: Session): string {
   return addMinutes(s.t, s.liveCount);
 }
 
+/** Same words posted twice in one session: the second gets "-2", the third "-3". */
+function uniqueId(cacheId: string, messages: ChatMessage[]): string {
+  if (!messages.some((m) => m.id === cacheId)) return cacheId;
+  let k = 2;
+  while (messages.some((m) => m.id === `${cacheId}-${k}`)) k++;
+  return `${cacheId}-${k}`;
+}
+
+/** Extraction output read under the cache id, re-sourced to the message actually posted. */
+function resource(result: ExtractResult, from: string, to: string): ExtractResult {
+  if (from === to) return result;
+  const src = (id: string) => (id === from ? to : id);
+  return {
+    messageId: to,
+    operations: result.operations.map((op) =>
+      op.type === "plan_task"
+        ? { ...op, sourceMessageId: src(op.sourceMessageId), task: { ...op.task, sourceMessageId: src(op.task.sourceMessageId) } }
+        : { ...op, sourceMessageId: src(op.sourceMessageId) },
+    ),
+    intents: result.intents.map((i) => ({ ...i, sourceMessageId: src(i.sourceMessageId) })),
+  };
+}
+
 export function postMessage(req: PostMessageRequest): Promise<PostMessageResponse> {
   const body = PostMessageRequest.parse(req);
   return serial(async () => {
     const s = await getSession();
     const n = s.liveCount + 1;
-    const message: ChatMessage = { ...body, id: `live-${n}`, time: addMinutes(s.t, n) };
+    const cacheId = liveCacheId(body.text, body.crewId);
+    const message: ChatMessage = { ...body, id: uniqueId(cacheId, s.messages), time: addMinutes(s.t, n) };
 
-    const result = await extract(message, learning.getContext());
+    const ctx = learning.getContext();
+    const extracted = resource(await extract({ ...message, id: cacheId }, ctx), cacheId, message.id);
+    const resolved = learning.resolvePlaces(extracted, message, s.scene, ctx);
+    const result = resolved.result;
+    for (const u of resolved.unresolved) logLine({ kind: "learning.unresolved", ...u });
     for (const op of result.operations) logLine({ kind: "operation", operation: op });
     let scene = applyOperations(s.scene, result.operations);
 
@@ -108,9 +142,8 @@ export function postMessage(req: PostMessageRequest): Promise<PostMessageRespons
     s.messages.push(message);
     s.findings.push(...findings);
     s.fixes.push(...fixes);
-    if (findings.length > 0) {
-      logLine({ kind: "api.message", messageId: message.id, findings: findings.length, fixes: fixes.length });
-    }
+    s.unresolved.push(...resolved.unresolved);
+    logLine({ kind: "api.message", messageId: message.id, cacheId, findings: findings.length, fixes: fixes.length });
     return { message, operations: result.operations, intents: result.intents, findings, fixes };
   });
 }
@@ -145,10 +178,59 @@ export function approveFix(id: string): Promise<ApproveFixResponse> {
         approved: true,
       });
       s.messages.push(...sent);
+      s.scene = applyOperations(s.scene, heardOperations(s, fix, sent));
       logLine({ kind: "api.fix_approved", fixId: fix.id, sent: sent.map((m) => m.id) });
     }
     return { fix: structuredClone(fix), sent };
   });
+}
+
+/** The finding behind a fix: live findings first, then the evening rehearsals. */
+function findingOf(s: Session, id: string): Finding | undefined {
+  return (
+    s.findings.find((f) => f.id === id) ??
+    s.rehearsals.flatMap((r) => r.frames.flatMap((fr) => fr.findings)).find((f) => f.id === id)
+  );
+}
+
+/**
+ * An approved notify_crew fix for a latest_change finding tells the crew where the element is now:
+ * one move per element and sent DM, to its current geometry, sourced from the DM. The crew has then
+ * heard the latest version, so the checks and the rehearsal stop flagging it. Other fix kinds change
+ * nothing in the model.
+ */
+function heardOperations(s: Session, fix: Fix, sent: ChatMessage[]): Operation[] {
+  if (fix.kind !== "notify_crew") return [];
+  const finding = findingOf(s, fix.findingId);
+  if (!finding || finding.check !== "latest_change") return [];
+  const ids = finding.ghost ? [finding.ghost.elementId] : finding.elementIds;
+  const ops: Operation[] = [];
+  for (const m of sent) {
+    for (const elementId of ids) {
+      const el = s.scene.elements.find((e) => e.id === elementId);
+      if (!el) continue;
+      ops.push({
+        id: `op-${m.id}-${elementId}`,
+        type: "move",
+        time: m.time,
+        sourceMessageId: m.id,
+        thread: m.thread,
+        confidence: 1,
+        elementId,
+        to: structuredClone(el.geometry),
+        note: "latest position sent to the crew",
+      });
+    }
+  }
+  for (const op of ops) logLine({ kind: "operation", operation: op });
+  return ops;
+}
+
+/** Unresolved places that no stored location_alias correction answers yet. */
+export async function getUnresolved(): Promise<learning.Unresolved[]> {
+  const s = await getSession();
+  const answered = new Set(learning.all().flatMap((c) => (c.kind === "location_alias" ? [c.sourceMessageId] : [])));
+  return s.unresolved.filter((u) => !answered.has(u.messageId));
 }
 
 /** Validates and stores a correction. It changes the next run (POST /api/reset), not the current scene. */
