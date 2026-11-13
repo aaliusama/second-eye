@@ -1,0 +1,19 @@
+{
+  "provenance": "hand-written expected extraction (lane B), not LLM output; see data/scenario.md",
+  "messageId": "live-584afecf14",
+  "operations": [],
+  "intents": [
+    {
+      "id": "intent-live-584afecf14-1",
+      "crewId": "crew-drywall",
+      "time": "2026-11-13T20:02:00",
+      "sourceMessageId": "live-584afecf14",
+      "confidence": 0.62,
+      "day": "2026-11-14",
+      "slot": "afternoon",
+      "taskType": "finish_drywall",
+      "description": "Board \"the blue room\", ceiling first (place not on record)",
+      "elementIds": []
+    }
+  ]
+}

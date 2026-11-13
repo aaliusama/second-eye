@@ -1,0 +1,43 @@
+{
+  "provenance": "hand-written expected extraction (lane B), not LLM output; see data/scenario.md",
+  "messageId": "m-082",
+  "operations": [
+    {
+      "id": "op-m-082-1",
+      "time": "2026-11-12T16:20:00",
+      "sourceMessageId": "m-082",
+      "thread": "site-group",
+      "confidence": 0.89,
+      "type": "plan_task",
+      "task": {
+        "id": "task-m-082-1",
+        "crewId": "crew-painting",
+        "day": "2026-11-13",
+        "slot": "morning",
+        "order": 0,
+        "taskType": "paint",
+        "description": "Prime Unit 205",
+        "placeId": "room-205",
+        "elementIds": [],
+        "status": "planned",
+        "sourceMessageId": "m-082",
+        "confidence": 0.89
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-m-082-1",
+      "crewId": "crew-painting",
+      "time": "2026-11-12T16:20:00",
+      "sourceMessageId": "m-082",
+      "confidence": 0.89,
+      "day": "2026-11-13",
+      "slot": "morning",
+      "taskType": "paint",
+      "description": "Prime Unit 205",
+      "placeId": "room-205",
+      "elementIds": []
+    }
+  ]
+}

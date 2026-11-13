@@ -1,0 +1,59 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "m-181",
+  "operations": [
+    {
+      "id": "op-m-181-1",
+      "time": "2026-11-13T17:10:00",
+      "sourceMessageId": "m-181",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-m-181-1",
+        "crewId": "crew-electrical",
+        "day": "2026-11-14",
+        "slot": "afternoon",
+        "order": 0,
+        "taskType": "rough_in_electrical",
+        "description": "rough in in 201",
+        "placeId": "room-201",
+        "elementIds": [],
+        "status": "planned",
+        "sourceMessageId": "m-181",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-m-181-1",
+      "crewId": "crew-electrical",
+      "time": "2026-11-13T17:10:00",
+      "sourceMessageId": "m-181",
+      "confidence": 1,
+      "day": "2026-11-14",
+      "slot": "afternoon",
+      "taskType": "rough_in_electrical",
+      "description": "rough in in 201",
+      "placeId": "room-201",
+      "elementIds": []
+    }
+  ],
+  "facts": {
+    "id": "m-181",
+    "plans": [
+      {
+        "day": "2026-11-14",
+        "slot": "afternoon",
+        "taskType": "rough_in_electrical",
+        "placeId": "room-201",
+        "placeSaid": null,
+        "elementIds": [],
+        "description": "rough in in 201",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

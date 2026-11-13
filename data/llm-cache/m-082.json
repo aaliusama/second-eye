@@ -1,0 +1,59 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "m-082",
+  "operations": [
+    {
+      "id": "op-m-082-1",
+      "time": "2026-11-12T16:20:00",
+      "sourceMessageId": "m-082",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-m-082-1",
+        "crewId": "crew-painting",
+        "day": "2026-11-13",
+        "slot": "morning",
+        "order": 0,
+        "taskType": "paint",
+        "description": "prime 205",
+        "placeId": "room-205",
+        "elementIds": [],
+        "status": "planned",
+        "sourceMessageId": "m-082",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-m-082-1",
+      "crewId": "crew-painting",
+      "time": "2026-11-12T16:20:00",
+      "sourceMessageId": "m-082",
+      "confidence": 1,
+      "day": "2026-11-13",
+      "slot": "morning",
+      "taskType": "paint",
+      "description": "prime 205",
+      "placeId": "room-205",
+      "elementIds": []
+    }
+  ],
+  "facts": {
+    "id": "m-082",
+    "plans": [
+      {
+        "day": "2026-11-13",
+        "slot": "morning",
+        "taskType": "paint",
+        "placeId": "room-205",
+        "placeSaid": null,
+        "elementIds": [],
+        "description": "prime 205",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

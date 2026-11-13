@@ -1,0 +1,43 @@
+{
+  "provenance": "hand-written expected extraction (lane B), not LLM output; see data/scenario.md",
+  "messageId": "m-177",
+  "operations": [
+    {
+      "id": "op-m-177-1",
+      "time": "2026-11-13T16:40:00",
+      "sourceMessageId": "m-177",
+      "thread": "site-group",
+      "confidence": 0.86,
+      "type": "plan_task",
+      "task": {
+        "id": "task-m-177-1",
+        "crewId": "crew-drywall",
+        "day": "2026-11-14",
+        "slot": "afternoon",
+        "order": 1,
+        "taskType": "layout",
+        "description": "Layout in Unit 201",
+        "placeId": "room-201",
+        "elementIds": [],
+        "status": "planned",
+        "sourceMessageId": "m-177",
+        "confidence": 0.86
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-m-177-1",
+      "crewId": "crew-drywall",
+      "time": "2026-11-13T16:40:00",
+      "sourceMessageId": "m-177",
+      "confidence": 0.86,
+      "day": "2026-11-14",
+      "slot": "afternoon",
+      "taskType": "layout",
+      "description": "Layout in Unit 201",
+      "placeId": "room-201",
+      "elementIds": []
+    }
+  ]
+}

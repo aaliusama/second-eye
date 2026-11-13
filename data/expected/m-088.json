@@ -1,0 +1,47 @@
+{
+  "provenance": "hand-written expected extraction (lane B), not LLM output; see data/scenario.md",
+  "messageId": "m-088",
+  "operations": [
+    {
+      "id": "op-m-088-1",
+      "time": "2026-11-12T17:00:00",
+      "sourceMessageId": "m-088",
+      "thread": "site-group",
+      "confidence": 0.87,
+      "type": "plan_task",
+      "task": {
+        "id": "task-m-088-1",
+        "crewId": "crew-plumbing",
+        "day": "2026-11-13",
+        "slot": "morning",
+        "order": 1,
+        "taskType": "install_fixtures",
+        "description": "Set the 203 bathroom vanity",
+        "placeId": "room-203",
+        "elementIds": [
+          "vanity-203"
+        ],
+        "status": "planned",
+        "sourceMessageId": "m-088",
+        "confidence": 0.87
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-m-088-1",
+      "crewId": "crew-plumbing",
+      "time": "2026-11-12T17:00:00",
+      "sourceMessageId": "m-088",
+      "confidence": 0.87,
+      "day": "2026-11-13",
+      "slot": "morning",
+      "taskType": "install_fixtures",
+      "description": "Set the 203 bathroom vanity",
+      "placeId": "room-203",
+      "elementIds": [
+        "vanity-203"
+      ]
+    }
+  ]
+}

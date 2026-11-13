@@ -7,7 +7,9 @@
       "id": "corridor",
       "type": "zone",
       "name": "Level 2 corridor",
-      "aliases": [],
+      "aliases": [
+        "corridor"
+      ],
       "geometry": {
         "kind": "polygon",
         "points": [
@@ -38,7 +40,150 @@
           "sourceMessageId": "drawing:rev-B",
           "thread": "drawing",
           "operationType": "add",
+          "geometry": {
+            "kind": "polygon",
+            "points": [
+              [
+                0,
+                0
+              ],
+              [
+                30,
+                0
+              ],
+              [
+                30,
+                2
+              ],
+              [
+                0,
+                2
+              ]
+            ]
+          },
           "state": "built",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "room-201",
+      "type": "room",
+      "name": "Unit 201",
+      "aliases": [],
+      "geometry": {
+        "kind": "polygon",
+        "points": [
+          [
+            0,
+            2
+          ],
+          [
+            5,
+            2
+          ],
+          [
+            5,
+            10
+          ],
+          [
+            0,
+            10
+          ]
+        ]
+      },
+      "state": "approved",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "polygon",
+            "points": [
+              [
+                0,
+                2
+              ],
+              [
+                5,
+                2
+              ],
+              [
+                5,
+                10
+              ],
+              [
+                0,
+                10
+              ]
+            ]
+          },
+          "state": "approved",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "room-202",
+      "type": "room",
+      "name": "Unit 202",
+      "aliases": [],
+      "geometry": {
+        "kind": "polygon",
+        "points": [
+          [
+            5,
+            2
+          ],
+          [
+            10,
+            2
+          ],
+          [
+            10,
+            10
+          ],
+          [
+            5,
+            10
+          ]
+        ]
+      },
+      "state": "approved",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "polygon",
+            "points": [
+              [
+                5,
+                2
+              ],
+              [
+                10,
+                2
+              ],
+              [
+                10,
+                10
+              ],
+              [
+                5,
+                10
+              ]
+            ]
+          },
+          "state": "approved",
           "confidence": 1
         }
       ]
@@ -78,6 +223,27 @@
           "sourceMessageId": "drawing:rev-B",
           "thread": "drawing",
           "operationType": "add",
+          "geometry": {
+            "kind": "polygon",
+            "points": [
+              [
+                10,
+                2
+              ],
+              [
+                15,
+                2
+              ],
+              [
+                15,
+                10
+              ],
+              [
+                10,
+                10
+              ]
+            ]
+          },
           "state": "approved",
           "confidence": 1
         }
@@ -87,9 +253,7 @@
       "id": "room-204",
       "type": "room",
       "name": "Unit 204",
-      "aliases": [
-        "the blue room"
-      ],
+      "aliases": [],
       "geometry": {
         "kind": "polygon",
         "points": [
@@ -120,7 +284,238 @@
           "sourceMessageId": "drawing:rev-B",
           "thread": "drawing",
           "operationType": "add",
+          "geometry": {
+            "kind": "polygon",
+            "points": [
+              [
+                15,
+                2
+              ],
+              [
+                20,
+                2
+              ],
+              [
+                20,
+                10
+              ],
+              [
+                15,
+                10
+              ]
+            ]
+          },
           "state": "approved",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "room-205",
+      "type": "room",
+      "name": "Unit 205",
+      "aliases": [],
+      "geometry": {
+        "kind": "polygon",
+        "points": [
+          [
+            20,
+            2
+          ],
+          [
+            25,
+            2
+          ],
+          [
+            25,
+            10
+          ],
+          [
+            20,
+            10
+          ]
+        ]
+      },
+      "state": "approved",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "polygon",
+            "points": [
+              [
+                20,
+                2
+              ],
+              [
+                25,
+                2
+              ],
+              [
+                25,
+                10
+              ],
+              [
+                20,
+                10
+              ]
+            ]
+          },
+          "state": "approved",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "room-206",
+      "type": "room",
+      "name": "Unit 206",
+      "aliases": [],
+      "geometry": {
+        "kind": "polygon",
+        "points": [
+          [
+            25,
+            2
+          ],
+          [
+            30,
+            2
+          ],
+          [
+            30,
+            10
+          ],
+          [
+            25,
+            10
+          ]
+        ]
+      },
+      "state": "approved",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "polygon",
+            "points": [
+              [
+                25,
+                2
+              ],
+              [
+                30,
+                2
+              ],
+              [
+                30,
+                10
+              ],
+              [
+                25,
+                10
+              ]
+            ]
+          },
+          "state": "approved",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "W-02",
+      "type": "wall",
+      "name": "Unit 201 corridor wall",
+      "aliases": [],
+      "geometry": {
+        "kind": "segment",
+        "from": [
+          0,
+          2
+        ],
+        "to": [
+          5,
+          2
+        ],
+        "thickness": 0.2
+      },
+      "height": 2.7,
+      "state": "planned",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "segment",
+            "from": [
+              0,
+              2
+            ],
+            "to": [
+              5,
+              2
+            ],
+            "thickness": 0.2
+          },
+          "state": "planned",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "W-05",
+      "type": "wall",
+      "name": "Unit 202 corridor wall",
+      "aliases": [],
+      "geometry": {
+        "kind": "segment",
+        "from": [
+          5,
+          2
+        ],
+        "to": [
+          10,
+          2
+        ],
+        "thickness": 0.2
+      },
+      "height": 2.7,
+      "state": "planned",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "segment",
+            "from": [
+              5,
+              2
+            ],
+            "to": [
+              10,
+              2
+            ],
+            "thickness": 0.2
+          },
+          "state": "planned",
           "confidence": 1
         }
       ]
@@ -152,7 +547,195 @@
           "sourceMessageId": "drawing:rev-B",
           "thread": "drawing",
           "operationType": "add",
+          "geometry": {
+            "kind": "segment",
+            "from": [
+              10,
+              2
+            ],
+            "to": [
+              15,
+              2
+            ],
+            "thickness": 0.2
+          },
           "state": "planned",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "W-11",
+      "type": "wall",
+      "name": "Unit 204 corridor wall",
+      "aliases": [],
+      "geometry": {
+        "kind": "segment",
+        "from": [
+          15,
+          2
+        ],
+        "to": [
+          20,
+          2
+        ],
+        "thickness": 0.2
+      },
+      "height": 2.7,
+      "state": "planned",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "segment",
+            "from": [
+              15,
+              2
+            ],
+            "to": [
+              20,
+              2
+            ],
+            "thickness": 0.2
+          },
+          "state": "planned",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "W-15",
+      "type": "wall",
+      "name": "Unit 205 corridor wall",
+      "aliases": [],
+      "geometry": {
+        "kind": "segment",
+        "from": [
+          20,
+          2
+        ],
+        "to": [
+          25,
+          2
+        ],
+        "thickness": 0.2
+      },
+      "height": 2.7,
+      "state": "planned",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "segment",
+            "from": [
+              20,
+              2
+            ],
+            "to": [
+              25,
+              2
+            ],
+            "thickness": 0.2
+          },
+          "state": "planned",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "W-18",
+      "type": "wall",
+      "name": "Unit 206 corridor wall",
+      "aliases": [],
+      "geometry": {
+        "kind": "segment",
+        "from": [
+          25,
+          2
+        ],
+        "to": [
+          30,
+          2
+        ],
+        "thickness": 0.2
+      },
+      "height": 2.7,
+      "state": "planned",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "segment",
+            "from": [
+              25,
+              2
+            ],
+            "to": [
+              30,
+              2
+            ],
+            "thickness": 0.2
+          },
+          "state": "planned",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "W-03",
+      "type": "wall",
+      "name": "Unit 201 bathroom east wall",
+      "aliases": [],
+      "geometry": {
+        "kind": "segment",
+        "from": [
+          3,
+          2
+        ],
+        "to": [
+          3,
+          5
+        ],
+        "thickness": 0.12
+      },
+      "height": 2.7,
+      "state": "approved",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "segment",
+            "from": [
+              3,
+              2
+            ],
+            "to": [
+              3,
+              5
+            ],
+            "thickness": 0.12
+          },
+          "state": "approved",
           "confidence": 1
         }
       ]
@@ -200,6 +783,303 @@
           "confidence": 1
         }
       ]
+    },
+    {
+      "id": "W-16",
+      "type": "wall",
+      "name": "Unit 205 bathroom east wall",
+      "aliases": [],
+      "geometry": {
+        "kind": "segment",
+        "from": [
+          23,
+          2
+        ],
+        "to": [
+          23,
+          5
+        ],
+        "thickness": 0.12
+      },
+      "height": 2.7,
+      "state": "approved",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "segment",
+            "from": [
+              23,
+              2
+            ],
+            "to": [
+              23,
+              5
+            ],
+            "thickness": 0.12
+          },
+          "state": "approved",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "W-21",
+      "type": "wall",
+      "name": "Unit 206 kitchen partition",
+      "aliases": [],
+      "geometry": {
+        "kind": "segment",
+        "from": [
+          25,
+          6
+        ],
+        "to": [
+          28,
+          6
+        ],
+        "thickness": 0.12
+      },
+      "height": 2.7,
+      "state": "approved",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "segment",
+            "from": [
+              25,
+              6
+            ],
+            "to": [
+              28,
+              6
+            ],
+            "thickness": 0.12
+          },
+          "state": "approved",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "W-22",
+      "type": "wall",
+      "name": "Unit 206 living room niche wall",
+      "aliases": [],
+      "geometry": {
+        "kind": "segment",
+        "from": [
+          26,
+          8
+        ],
+        "to": [
+          29,
+          8
+        ],
+        "thickness": 0.12
+      },
+      "height": 2.7,
+      "state": "approved",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "segment",
+            "from": [
+              26,
+              8
+            ],
+            "to": [
+              29,
+              8
+            ],
+            "thickness": 0.12
+          },
+          "state": "approved",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "tile-205-bath",
+      "type": "fixture",
+      "name": "Unit 205 bathroom floor tile",
+      "aliases": [],
+      "geometry": {
+        "kind": "point",
+        "at": [
+          22,
+          4
+        ]
+      },
+      "state": "planned",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "point",
+            "at": [
+              22,
+              4
+            ]
+          },
+          "state": "planned",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "light-202-kitchen",
+      "type": "fixture",
+      "name": "Unit 202 kitchen light fixtures",
+      "aliases": [],
+      "geometry": {
+        "kind": "point",
+        "at": [
+          7,
+          8
+        ]
+      },
+      "state": "planned",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "point",
+            "at": [
+              7,
+              8
+            ]
+          },
+          "state": "planned",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "vanity-203",
+      "type": "fixture",
+      "name": "Unit 203 bathroom vanity",
+      "aliases": [],
+      "geometry": {
+        "kind": "point",
+        "at": [
+          11.5,
+          3.5
+        ]
+      },
+      "state": "planned",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "point",
+            "at": [
+              11.5,
+              3.5
+            ]
+          },
+          "state": "planned",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "light-206-bath",
+      "type": "fixture",
+      "name": "Unit 206 bathroom light",
+      "aliases": [],
+      "geometry": {
+        "kind": "point",
+        "at": [
+          27,
+          3.5
+        ]
+      },
+      "state": "planned",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "point",
+            "at": [
+              27,
+              3.5
+            ]
+          },
+          "state": "planned",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "paint-206-living",
+      "type": "fixture",
+      "name": "Unit 206 living room paint colour",
+      "aliases": [],
+      "geometry": {
+        "kind": "point",
+        "at": [
+          27.5,
+          9
+        ]
+      },
+      "state": "planned",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "point",
+            "at": [
+              27.5,
+              9
+            ]
+          },
+          "state": "planned",
+          "confidence": 1
+        }
+      ]
     }
   ],
   "crews": [
@@ -217,6 +1097,34 @@
       "name": "Walsh Drywall",
       "trade": "drywall",
       "letter": "D",
+      "threads": [
+        "site-group"
+      ]
+    },
+    {
+      "id": "crew-electrical",
+      "name": "Brandt Electric",
+      "trade": "electrical",
+      "letter": "E",
+      "threads": [
+        "site-group"
+      ]
+    },
+    {
+      "id": "crew-painting",
+      "name": "Kovac Painting",
+      "trade": "painting",
+      "letter": "A",
+      "threads": [
+        "site-group",
+        "office"
+      ]
+    },
+    {
+      "id": "crew-tiling",
+      "name": "Sorel Tiling",
+      "trade": "tiling",
+      "letter": "T",
       "threads": [
         "site-group"
       ]

@@ -17,9 +17,9 @@ chat message -> server/extract -> operations + intents -> server/model -> scene 
 ## Extraction (`server/extract/`)
 
 - Demo mode reads `data/llm-cache/<messageId>.json` only. No entry: empty result, logged `extract.cache_miss`.
-- `LIVE_LLM=1`: a cache entry still wins. Otherwise one Groq call (`llm.ts`, plain `fetch`, JSON mode, temperature 0, waits and retries on 429). The prompt is `prompts/extract.md`, filled with the scene's elements, learned nicknames and crews.
-- `validate.ts` turns the raw reply into an `ExtractResult` checked by the zod schemas in `contracts/`. The model gives facts only: ids (`op-<msg>-<n>`, `task-<msg>-<n>`, `intent-<msg>-<n>`), time, thread and `sourceMessageId` are forced from the message, and an intent takes the sender's crew.
-- Operations on unknown elements or crews are dropped and an unknown intent place is left out, each logged as `extract.rejected`. Never guessed.
+- `LIVE_LLM=1`: a cache entry still wins. Otherwise Groq extracts facts (`llm.ts`, plain `fetch`, JSON mode, temperature 0, waits and retries on 429). Its prompt lists the current scene's elements and crews; nicknames are resolved later by learning rules.
+- `facts.ts` validates the raw reply; `result.ts` builds an `ExtractResult` checked by the zod schemas in `contracts/`. Ids, time, thread and `sourceMessageId` come from the message, and an intent takes the sender's crew. Live moves are measured from the current scene supplied by replay or the API.
+- Unknown ids are dropped and an unknown intent place is left out. A move without direction or distance becomes `unconfirmed`. Never guessed.
 - Invalid JSON or schema: one retry with the error. Still invalid: empty result and `extract.error`, never a throw.
 - A good live result is written to `data/llm-cache/`. `build-cache.ts` does this for every replay message in order (each on the scene the earlier ones built) and for scripted phone texts under their live id.
 

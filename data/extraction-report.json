@@ -1,0 +1,61 @@
+{
+  "note": "Simulated site data. LLM extraction compared with the hand-written expectation in data/expected/, fact by fact.",
+  "model": "openai/gpt-oss-120b",
+  "messages": 192,
+  "messagesExact": 187,
+  "facts": {
+    "expected": 38,
+    "extracted": 36,
+    "matched": 33,
+    "extra": 3,
+    "missed": 5
+  },
+  "mismatches": [
+    {
+      "messageId": "m-043",
+      "text": "202 kitchen lights: suggesting the slim LED track, waiting on owner sign-off",
+      "expected": [
+        "status light-202-kitchen proposed"
+      ],
+      "llm": []
+    },
+    {
+      "messageId": "m-092",
+      "text": "fri morning we stage the tile in the corridor, ok?",
+      "expected": [
+        "plan crew-tiling 2026-11-13 morning other corridor []"
+      ],
+      "llm": [
+        "plan crew-tiling 2026-11-13 morning tile (no place) []"
+      ]
+    },
+    {
+      "messageId": "m-094",
+      "text": "friday afternoon we start the 203 walls",
+      "expected": [
+        "plan crew-painting 2026-11-13 afternoon paint room-203 []"
+      ],
+      "llm": [
+        "plan crew-painting 2026-11-13 afternoon finish_drywall room-203 []"
+      ]
+    },
+    {
+      "messageId": "m-170",
+      "text": "sat morning we paint the 206 living room, niche wall first",
+      "expected": [
+        "plan crew-painting 2026-11-14 morning paint room-206 [W-22,paint-206-living]"
+      ],
+      "llm": [
+        "plan crew-painting 2026-11-14 morning paint room-206 [W-22]"
+      ]
+    },
+    {
+      "messageId": "m-177",
+      "text": "and kev does layout in 201 sat afternoon",
+      "expected": [
+        "plan crew-drywall 2026-11-14 afternoon layout room-201 []"
+      ],
+      "llm": []
+    }
+  ]
+}

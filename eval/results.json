@@ -1,31 +1,31 @@
 {
-  "replayId": "golden-slice-1",
-  "cases": 1,
+  "replayId": "golden",
+  "cases": 15,
   "perCheck": {
     "latest_change": {
-      "caught": 1,
+      "caught": 4,
       "missed": 0,
       "falseAlarms": 0
     },
     "space_clash": {
-      "caught": 0,
-      "missed": 0,
+      "caught": 3,
+      "missed": 1,
       "falseAlarms": 0
     },
     "order_of_work": {
-      "caught": 0,
+      "caught": 3,
       "missed": 0,
       "falseAlarms": 0
     },
     "open_decision": {
-      "caught": 0,
-      "missed": 0,
-      "falseAlarms": 0
+      "caught": 2,
+      "missed": 2,
+      "falseAlarms": 1
     }
   },
   "total": {
-    "caught": 1,
-    "missed": 0,
-    "falseAlarms": 0
+    "caught": 12,
+    "missed": 3,
+    "falseAlarms": 1
   }
 }

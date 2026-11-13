@@ -1,0 +1,43 @@
+{
+  "provenance": "hand-written expected extraction (lane B), not LLM output; see data/scenario.md",
+  "messageId": "m-057",
+  "operations": [
+    {
+      "id": "op-m-057-1",
+      "time": "2026-11-12T13:10:00",
+      "sourceMessageId": "m-057",
+      "thread": "site-group",
+      "confidence": 0.9,
+      "type": "plan_task",
+      "task": {
+        "id": "task-m-057-1",
+        "crewId": "crew-plumbing",
+        "day": "2026-11-13",
+        "slot": "morning",
+        "order": 0,
+        "taskType": "inspection",
+        "description": "Plumbing inspection of the 206 rough-in",
+        "placeId": "room-206",
+        "elementIds": [],
+        "status": "planned",
+        "sourceMessageId": "m-057",
+        "confidence": 0.9
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-m-057-1",
+      "crewId": "crew-plumbing",
+      "time": "2026-11-12T13:10:00",
+      "sourceMessageId": "m-057",
+      "confidence": 0.9,
+      "day": "2026-11-13",
+      "slot": "morning",
+      "taskType": "inspection",
+      "description": "Plumbing inspection of the 206 rough-in",
+      "placeId": "room-206",
+      "elementIds": []
+    }
+  ]
+}

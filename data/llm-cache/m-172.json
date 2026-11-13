@@ -1,0 +1,68 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "m-172",
+  "operations": [
+    {
+      "id": "op-m-172-1",
+      "time": "2026-11-13T16:15:00",
+      "sourceMessageId": "m-172",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-m-172-1",
+        "crewId": "crew-tiling",
+        "day": "2026-11-14",
+        "slot": "full_day",
+        "order": 0,
+        "taskType": "tile",
+        "description": "start tiling the 205 bath floor, east wall side first",
+        "placeId": "room-205",
+        "elementIds": [
+          "tile-205-bath",
+          "W-16"
+        ],
+        "status": "planned",
+        "sourceMessageId": "m-172",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-m-172-1",
+      "crewId": "crew-tiling",
+      "time": "2026-11-13T16:15:00",
+      "sourceMessageId": "m-172",
+      "confidence": 1,
+      "day": "2026-11-14",
+      "slot": "full_day",
+      "taskType": "tile",
+      "description": "start tiling the 205 bath floor, east wall side first",
+      "placeId": "room-205",
+      "elementIds": [
+        "tile-205-bath",
+        "W-16"
+      ]
+    }
+  ],
+  "facts": {
+    "id": "m-172",
+    "plans": [
+      {
+        "day": "2026-11-14",
+        "slot": "full_day",
+        "taskType": "tile",
+        "placeId": "room-205",
+        "placeSaid": null,
+        "elementIds": [
+          "tile-205-bath",
+          "W-16"
+        ],
+        "description": "start tiling the 205 bath floor, east wall side first",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

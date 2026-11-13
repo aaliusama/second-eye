@@ -1,0 +1,47 @@
+{
+  "provenance": "hand-written expected extraction (lane B), not LLM output; see data/scenario.md",
+  "messageId": "m-002",
+  "operations": [
+    {
+      "id": "op-m-002-1",
+      "time": "2026-11-13T17:40:00",
+      "sourceMessageId": "m-002",
+      "thread": "site-group",
+      "confidence": 0.88,
+      "type": "plan_task",
+      "task": {
+        "id": "task-m-002-1",
+        "crewId": "crew-plumbing",
+        "day": "2026-11-14",
+        "slot": "morning",
+        "order": 0,
+        "taskType": "rough_in_plumbing",
+        "description": "Rough in the 204 bathroom along the east wall",
+        "placeId": "room-204",
+        "elementIds": [
+          "W-12"
+        ],
+        "status": "planned",
+        "sourceMessageId": "m-002",
+        "confidence": 0.88
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-m-002-1",
+      "crewId": "crew-plumbing",
+      "time": "2026-11-13T17:40:00",
+      "sourceMessageId": "m-002",
+      "confidence": 0.88,
+      "day": "2026-11-14",
+      "slot": "morning",
+      "taskType": "rough_in_plumbing",
+      "description": "Rough in the 204 bathroom along the east wall",
+      "placeId": "room-204",
+      "elementIds": [
+        "W-12"
+      ]
+    }
+  ]
+}

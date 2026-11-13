@@ -1,0 +1,29 @@
+{
+  "provenance": "hand-written expected extraction (lane B), not LLM output; see data/scenario.md",
+  "messageId": "m-044",
+  "operations": [
+    {
+      "id": "op-m-044-1",
+      "time": "2026-11-12T10:50:00",
+      "sourceMessageId": "m-044",
+      "thread": "office",
+      "confidence": 0.9,
+      "type": "move",
+      "elementId": "W-22",
+      "to": {
+        "kind": "segment",
+        "from": [
+          26,
+          7.85
+        ],
+        "to": [
+          29,
+          7.85
+        ],
+        "thickness": 0.12
+      },
+      "note": "15 cm south"
+    }
+  ],
+  "intents": []
+}

@@ -1,0 +1,35 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "m-092",
+  "operations": [],
+  "intents": [
+    {
+      "id": "intent-m-092-1",
+      "crewId": "crew-tiling",
+      "time": "2026-11-12T17:20:00",
+      "sourceMessageId": "m-092",
+      "confidence": 1,
+      "day": "2026-11-13",
+      "slot": "morning",
+      "taskType": "tile",
+      "description": "stage the tile in the corridor",
+      "elementIds": []
+    }
+  ],
+  "facts": {
+    "id": "m-092",
+    "plans": [
+      {
+        "day": "2026-11-13",
+        "slot": "morning",
+        "taskType": "tile",
+        "placeId": null,
+        "placeSaid": "corridor",
+        "elementIds": [],
+        "description": "stage the tile in the corridor",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

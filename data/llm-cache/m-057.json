@@ -1,0 +1,59 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "m-057",
+  "operations": [
+    {
+      "id": "op-m-057-1",
+      "time": "2026-11-12T13:10:00",
+      "sourceMessageId": "m-057",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-m-057-1",
+        "crewId": "crew-plumbing",
+        "day": "2026-11-13",
+        "slot": "morning",
+        "order": 0,
+        "taskType": "inspection",
+        "description": "inspector booked for the 206 rough-in",
+        "placeId": "room-206",
+        "elementIds": [],
+        "status": "planned",
+        "sourceMessageId": "m-057",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-m-057-1",
+      "crewId": "crew-plumbing",
+      "time": "2026-11-12T13:10:00",
+      "sourceMessageId": "m-057",
+      "confidence": 1,
+      "day": "2026-11-13",
+      "slot": "morning",
+      "taskType": "inspection",
+      "description": "inspector booked for the 206 rough-in",
+      "placeId": "room-206",
+      "elementIds": []
+    }
+  ],
+  "facts": {
+    "id": "m-057",
+    "plans": [
+      {
+        "day": "2026-11-13",
+        "slot": "morning",
+        "taskType": "inspection",
+        "placeId": "room-206",
+        "placeSaid": null,
+        "elementIds": [],
+        "description": "inspector booked for the 206 rough-in",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "m-162",
+  "operations": [
+    {
+      "id": "op-m-162-1",
+      "time": "2026-11-13T15:10:00",
+      "sourceMessageId": "m-162",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-m-162-1",
+        "crewId": "crew-plumbing",
+        "day": "2026-11-14",
+        "slot": "afternoon",
+        "order": 0,
+        "taskType": "inspection",
+        "description": "inspection for 203",
+        "placeId": "room-203",
+        "elementIds": [],
+        "status": "planned",
+        "sourceMessageId": "m-162",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-m-162-1",
+      "crewId": "crew-plumbing",
+      "time": "2026-11-13T15:10:00",
+      "sourceMessageId": "m-162",
+      "confidence": 1,
+      "day": "2026-11-14",
+      "slot": "afternoon",
+      "taskType": "inspection",
+      "description": "inspection for 203",
+      "placeId": "room-203",
+      "elementIds": []
+    }
+  ],
+  "facts": {
+    "id": "m-162",
+    "plans": [
+      {
+        "day": "2026-11-14",
+        "slot": "afternoon",
+        "taskType": "inspection",
+        "placeId": "room-203",
+        "placeSaid": null,
+        "elementIds": [],
+        "description": "inspection for 203",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

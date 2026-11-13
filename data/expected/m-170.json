@@ -1,0 +1,49 @@
+{
+  "provenance": "hand-written expected extraction (lane B), not LLM output; see data/scenario.md",
+  "messageId": "m-170",
+  "operations": [
+    {
+      "id": "op-m-170-1",
+      "time": "2026-11-13T16:00:00",
+      "sourceMessageId": "m-170",
+      "thread": "site-group",
+      "confidence": 0.88,
+      "type": "plan_task",
+      "task": {
+        "id": "task-m-170-1",
+        "crewId": "crew-painting",
+        "day": "2026-11-14",
+        "slot": "morning",
+        "order": 0,
+        "taskType": "paint",
+        "description": "Paint the 206 living room, niche wall first",
+        "placeId": "room-206",
+        "elementIds": [
+          "W-22",
+          "paint-206-living"
+        ],
+        "status": "planned",
+        "sourceMessageId": "m-170",
+        "confidence": 0.88
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-m-170-1",
+      "crewId": "crew-painting",
+      "time": "2026-11-13T16:00:00",
+      "sourceMessageId": "m-170",
+      "confidence": 0.88,
+      "day": "2026-11-14",
+      "slot": "morning",
+      "taskType": "paint",
+      "description": "Paint the 206 living room, niche wall first",
+      "placeId": "room-206",
+      "elementIds": [
+        "W-22",
+        "paint-206-living"
+      ]
+    }
+  ]
+}

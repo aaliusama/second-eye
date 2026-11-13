@@ -1,0 +1,43 @@
+{
+  "provenance": "hand-written expected extraction (lane B), not LLM output; see data/scenario.md",
+  "messageId": "m-179",
+  "operations": [
+    {
+      "id": "op-m-179-1",
+      "time": "2026-11-13T16:55:00",
+      "sourceMessageId": "m-179",
+      "thread": "site-group",
+      "confidence": 0.86,
+      "type": "plan_task",
+      "task": {
+        "id": "task-m-179-1",
+        "crewId": "crew-tiling",
+        "day": "2026-11-14",
+        "slot": "morning",
+        "order": 1,
+        "taskType": "tile",
+        "description": "Tile the 201 bathroom walls",
+        "placeId": "room-201",
+        "elementIds": [],
+        "status": "planned",
+        "sourceMessageId": "m-179",
+        "confidence": 0.86
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-m-179-1",
+      "crewId": "crew-tiling",
+      "time": "2026-11-13T16:55:00",
+      "sourceMessageId": "m-179",
+      "confidence": 0.86,
+      "day": "2026-11-14",
+      "slot": "morning",
+      "taskType": "tile",
+      "description": "Tile the 201 bathroom walls",
+      "placeId": "room-201",
+      "elementIds": []
+    }
+  ]
+}

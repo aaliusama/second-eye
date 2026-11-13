@@ -1,0 +1,65 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "live-9aa884fec0",
+  "operations": [
+    {
+      "id": "op-live-9aa884fec0-1",
+      "time": "2026-11-13T20:01:00",
+      "sourceMessageId": "live-9aa884fec0",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-live-9aa884fec0-1",
+        "crewId": "crew-plumbing",
+        "day": "2026-11-14",
+        "slot": "morning",
+        "order": 0,
+        "taskType": "rough_in_plumbing",
+        "description": "rough in the 204 bath along the east wall",
+        "placeId": "room-204",
+        "elementIds": [
+          "W-12"
+        ],
+        "status": "planned",
+        "sourceMessageId": "live-9aa884fec0",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-live-9aa884fec0-1",
+      "crewId": "crew-plumbing",
+      "time": "2026-11-13T20:01:00",
+      "sourceMessageId": "live-9aa884fec0",
+      "confidence": 1,
+      "day": "2026-11-14",
+      "slot": "morning",
+      "taskType": "rough_in_plumbing",
+      "description": "rough in the 204 bath along the east wall",
+      "placeId": "room-204",
+      "elementIds": [
+        "W-12"
+      ]
+    }
+  ],
+  "facts": {
+    "id": "live-9aa884fec0",
+    "plans": [
+      {
+        "day": "2026-11-14",
+        "slot": "morning",
+        "taskType": "rough_in_plumbing",
+        "placeId": "room-204",
+        "placeSaid": null,
+        "elementIds": [
+          "W-12"
+        ],
+        "description": "rough in the 204 bath along the east wall",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

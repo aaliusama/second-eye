@@ -1,0 +1,65 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "m-080",
+  "operations": [
+    {
+      "id": "op-m-080-1",
+      "time": "2026-11-12T16:10:00",
+      "sourceMessageId": "m-080",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-m-080-1",
+        "crewId": "crew-electrical",
+        "day": "2026-11-13",
+        "slot": "afternoon",
+        "order": 0,
+        "taskType": "rough_in_electrical",
+        "description": "run the 206 kitchen circuits along the kitchen partition",
+        "placeId": "room-206",
+        "elementIds": [
+          "W-21"
+        ],
+        "status": "planned",
+        "sourceMessageId": "m-080",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-m-080-1",
+      "crewId": "crew-electrical",
+      "time": "2026-11-12T16:10:00",
+      "sourceMessageId": "m-080",
+      "confidence": 1,
+      "day": "2026-11-13",
+      "slot": "afternoon",
+      "taskType": "rough_in_electrical",
+      "description": "run the 206 kitchen circuits along the kitchen partition",
+      "placeId": "room-206",
+      "elementIds": [
+        "W-21"
+      ]
+    }
+  ],
+  "facts": {
+    "id": "m-080",
+    "plans": [
+      {
+        "day": "2026-11-13",
+        "slot": "afternoon",
+        "taskType": "rough_in_electrical",
+        "placeId": "room-206",
+        "placeSaid": null,
+        "elementIds": [
+          "W-21"
+        ],
+        "description": "run the 206 kitchen circuits along the kitchen partition",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "m-089",
+  "operations": [
+    {
+      "id": "op-m-089-1",
+      "time": "2026-11-12T17:05:00",
+      "sourceMessageId": "m-089",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-m-089-1",
+        "crewId": "crew-plumbing",
+        "day": "2026-11-13",
+        "slot": "afternoon",
+        "order": 0,
+        "taskType": "rough_in_plumbing",
+        "description": "supply lines in the 201 bath along the east wall",
+        "placeId": "room-201",
+        "elementIds": [
+          "W-03"
+        ],
+        "status": "planned",
+        "sourceMessageId": "m-089",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-m-089-1",
+      "crewId": "crew-plumbing",
+      "time": "2026-11-12T17:05:00",
+      "sourceMessageId": "m-089",
+      "confidence": 1,
+      "day": "2026-11-13",
+      "slot": "afternoon",
+      "taskType": "rough_in_plumbing",
+      "description": "supply lines in the 201 bath along the east wall",
+      "placeId": "room-201",
+      "elementIds": [
+        "W-03"
+      ]
+    }
+  ],
+  "facts": {
+    "id": "m-089",
+    "plans": [
+      {
+        "day": "2026-11-13",
+        "slot": "afternoon",
+        "taskType": "rough_in_plumbing",
+        "placeId": "room-201",
+        "placeSaid": null,
+        "elementIds": [
+          "W-03"
+        ],
+        "description": "supply lines in the 201 bath along the east wall",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}
