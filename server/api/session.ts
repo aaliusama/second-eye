@@ -43,11 +43,15 @@ function serial<T>(fn: () => Promise<T>): Promise<T> {
   return run;
 }
 
-/** Lazily plays the golden replay once (with the current learning context) and keeps the result. */
+/**
+ * Lazily plays the golden replay once and keeps the result. Stored corrections are applied to the
+ * start scene first (learning.applyToScene), so run 2 after POST /api/reset already knows the nicknames.
+ */
 export function getSession(): Promise<Session> {
   if (!current) {
     const p = (async (): Promise<Session> => {
-      const state = await runReplay(await loadGoldenReplay(), await loadStartScene());
+      const start = learning.applyToScene(await loadStartScene());
+      const state = await runReplay(await loadGoldenReplay(), start);
       return { ...state, liveCount: 0 };
     })();
     // A failed replay is not cached; the next request tries again.
@@ -94,7 +98,8 @@ export function postMessage(req: PostMessageRequest): Promise<PostMessageRespons
       const found = runChecks(scene, getPlan(scene, intent.day), intent);
       for (const finding of found) logLine({ kind: "finding", finding });
       findings.push(...found);
-      fixes.push(...proposeFixes(found, scene));
+      // Messages include the one being posted, so a fix can quote its source.
+      fixes.push(...proposeFixes(found, scene, [...s.messages, message]));
     }
 
     // Commit only after the whole pipeline succeeded.

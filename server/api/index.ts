@@ -12,6 +12,7 @@ import {
   type StateResponse,
 } from "@site/contracts";
 import { rehearse } from "../checks/index";
+import * as learning from "../learning/index";
 import { logLine } from "../log";
 import { getPlan } from "../model/index";
 import { loadGoldenReplay, loadStartScene } from "../model/load";
@@ -101,13 +102,22 @@ export async function handle(req: IncomingMessage, res: ServerResponse): Promise
         if (!ReplayTime.safeParse(t).success) {
           return send(res, 400, { error: "t must look like 2026-11-13T17:40:00" });
         }
-        const state = await runReplay(await loadGoldenReplay(), await loadStartScene(), t);
+        const state = await runReplay(await loadGoldenReplay(), learning.applyToScene(await loadStartScene()), t);
         const body: StateResponse = { t: state.t, scene: state.scene, findings: state.findings, fixes: state.fixes };
         return send(res, 200, body);
       }
       const s = await getSession();
       const body: StateResponse = { t: sessionNow(s), scene: s.scene, findings: s.findings, fixes: s.fixes };
       return send(res, 200, body);
+    }
+
+    if (route === "GET /api/eval") {
+      try {
+        const raw = await readFile(evalPath("results.json"), "utf8");
+        return send(res, 200, EvalResults.parse(JSON.parse(raw)));
+      } catch {
+        return send(res, 404, { error: "not found: run npm run eval" });
+      }
     }
 
     if (route === "GET /api/messages") {

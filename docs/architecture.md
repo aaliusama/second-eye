@@ -13,6 +13,14 @@ chat message -> server/extract -> operations + intents -> server/model -> scene 
 - Live trigger: a crew states an intent, `runChecks(scene, plan, intent)` runs at once.
 - Evening trigger: a `rehearse` event in the replay steps tomorrow's plan, `rehearse(scene, plan)`.
 
+## Session and learning
+
+- `server/api/session.ts` holds one session. The first request plays the golden replay and keeps the result. Live messages are added on top.
+- `POST /api/corrections` stores a correction in `server/learning`. It does not change the current run.
+- `POST /api/reset` drops the session. With `keepLearning` (default `true`) the stored corrections stay.
+- The next run starts from `learning.applyToScene(startScene)`: each stored nickname is added to its element's `aliases`. Extraction gets `learning.getContext()` (nicknames and crew notes).
+- `GET /api/state?t=` replays from the plain start scene, without stored corrections.
+
 ## Rules that shape the code
 
 - The LLM extracts facts (`server/extract/`). Rules decide (`server/checks/`). No LLM call in checks.

@@ -36,12 +36,16 @@ export async function runReplay(replay: GoldenReplay, start: Scene, until?: stri
         const found = runChecks(state.scene, getPlan(state.scene, intent.day), intent);
         for (const finding of found) logLine({ kind: "finding", finding });
         state.findings.push(...found);
-        state.fixes.push(...proposeFixes(found, state.scene));
+        state.fixes.push(...proposeFixes(found, state.scene, state.messages));
       }
     } else {
       const rehearsal = rehearse(state.scene, getPlan(state.scene, event.day));
       for (const frame of rehearsal.frames) for (const finding of frame.findings) logLine({ kind: "finding", finding });
       state.rehearsals.push(rehearsal);
+      // Evening fixes: each finding once (frames repeat full_day findings), first fix per id wins.
+      const unique = [...new Map(rehearsal.frames.flatMap((fr) => fr.findings).map((f) => [f.id, f])).values()];
+      const known = new Set(state.fixes.map((x) => x.id));
+      state.fixes.push(...proposeFixes(unique, state.scene, state.messages).filter((x) => !known.has(x.id)));
     }
   }
 

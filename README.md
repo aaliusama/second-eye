@@ -29,6 +29,23 @@ Copy `.env.example` to `.env`. `LIVE_LLM=1` calls the extraction model live and 
 | `npm run eval` | golden replay vs `data/labels.json`: caught / missed / false alarms |
 | `npm run typecheck` | all workspaces |
 
+## API
+
+The server listens on port 8787. The web app reaches it through the Vite proxy at `/api`.
+
+| Route | What |
+|---|---|
+| `GET /api/health` | liveness check |
+| `GET /api/state[?t=]` | scene, findings and fixes; with `t` a fresh replay up to that replay time |
+| `POST /api/message` | post a crew message; runs extract, model and checks |
+| `GET /api/messages` | all messages in the session |
+| `GET /api/rehearsal[?day=]` | rehearsal of one day's plan; defaults to the latest planned day |
+| `GET /api/fixes` | proposed and approved fixes |
+| `POST /api/fixes/:id/approve` | approve a fix, send its DMs, store the decision |
+| `POST /api/corrections` | store a correction (nickname, crew misread, fix decision) for the next run |
+| `POST /api/reset` `{keepLearning}` | start a new run; `keepLearning` defaults to `true` |
+| `GET /api/eval` | golden replay scored against `data/labels.json` |
+
 ## Layout
 
 See `docs/architecture.md`. Who owns which folder: `TEAM.md`. Rules for AI coding tools: `AGENTS.md`.

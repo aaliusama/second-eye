@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { Fix as FixSchema, Rehearsal as RehearsalSchema } from "@site/contracts";
-import type { Finding, Plan, PlanTask, Scene } from "@site/contracts";
-import { fixtureFinding, fixtureFix, fixtureScene } from "@site/contracts/fixtures";
+import type { ChatMessage, Finding, Plan, PlanTask, Scene } from "@site/contracts";
+import { fixtureFinding, fixtureFix, fixtureMessages, fixtureScene } from "@site/contracts/fixtures";
 import { rehearse } from "./rehearse";
 import { proposeFixes } from "./fixes";
 
@@ -117,5 +117,60 @@ describe("proposeFixes", () => {
     expect(proposeFixes(fs, fixtureScene).map((x) => x.id)).toEqual(["fix-b", "fix-a"]);
     expect(proposeFixes(fs, fixtureScene)).toEqual(proposeFixes(fs, fixtureScene));
     expect(proposeFixes([], fixtureScene)).toEqual([]);
+  });
+
+  describe("listen rule with messages", () => {
+    const [change, plumbing] = fixtureMessages as [ChatMessage, ChatMessage];
+    // Evening finding on a plan task whose crew last spoke before the change.
+    const evening: Finding = { ...fixtureFinding, id: "f-eve", trigger: "rehearsal", sourceMessageId: "m-000" };
+    const before: ChatMessage = { ...plumbing, id: "m-000", time: "2026-11-11T16:00:00" };
+
+    it("silent crew gets an ask_crew question naming the risk", () => {
+      const [fix] = proposeFixes([evening], fixtureScene, [before, change]);
+      expect(FixSchema.parse(fix)).toEqual(fix);
+      expect(fix!.kind).toBe("ask_crew");
+      expect(fix!.messages).toEqual([
+        {
+          crewId: "crew-plumbing",
+          text: "Are you still planning rough in the 204 bathroom along the east wall in the morning? Unit 204 bathroom east wall moved 0.4 m east per the record (m-001). Reply before 07:00.",
+        },
+      ]);
+    });
+
+    it("crew that posted after the change gets the normal fix", () => {
+      const [fix] = proposeFixes([evening], fixtureScene, [before, change, plumbing]);
+      expect(fix!.kind).toBe("notify_crew");
+      // Another crew posting does not count.
+      const other: ChatMessage = { ...plumbing, id: "m-009", crewId: "crew-drywall" };
+      expect(proposeFixes([evening], fixtureScene, [before, change, other])[0]!.kind).toBe("ask_crew");
+    });
+
+    it("multi-crew finding asks only if every crew is silent", () => {
+      const clash: Finding = { ...evening, crewIds: ["crew-drywall", "crew-plumbing"], evidenceMessageIds: ["m-001"] };
+      expect(proposeFixes([clash], fixtureScene, [before, change])[0]!.kind).toBe("ask_crew");
+      expect(proposeFixes([clash], fixtureScene, [before, change, plumbing])[0]!.kind).toBe("notify_crew");
+    });
+
+    it("no evidence in messages falls back to the source message time; none at all is not silent", () => {
+      const noEvidence: Finding = { ...evening, evidenceMessageIds: ["m-404"] };
+      expect(proposeFixes([noEvidence], fixtureScene, [before])[0]!.kind).toBe("ask_crew");
+      expect(proposeFixes([noEvidence], fixtureScene, [])[0]!.kind).toBe("notify_crew");
+    });
+
+    it("live finding never becomes ask_crew", () => {
+      const unsure = task({ id: "task-001", confidence: 0.5 });
+      expect(proposeFixes([{ ...evening, trigger: "live" }], fixtureScene, [before, change])[0]!.kind).toBe("notify_crew");
+      expect(proposeFixes([fixtureFinding], sceneWith([unsure]), [change])[0]!.kind).toBe("notify_crew");
+    });
+
+    it("undefined messages behaves as before; low confidence still asks with messages", () => {
+      const fs = [evening, fixtureFinding];
+      expect(proposeFixes(fs, fixtureScene, undefined)).toEqual(proposeFixes(fs, fixtureScene));
+      expect(proposeFixes(fs, fixtureScene).map((x) => x.kind)).toEqual(["notify_crew", "notify_crew"]);
+      const unsure = task({ id: "task-001", confidence: 0.5 });
+      const [fix] = proposeFixes([evening], sceneWith([unsure]), [before, change, plumbing]);
+      expect(fix!.kind).toBe("ask_crew");
+      expect(fix!.messages[0]!.text.endsWith("Reply before 07:00.")).toBe(false);
+    });
   });
 });

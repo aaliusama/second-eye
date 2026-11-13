@@ -95,7 +95,9 @@ describe("api", () => {
   });
 
   it("posting a message runs the pipeline with deterministic ids and times", async () => {
-    const t0 = StateResponse.parse((await call("GET", "/api/state")).body).t;
+    const s0 = StateResponse.parse((await call("GET", "/api/state")).body);
+    const t0 = s0.t;
+    const fixes0 = FixesResponse.parse((await call("GET", "/api/fixes")).body).fixes.length;
     const r1 = await call("POST", "/api/message", plumberSays);
     expect(r1.status).toBe(200);
     const p1 = PostMessageResponse.parse(r1.body);
@@ -110,8 +112,9 @@ describe("api", () => {
 
     const state = StateResponse.parse((await call("GET", "/api/state")).body);
     expect(state.t).toBe(addMinutes(t0, 2));
-    expect(state.findings).toHaveLength(1);
-    expect(FixesResponse.parse((await call("GET", "/api/fixes")).body).fixes).toHaveLength(1);
+    // The golden replay may already hold findings; the live posts add exactly one.
+    expect(state.findings).toHaveLength(s0.findings.length + 1);
+    expect(FixesResponse.parse((await call("GET", "/api/fixes")).body).fixes).toHaveLength(fixes0 + 1);
   });
 
   it("approve unknown fix is 404", async () => {
@@ -156,6 +159,30 @@ describe("api", () => {
 
     await call("POST", "/api/reset", { keepLearning: false });
     expect(learning.getContext().locationAliases).toEqual({});
+  });
+
+  it("run 2: a stored nickname shows on the element after POST /api/reset", async () => {
+    const aliasesOf = async (id: string) =>
+      StateResponse.parse((await call("GET", "/api/state")).body).scene.elements.find((e) => e.id === id)!.aliases;
+    expect(await aliasesOf("room-203")).not.toContain("the blue room");
+
+    const r = await call("POST", "/api/corrections", {
+      kind: "location_alias",
+      id: "c-2",
+      time: "2026-11-13T18:00:00",
+      sourceMessageId: "live-1",
+      alias: "The Blue Room",
+      elementId: "room-203",
+    });
+    expect(r.status).toBe(200);
+    // The current run is not changed; the next run is.
+    expect(await aliasesOf("room-203")).not.toContain("the blue room");
+
+    expect((await call("POST", "/api/reset", {})).status).toBe(200);
+    expect(await aliasesOf("room-203")).toContain("the blue room");
+
+    await call("POST", "/api/reset", { keepLearning: false });
+    expect(await aliasesOf("room-203")).not.toContain("the blue room");
   });
 
   it("invalid correction is 400", async () => {
