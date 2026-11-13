@@ -44,7 +44,16 @@ Every beat calls the same code as the buttons (store actions, the phone's own se
 ## Fallbacks
 
 - Phone not on the network: the laptop's **Crew phone** inset does everything; presenter beats use it anyway.
-- A text has no cache entry: the phone answers "Not found" with its id. Keep going; the ghost from the golden replay is already on the plan and beat 3 replays its reveal.
+- A text has no cache entry: the phone answers "Not found: no plan for tomorrow recognised in this message" and cites the crew's own message. Keep going; the ghost from the golden replay is already on the plan and beat 3 replays its reveal. Say "the plan was already checked the evening before".
+- Server down: the plan draws the contract fixtures (the same ghost-wall case) with a banner saying so. Restart with `npm run demo`; do not present from the fixtures.
+
+## Status on main (audit Sat 14 Nov)
+
+Checked against the running app (server + web, golden replay of 2 messages, 1 labelled case):
+
+- Plays as written: beats 1, 2, 4, 5, 6, 7, 10. The ghost wall is on screen from 0:00 (golden replay) and its reveal replays at 0:45. Beat 10 shows only `eval/results.json` (today: 1 case).
+- Beat 3 live: the phone text has no cache entry yet (`live-9aa884fec0`), so the phone answers "Not found" instead of HOLD. Needs lane B's cache entry.
+- Beats 8 and 9: the blue-room text in `web/src/present/beats.ts` is still a `[[...]]` placeholder; the bar says so and nothing is sent. Needs lane B's phone script.
 - A route not on the server yet: its panel hides or says so; the flat plan and the ghost never depend on it.
 - 3D: the **Flat | 3D** toggle is optional. Stay on flat for the reveal; it is the one that always works.
 - Reduced motion on the presenting machine: the reveal jumps to its end state. Say "here is where plumbing thinks the wall is" and point.

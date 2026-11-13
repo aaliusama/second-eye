@@ -2,12 +2,13 @@ import { useState } from "react";
 import type { ChatMessage, ElementChange, Finding, Fix, Scene } from "@site/contracts";
 import type { UnresolvedItem } from "./api";
 import { crewName, elementById, findingKey, formatTime, sourceLabel } from "./derive";
+import { describeSource, sourceLine } from "./sources";
 import { useSite, type Selection } from "./store";
 
 // Owner: D. Panels beside the model. Words: sentence case, "per the record", no apologies.
 
 /** A quoted source message, or the drawing it came from. No source, no row. */
-export function Source({ id, messages }: { id: string; messages: Map<string, ChatMessage> }) {
+export function Source({ id, messages, scene }: { id: string; messages: Map<string, ChatMessage>; scene: Scene }) {
   const drawing = sourceLabel(id);
   if (drawing) return <span className="source">{drawing}</span>;
   const m = messages.get(id);
@@ -16,7 +17,7 @@ export function Source({ id, messages }: { id: string; messages: Map<string, Cha
     <blockquote className="source">
       <p>“{m.text}”</p>
       <footer>
-        {m.senderName} · {m.thread} · {formatTime(m.time)} · {m.id}
+        {sourceLine(describeSource(id, [m], (c) => crewName(scene, c)))}
       </footer>
     </blockquote>
   );
@@ -79,7 +80,7 @@ export function Inspector({
                 <p>
                   <strong>v{h.version}</strong> {change(h)} · {formatTime(h.time)} · confidence {Math.round(h.confidence * 100)}%
                 </p>
-                <Source id={h.sourceMessageId} messages={messages} />
+                <Source id={h.sourceMessageId} messages={messages} scene={scene} />
               </li>
             ))}
           </ol>
@@ -101,12 +102,12 @@ function FindingBlock({ f, scene, messages }: { f: Finding; scene: Scene; messag
       <p>{f.summary}</p>
       {f.ghost && <p className="meta">Ghost offset: {f.ghost.label}</p>}
       <h3>What was said</h3>
-      <Source id={f.sourceMessageId} messages={messages} />
+      <Source id={f.sourceMessageId} messages={messages} scene={scene} />
       {f.evidenceMessageIds.length > 0 && (
         <>
           <h3>What {f.crewIds.map((id) => crewName(scene, id)).join(" and ")} did not hear</h3>
           {f.evidenceMessageIds.map((id) => (
-            <Source key={id} id={id} messages={messages} />
+            <Source key={id} id={id} messages={messages} scene={scene} />
           ))}
         </>
       )}
@@ -227,7 +228,7 @@ export function Learning({ scene, items }: { scene: Scene; items: UnresolvedItem
 
 // ---------- Agent log ----------
 
-export function AgentLog({ scene }: { scene: Scene }) {
+export function AgentLog({ scene, messages }: { scene: Scene; messages: ChatMessage[] }) {
   const log = useSite((s) => s.agentLog);
   if (!log) return null;
   return (
@@ -244,7 +245,9 @@ export function AgentLog({ scene }: { scene: Scene }) {
                 {a.crewId ? ` · ${crewName(scene, a.crewId)}` : ""}
                 {a.text ? `: ${a.text}` : ""}
                 {a.reason && <span className="meta"> ({a.reason.replace(/_/g, " ")})</span>}
-                {a.sourceMessageIds?.length ? <span className="meta"> · {a.sourceMessageIds.join(", ")}</span> : null}
+                {a.sourceMessageIds?.length ? (
+                  <span className="meta"> · {a.sourceMessageIds.map((id) => sourceLine(describeSource(id, messages, (c) => crewName(scene, c)))).join("; ")}</span>
+                ) : null}
               </p>
             ))}
           </li>
@@ -256,7 +259,7 @@ export function AgentLog({ scene }: { scene: Scene }) {
 
 // ---------- Record ----------
 
-export function Record({ messages }: { messages: ChatMessage[] }) {
+export function Record({ scene, messages }: { scene: Scene; messages: ChatMessage[] }) {
   const setAsOf = useSite((s) => s.setAsOf);
   const asOf = useSite((s) => s.asOf);
   const said = messages.filter((m) => m.senderRole !== "system");
@@ -268,7 +271,7 @@ export function Record({ messages }: { messages: ChatMessage[] }) {
         {[...said].reverse().map((m) => (
           <li key={m.id} className={asOf === m.time ? "current" : ""}>
             <p className="meta">
-              {formatTime(m.time)} · {m.senderName} · {m.thread}
+              {formatTime(m.time)} · {sourceLine({ ...describeSource(m.id, [m], (c) => crewName(scene, c)), when: "" })}
             </p>
             <p>{m.text}</p>
             {/* The time view replays the golden record only; live messages are not in it. */}
@@ -291,7 +294,7 @@ export function Measured() {
   return (
     <section className="panel" id="measured">
       <h2>Measured</h2>
-      {!results && <p className="meta">No eval results on record. Run npm run eval.</p>}
+      {!results && <p className="meta">Not found: no eval results on record. Run npm run eval.</p>}
       {results && (
         <>
           <p className="meta">

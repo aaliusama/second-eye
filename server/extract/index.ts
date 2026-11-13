@@ -16,16 +16,18 @@ const isLive = () => process.env.LIVE_LLM === "1";
 export const llmProvenance = () => `llm: groq ${groqModel()}`;
 
 /** Demo mode reads data/llm-cache/<messageId>.json only. A missing entry yields nothing, logged as not found. */
-export async function extract(message: ChatMessage, ctx: LearningContext): Promise<ExtractResult> {
-  if (isLive()) return extractLive(message, ctx);
+export async function extract(message: ChatMessage, ctx: LearningContext, scene?: Scene): Promise<ExtractResult> {
   try {
     const raw = await readFile(dataPath("llm-cache", `${message.id}.json`), "utf8");
     return ExtractResult.parse(JSON.parse(raw));
   } catch (err) {
     if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err;
-    logLine({ kind: "extract.cache_miss", messageId: message.id });
-    return { messageId: message.id, operations: [], intents: [] };
+    if (!isLive()) {
+      logLine({ kind: "extract.cache_miss", messageId: message.id });
+      return { messageId: message.id, operations: [], intents: [] };
+    }
   }
+  return extractLive(message, ctx, scene ?? (await loadStartScene()));
 }
 
 export interface Extracted {
@@ -50,10 +52,20 @@ export async function extractBatch(messages: ChatMessage[], scene: Scene): Promi
   return messages.map((m, i) => ({ result: toResult(m, facts[i]!, scene), facts: facts[i]! }));
 }
 
-/** One live message: call Groq, validate, write the cache entry. Moves are measured from the start floor. */
-async function extractLive(message: ChatMessage, _ctx: LearningContext): Promise<ExtractResult> {
-  const [x] = await extractBatch([message], await loadStartScene());
-  await writeCacheEntry(x!.result, llmProvenance(), x!.facts);
+/** One live message: measure moves from the current scene; failures are logged, never thrown. */
+async function extractLive(message: ChatMessage, _ctx: LearningContext, scene: Scene): Promise<ExtractResult> {
+  let x: Extracted;
+  try {
+    [x] = await extractBatch([message], scene) as [Extracted];
+  } catch (err) {
+    logLine({ kind: "extract.error", messageId: message.id, error: String(err) });
+    return { messageId: message.id, operations: [], intents: [] };
+  }
+  try {
+    await writeCacheEntry(x.result, llmProvenance(), x.facts);
+  } catch (err) {
+    logLine({ kind: "extract.cache_write_failed", messageId: message.id, error: String(err) });
+  }
   logLine({ kind: "extract.live", messageId: message.id, operations: x!.result.operations.length, intents: x!.result.intents.length });
   return x!.result;
 }

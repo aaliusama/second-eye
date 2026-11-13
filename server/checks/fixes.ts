@@ -72,7 +72,8 @@ function allCrewsSilent(f: Finding, messages: ChatMessage[]): boolean {
 /**
  * One fix per finding. With `messages` (the chat so far), an evening rehearsal finding whose
  * crews have all been silent since the change becomes an ask_crew question. Without `messages`,
- * only the low-confidence listen rule applies. Live findings never become ask_crew.
+ * only the low-confidence listen rule applies. Live findings never become ask_crew, but with `messages`
+ * every other crew on a live finding that has been silent since the statement gets a question instead of a HOLD.
  */
 export function proposeFixes(findings: Finding[], scene: Scene, messages?: ChatMessage[]): Fix[] {
   const elementName = (id: string | undefined) =>
@@ -149,9 +150,31 @@ export function proposeFixes(findings: Finding[], scene: Scene, messages?: ChatM
       }
     }
 
-    // Listen rule, evening only: ask instead of tell when the crews went quiet since the change
+    const question = (crewId: string) => {
+      const task = tasks.find((t) => t.crewId === crewId) ?? tasks[0];
+      return task
+        ? `Are you still planning ${lowerFirst(task.description)} ${SLOT_TEXT[task.slot]}?`
+        : `Are you still planning work on ${element}?`;
+    };
+
+    // Listen rule, live: the crew that just spoke gets the fix; any other crew on the finding that has
+    // said nothing since that statement is at risk and silent, so it gets a question, not an order.
+    if (f.trigger !== "rehearsal") {
+      const said = messages?.find((m) => m.id === f.sourceMessageId);
+      if (!said?.crewId) return { ...base, ...fix };
+      const silent = (crewId: string) =>
+        crewId !== said.crewId && !messages!.some((m) => m.crewId === crewId && m.time > said.time);
+      return {
+        ...base,
+        ...fix,
+        messages: fix.messages.map((m) =>
+          silent(m.crewId) ? { crewId: m.crewId, text: `${question(m.crewId)} ${reason} Reply before ${REPLY_BY}.` } : m,
+        ),
+      };
+    }
+
+    // Listen rule, evening: ask instead of tell when the crews went quiet since the change
     // (needs `messages`), or when every plan task behind the finding is low confidence.
-    if (f.trigger !== "rehearsal") return { ...base, ...fix };
     const silent = messages !== undefined && allCrewsSilent(f, messages);
     const unsure =
       tasks.length > 0 &&
@@ -165,13 +188,7 @@ export function proposeFixes(findings: Finding[], scene: Scene, messages?: ChatM
         description: silent
           ? `Ask ${crews} to confirm the plan before ${REPLY_BY}; they have not posted since the change.`
           : `Ask ${crews} to confirm the plan before the morning.`,
-        messages: f.crewIds.map((crewId) => {
-          const task = tasks.find((t) => t.crewId === crewId) ?? tasks[0];
-          const question = task
-            ? `Are you still planning ${lowerFirst(task.description)} ${SLOT_TEXT[task.slot]}?`
-            : `Are you still planning work on ${element}?`;
-          return { crewId, text: `${question} ${reason}${replyBy}` };
-        }),
+        messages: f.crewIds.map((crewId) => ({ crewId, text: `${question(crewId)} ${reason}${replyBy}` })),
       };
     }
 

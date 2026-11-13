@@ -18,6 +18,15 @@ export const PREREQUISITES: Partial<Record<TaskType, { before: TaskType; mandato
 /** Work that cannot be undone cheaply: an open decision on what it touches is a hold, otherwise a warn. */
 export const HOLD_ON_OPEN_DECISION: ReadonlySet<TaskType> = new Set<TaskType>(["tile", "close_wall", "install_fixtures"]);
 
+/**
+ * Work that depends on a decision about what is inside its place, even when the crew does not name it:
+ * tiling the 205 bath depends on the tile choice in that bath. Only proposed fixtures and zones inside the place count.
+ */
+export const DECISION_INSIDE_PLACE: ReadonlySet<TaskType> = new Set<TaskType>(["tile", "install_fixtures"]);
+
+/** Below this confidence a statement, task or change is unsure: a finding resting on it is a warn, never a hold. */
+export const UNSURE_BELOW = 0.7;
+
 /** full_day overlaps both halves. */
 export function slotsOverlap(a: Slot, b: Slot): boolean {
   return a === b || a === "full_day" || b === "full_day";

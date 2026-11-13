@@ -19,17 +19,19 @@ import { logLine } from "../log";
 import { applyOperations, getPlan } from "../model/index";
 import { loadGoldenReplay, loadStartScene } from "../model/load";
 import { runReplay } from "../model/replay";
+import { resolveLiveFindings, type LiveRecord } from "../model/resolve";
 import { liveCacheId } from "./live-id";
 
 // Owner: A. The live session: golden replay once, then crew chat posted from the web on top.
 // Deterministic: live message n is stamped replay end + n minutes, and its id comes from its words
 // (live-id.ts), so scripted phone messages hit data/llm-cache. No wall clock, no randomness.
 
-export interface Session {
+export interface Session extends LiveRecord {
   /** Replay time at the end of the golden replay. Live messages count from here. */
   t: string;
   scene: Scene;
   messages: ChatMessage[];
+  /** Active findings. Live findings a later message fixed move to resolvedFindings (model/resolve.ts). */
   findings: Finding[];
   fixes: Fix[];
   rehearsals: Rehearsal[];
@@ -47,12 +49,13 @@ export interface Session {
  * dm:<crewId> messages; done ids carry over so nothing is sent twice.
  */
 function stepAgent(s: Session, steps: string[]): void {
+  // The agent also sees resolved live findings (and their dropped fixes), so it can still say CLEAR.
   const run = runAgent(
     {
       scene: s.scene,
       messages: s.messages,
-      findings: s.findings,
-      fixes: s.fixes,
+      findings: [...s.findings, ...s.resolvedFindings],
+      fixes: [...s.fixes, ...s.resolvedFixes],
       rehearsals: s.rehearsals,
       learning: learning.getContext(),
       done: s.agentDone,
@@ -109,7 +112,7 @@ export async function learnFromRun(): Promise<number> {
   if (!current) return 0;
   const s = await current;
   const known = new Set(learning.all().map((c) => c.id));
-  const fresh = suggestCorrections(computeProfiles(s.scene.crews, s.findings, s.fixes, s.messages), sessionNow(s)).filter(
+  const fresh = suggestCorrections(computeProfiles(s.scene.crews, [...s.findings, ...s.resolvedFindings], [...s.fixes, ...s.resolvedFixes], s.messages), sessionNow(s)).filter(
     (c) => !known.has(c.id),
   );
   for (const c of fresh) learning.record(c);
@@ -167,7 +170,7 @@ export function postMessage(req: PostMessageRequest): Promise<PostMessageRespons
     const message: ChatMessage = { ...body, id: uniqueId(cacheId, s.messages), time: addMinutes(s.t, n) };
 
     const ctx = learning.getContext();
-    const extracted = resource(await extract({ ...message, id: cacheId }, ctx), cacheId, message.id);
+    const extracted = resource(await extract({ ...message, id: cacheId }, ctx, s.scene), cacheId, message.id);
     const resolved = learning.resolvePlaces(extracted, message, s.scene, ctx);
     const result = resolved.result;
     for (const u of resolved.unresolved) logLine({ kind: "learning.unresolved", ...u });
@@ -176,9 +179,11 @@ export function postMessage(req: PostMessageRequest): Promise<PostMessageRespons
 
     const findings: Finding[] = [];
     const fixes: Fix[] = [];
+    const intents: LiveRecord["liveIntents"] = {};
     for (const intent of result.intents) {
       const found = runChecks(scene, getPlan(scene, intent.day), intent);
       for (const finding of found) logLine({ kind: "finding", finding });
+      for (const finding of found) intents[finding.id] = intent;
       findings.push(...found);
       // Messages include the one being posted, so a fix can quote its source.
       fixes.push(...proposeFixes(found, scene, [...s.messages, message]));
@@ -188,6 +193,9 @@ export function postMessage(req: PostMessageRequest): Promise<PostMessageRespons
     s.liveCount = n;
     s.scene = scene;
     s.messages.push(message);
+    // Open live findings this message fixed leave the active list, with their pending fixes.
+    resolveLiveFindings(s, message.id);
+    Object.assign(s.liveIntents, intents);
     s.findings.push(...findings);
     s.fixes.push(...fixes);
     s.unresolved.push(...resolved.unresolved);

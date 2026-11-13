@@ -1,4 +1,5 @@
 import type { ChatMessage, EvalResults, Rehearsal, StateResponse } from "@site/contracts";
+import { fixtureFinding, fixtureFix, fixtureMessages, fixtureScene } from "@site/contracts/fixtures";
 import { create } from "zustand";
 import { announceChange, api, type AgentLogEntry, type UnresolvedItem } from "./api";
 
@@ -67,7 +68,17 @@ export const useSite = create<SiteStore>((set, get) => ({
       ]);
       set({ status: "ok", error: undefined, state, messages, rehearsal, evalResults, unresolved, agentLog });
     } catch (err) {
-      set({ status: get().state ? "ok" : "error", error: `Server not reachable (${String(err)}). Start it with npm run demo.` });
+      // No server yet: draw the contract fixtures (the ghost-wall case) so the plan still works, and say so.
+      if (!get().state) {
+        set({
+          state: { t: fixtureScene.time, scene: fixtureScene, findings: [fixtureFinding], fixes: [fixtureFix] },
+          messages: fixtureMessages,
+          evalResults: null,
+          unresolved: null,
+          agentLog: null,
+        });
+      }
+      set({ status: "ok", error: `Server not reachable (${String(err)}). Showing the contract fixtures. Start the server with npm run demo.` });
     }
   },
 

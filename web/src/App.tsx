@@ -61,7 +61,10 @@ function PhonePage() {
       {state ? (
         <Phone scene={state.scene} messages={messages} day={rehearsal?.day} onPosted={() => void refresh()} />
       ) : (
-        <p className="meta">{error ?? "Loading the site record"}</p>
+        <div className="boot">
+          <p className="meta">{error ?? "Loading the site record"}</p>
+          <span className="sim">Simulated site data</span>
+        </div>
       )}
     </div>
   );
@@ -113,8 +116,13 @@ function Main() {
   const reveal = useReveal(d?.ghosts.map(findingKey) ?? [], run);
   const msgMap = useMemo(() => messageMap(messages), [messages]);
 
-  if (status === "loading") return <p className="boot">Loading the site record</p>;
-  if (!state || !d) return <p className="boot">{error ?? "Server not reachable. Start it with npm run demo."}</p>;
+  if (status === "loading" || !state || !d)
+    return (
+      <div className="boot">
+        <p>{status === "loading" ? "Loading the site record" : (error ?? "Server not reachable. Start it with npm run demo.")}</p>
+        <span className="sim">Simulated site data</span>
+      </div>
+    );
 
   // 3D outlines elements only; a selected finding outlines its ghost's element.
   const selectedFinding = selection?.kind === "finding" ? d.all.find((f) => findingKey(f) === selection.key) : undefined;
@@ -215,8 +223,8 @@ function Main() {
           <Queue scene={state.scene} fixes={state.fixes} findings={d.all} messages={messages} />
         </section>
         <Learning scene={state.scene} items={unresolved} />
-        <AgentLog scene={state.scene} />
-        <Record messages={messages} />
+        <AgentLog scene={state.scene} messages={messages} />
+        <Record scene={state.scene} messages={messages} />
         <Measured />
       </aside>
 
