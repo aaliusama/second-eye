@@ -1,0 +1,11 @@
+{
+  "key": "732f9e3eed",
+  "text": "any changes in 204?",
+  "crewId": "crew-plumbing",
+  "query": {
+    "kind": "what_changed",
+    "placeId": "room-204"
+  },
+  "source": "llm",
+  "model": "openai/gpt-oss-120b"
+}

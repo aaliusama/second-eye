@@ -1,0 +1,11 @@
+{
+  "key": "f1d9aa8bfb",
+  "text": "where's the east wall in the 204 bath now?",
+  "crewId": "crew-plumbing",
+  "query": {
+    "kind": "where_is",
+    "elementId": "W-12"
+  },
+  "source": "llm",
+  "model": "openai/gpt-oss-120b"
+}

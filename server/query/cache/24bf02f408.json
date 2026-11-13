@@ -1,0 +1,15 @@
+{
+  "key": "24bf02f408",
+  "text": "can we start rough in at 204 tomorrow morning?",
+  "crewId": "crew-plumbing",
+  "query": {
+    "kind": "can_i_start",
+    "crewId": "crew-plumbing",
+    "taskType": "rough_in_plumbing",
+    "placeId": "room-204",
+    "day": "2026-11-14",
+    "slot": "morning"
+  },
+  "source": "llm",
+  "model": "openai/gpt-oss-120b"
+}
