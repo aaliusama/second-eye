@@ -4,13 +4,15 @@ import { extract } from "../extract/index";
 import * as learning from "../learning/index";
 import { logLine } from "../log";
 import { applyOperations, getPlan } from "./index";
+import { resolveLiveFindings, type LiveRecord } from "./resolve";
 
 // Owner: A. The replay clock and the pipeline: message -> extract -> model -> checks -> fixes.
 
-export interface ReplayState {
+export interface ReplayState extends LiveRecord {
   t: string;
   scene: Scene;
   messages: ChatMessage[];
+  /** Active findings. Live findings a later message fixed move to resolvedFindings. */
   findings: Finding[];
   fixes: Fix[];
   rehearsals: Rehearsal[];
@@ -20,7 +22,7 @@ export interface ReplayState {
 
 /** Play the golden replay up to replay time `until` (inclusive). Same input, same output. */
 export async function runReplay(replay: GoldenReplay, start: Scene, until?: string): Promise<ReplayState> {
-  const state: ReplayState = { t: start.time, scene: start, messages: [], findings: [], fixes: [], rehearsals: [], unresolved: [] };
+  const state: ReplayState = { t: start.time, scene: start, messages: [], findings: [], fixes: [], rehearsals: [], unresolved: [], liveIntents: {}, resolvedFindings: [], resolvedFixes: [] };
 
   for (const event of replay.events) {
     const at = event.kind === "message" ? event.message.time : event.time;
@@ -37,10 +39,13 @@ export async function runReplay(replay: GoldenReplay, start: Scene, until?: stri
       state.unresolved.push(...resolved.unresolved);
       for (const op of result.operations) logLine({ kind: "operation", operation: op });
       state.scene = applyOperations(state.scene, result.operations);
+      // Open live findings this message fixed (the crew heard the change, the task was cancelled, ...).
+      resolveLiveFindings(state, message.id);
 
       for (const intent of result.intents) {
         const found = runChecks(state.scene, getPlan(state.scene, intent.day), intent);
         for (const finding of found) logLine({ kind: "finding", finding });
+        for (const finding of found) state.liveIntents[finding.id] = intent;
         state.findings.push(...found);
         state.fixes.push(...proposeFixes(found, state.scene, state.messages));
       }
