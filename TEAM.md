@@ -42,6 +42,7 @@ Last update: Fri 13 Nov, night. `main`: typecheck clean, 188 unit tests, e2e 14 
 | O | premium pass: "Site chat" feed showing each message becoming operations with confidence (the Build step) | building |
 | P | premium pass: crew phone like a real site thread, human sources, briefing card; multi-crew slider | building |
 | Q | premium pass: plan as an architect's drawing (wall poché, doors, areas, north arrow, scale), crew presence, clash hatch | building |
+| R | judge-grade README, architecture diagram, screenshots, measured numbers | building |
 
 Groq key: put it in `.env` after `GROQ_API_KEY=` (see README, Environment).
 
