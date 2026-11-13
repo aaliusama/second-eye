@@ -1,0 +1,11 @@
+{
+  "key": "c465337d6f",
+  "text": "can we move the vanity wall back 40cm so our pipes fit?",
+  "crewId": "crew-plumbing",
+  "query": {
+    "kind": "decision_needed",
+    "topic": "move vanity wall back 40cm"
+  },
+  "source": "llm",
+  "model": "openai/gpt-oss-120b"
+}

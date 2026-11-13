@@ -1,0 +1,12 @@
+{
+  "key": "47f4bba695",
+  "text": "what's planned in 204 tomorrow",
+  "crewId": "crew-plumbing",
+  "query": {
+    "kind": "whats_planned",
+    "placeId": "room-204",
+    "day": "2026-11-14"
+  },
+  "source": "llm",
+  "model": "openai/gpt-oss-120b"
+}

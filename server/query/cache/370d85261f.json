@@ -1,0 +1,15 @@
+{
+  "key": "370d85261f",
+  "text": "ok to close up the walls in 203 tomorrow?",
+  "crewId": "crew-drywall",
+  "query": {
+    "kind": "can_i_start",
+    "crewId": "crew-drywall",
+    "taskType": "close_wall",
+    "placeId": "room-203",
+    "day": "2026-11-14",
+    "slot": "full_day"
+  },
+  "source": "llm",
+  "model": "openai/gpt-oss-120b"
+}
