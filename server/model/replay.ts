@@ -14,11 +14,13 @@ export interface ReplayState {
   findings: Finding[];
   fixes: Fix[];
   rehearsals: Rehearsal[];
+  /** Messages with an intent whose place could not be told (learning.resolvePlaces). */
+  unresolved: learning.Unresolved[];
 }
 
 /** Play the golden replay up to replay time `until` (inclusive). Same input, same output. */
 export async function runReplay(replay: GoldenReplay, start: Scene, until?: string): Promise<ReplayState> {
-  const state: ReplayState = { t: start.time, scene: start, messages: [], findings: [], fixes: [], rehearsals: [] };
+  const state: ReplayState = { t: start.time, scene: start, messages: [], findings: [], fixes: [], rehearsals: [], unresolved: [] };
 
   for (const event of replay.events) {
     const at = event.kind === "message" ? event.message.time : event.time;
@@ -28,7 +30,11 @@ export async function runReplay(replay: GoldenReplay, start: Scene, until?: stri
     if (event.kind === "message") {
       const message = event.message;
       state.messages.push(message);
-      const result = await extract(message, learning.getContext());
+      const ctx = learning.getContext();
+      const resolved = learning.resolvePlaces(await extract(message, ctx), message, state.scene, ctx);
+      const result = resolved.result;
+      for (const u of resolved.unresolved) logLine({ kind: "learning.unresolved", ...u });
+      state.unresolved.push(...resolved.unresolved);
       for (const op of result.operations) logLine({ kind: "operation", operation: op });
       state.scene = applyOperations(state.scene, result.operations);
 
