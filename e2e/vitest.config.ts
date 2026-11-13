@@ -6,7 +6,8 @@ export default defineConfig({
   test: {
     include: ["e2e/**/*.e2e.test.ts"],
     environment: "node",
-    testTimeout: 30_000,
+    // Full scenario: one golden replay (each reset) takes ~15 s and the MCP robot ~26 s on the demo laptop.
+    testTimeout: 120_000,
     hookTimeout: 60_000,
     fileParallelism: false,
   },

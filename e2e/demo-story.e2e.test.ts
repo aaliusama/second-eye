@@ -1,4 +1,5 @@
 import { spawn, execFile, execSync, type ChildProcess } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -202,10 +203,134 @@ describe("demo story (golden replay, cached extraction)", () => {
     expect((await get("/api/health")).status).toBe(200);
   });
 
-  // Beats that need lane B's full scenario (data/). Turn each into a real test when it lands on main.
-  it.todo("beat 3 live: a scripted phone message from plumbing (cached by text) produces the ghost");
-  it.todo("beat 6: 'the blue room' is unresolved on run 1, superintendent maps it, run 2 resolves it on its own");
-  it.todo("incident 2: electrical and painting both in unit 206 Saturday morning -> space_clash");
-  it.todo("incident 3: drywall closes the 203 wall before the plumbing inspection -> order_of_work");
-  it.todo("incident 4: tiling 205 while the tile choice is still proposed -> open_decision");
+});
+
+// Phone script (data/scenario.md): exact words, cached by text + crew in data/llm-cache/live-*.json.
+const PHONE_PLUMBING = "tomorrow morning we rough in the 204 bath along the east wall";
+const PHONE_BLUE_ROOM = "tmrw afternoon we start boarding the blue room, ceiling first";
+
+describe("phone beats (live posts, cached extraction)", () => {
+  it("beat 3 live: plumbing's phone text produces the W-12 ghost and the HOLD reaches its phone", async () => {
+    expect((await post("/api/reset", { keepLearning: false })).status).toBe(200);
+
+    const sent = await post("/api/message", {
+      thread: "site-group",
+      senderName: "Marek",
+      senderRole: "crew",
+      crewId: "crew-plumbing",
+      text: PHONE_PLUMBING,
+      kind: "text",
+    });
+    expect(sent.status).toBe(200);
+    expect(sent.body.message.id).toBe("live-9aa884fec0");
+    const ghost = sent.body.findings.find((f: any) => f.check === "latest_change" && f.ghost?.elementId === "W-12");
+    expect(ghost).toBeDefined();
+    expect(ghost.trigger).toBe("live");
+    expect(ghost.sourceMessageId).toBe("live-9aa884fec0");
+    expect(ghost.ghost.label).toBe("0.4 m east");
+
+    // The superintendent approves the notify_crew fix; the HOLD DM lands in plumbing's phone thread.
+    const fix = sent.body.fixes.find((x: any) => x.findingId === ghost.id && x.kind === "notify_crew");
+    expect(fix).toBeDefined();
+    const approved = await post(`/api/fixes/${encodeURIComponent(fix.id)}/approve`);
+    expect(approved.status).toBe(200);
+    const dm = approved.body.sent.find((m: any) => m.crewId === "crew-plumbing");
+    expect(dm?.thread).toBe("dm:crew-plumbing");
+    expect(dm?.text).toMatch(/^HOLD:/);
+    const { body } = await get("/api/messages");
+    expect(body.messages.some((m: any) => m.id === dm.id && m.thread === "dm:crew-plumbing")).toBe(true);
+  });
+
+  it("beat 8-9 (A's Done when): 'the blue room' is unresolved on run 1, mapped once, resolved on run 2", async () => {
+    expect((await post("/api/reset", { keepLearning: false })).status).toBe(200);
+    const drywall = {
+      thread: "site-group",
+      senderName: "Sean",
+      senderRole: "crew",
+      crewId: "crew-drywall",
+      text: PHONE_BLUE_ROOM,
+      kind: "text",
+    };
+
+    // Run 1: the record has no such place. No guess, no confident finding; the superintendent is asked.
+    const run1 = await post("/api/message", drywall);
+    expect(run1.status).toBe(200);
+    const id = run1.body.message.id;
+    expect(id).toBe("live-584afecf14");
+    expect(run1.body.intents.length).toBeGreaterThan(0);
+    expect(run1.body.intents.every((i: any) => i.placeId === undefined)).toBe(true);
+    expect(run1.body.findings).toEqual([]);
+    const open1 = await get("/api/unresolved");
+    expect(open1.body.items.map((u: any) => u.messageId)).toContain(id);
+
+    // The superintendent maps the nickname once (scenario.md: crews call Unit 204 "the blue room").
+    const { body: state } = await get("/api/state");
+    const corr = await post("/api/corrections", {
+      kind: "location_alias",
+      id: `corr-alias-${id}`,
+      time: state.t,
+      sourceMessageId: id,
+      alias: "the blue room",
+      elementId: "room-204",
+    });
+    expect(corr.status).toBe(200);
+    expect((await get("/api/unresolved")).body.items.map((u: any) => u.messageId)).not.toContain(id);
+
+    // Run 2: same words, resolved on their own.
+    const reset = await post("/api/reset", { keepLearning: true });
+    expect(reset.status).toBe(200);
+    const run2 = await post("/api/message", drywall);
+    expect(run2.status).toBe(200);
+    expect(run2.body.message.id).toBe(id); // fresh session: same id as run 1
+    expect(run2.body.intents.length).toBeGreaterThan(0);
+    expect(run2.body.intents.every((i: any) => i.placeId === "room-204")).toBe(true);
+    // scenario.md non-case: drywall boards 204 Saturday afternoon, plumbing is there in the morning only.
+    expect(run2.body.findings).toEqual([]);
+    expect((await get("/api/unresolved")).body.items).toEqual([]);
+  });
+});
+
+// Planted cases from data/labels.json, checked over HTTP with eval's rule (eval/score.ts): a case is
+// caught when a live or rehearsal finding has its check and its trigger message (space_clash: source or
+// evidence, the clash is symmetric). Expected = the cases eval/results.detail.json reports caught, so
+// this suite follows lane C's measured numbers instead of inventing its own. Missed today, so skipped
+// here (lane C's work, not hidden by a test expectation): SC3, OD2, OD4.
+const ROOT_FILE = (p: string) => readFileSync(fileURLToPath(new URL(`../${p}`, import.meta.url)), "utf8");
+const labels: { id: string; check: string; triggerMessageId: string }[] = JSON.parse(ROOT_FILE("data/labels.json")).cases;
+const detail: { cases: { id: string; caught: boolean }[] } = JSON.parse(ROOT_FILE("eval/results.detail.json"));
+const caughtIds = new Set(detail.cases.filter((c) => c.caught).map((c) => c.id));
+const CHECKS = ["latest_change", "space_clash", "order_of_work", "open_decision"] as const;
+
+describe("planted cases (data/labels.json) over HTTP", () => {
+  let pooled: any[] = [];
+
+  beforeAll(async () => {
+    expect((await post("/api/reset", { keepLearning: false })).status).toBe(200);
+    const { body: state } = await get("/api/state");
+    const days = [...new Set<string>(state.scene.tasks.map((t: any) => t.day))].sort();
+    pooled = [...state.findings];
+    for (const day of days) {
+      const { body } = await get(`/api/rehearsal?day=${day}`);
+      pooled.push(...body.frames.flatMap((fr: any) => fr.findings));
+    }
+  });
+
+  it("eval detail is current with labels.json (same case ids)", () => {
+    expect(detail.cases.map((c) => c.id).sort()).toEqual(labels.map((c) => c.id).sort());
+  });
+
+  it.each(CHECKS)("%s: every case eval reports caught has a finding on its trigger message", (check) => {
+    const cases = labels.filter((c) => c.check === check && caughtIds.has(c.id));
+    expect(cases.length).toBeGreaterThan(0);
+    const missing = cases.filter(
+      (c) =>
+        !pooled.some(
+          (f) =>
+            f.check === c.check &&
+            (f.sourceMessageId === c.triggerMessageId ||
+              (f.check === "space_clash" && f.evidenceMessageIds.includes(c.triggerMessageId))),
+        ),
+    );
+    expect(missing.map((c) => c.id)).toEqual([]);
+  });
 });
