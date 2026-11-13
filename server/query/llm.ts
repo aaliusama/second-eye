@@ -48,14 +48,32 @@ function userPrompt(q: Question, scene: Scene): string {
   return `Sent: ${q.time}\nFrom: ${crew ? `${crew.id} (${crew.name}, ${crew.trade})` : "unknown sender"}\nMessage: ${q.text}`;
 }
 
+/** Seconds Groq asks us to wait on a 429: retry-after header, else "try again in 1.68s" in the body, else 5. */
+function retryAfter(res: Response, body: string): number {
+  const header = Number(res.headers.get("retry-after"));
+  if (Number.isFinite(header) && header > 0) return header;
+  const m = /try again in ([\d.]+)s/i.exec(body);
+  return m ? Number(m[1]) : 5;
+}
+
+const RATE_LIMIT_TRIES = 6;
+
 async function call(messages: { role: string; content: string }[]): Promise<string> {
   const key = process.env.GROQ_API_KEY;
   if (!key) throw new Error("GROQ_API_KEY is not set; live question parsing needs it (see .env.example)");
-  const res = await fetch(URL, {
-    method: "POST",
-    headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
-    body: JSON.stringify({ model: groqModel(), temperature: 0, response_format: { type: "json_object" }, messages }),
-  });
+  let res: Response | undefined;
+  for (let attempt = 1; ; attempt++) {
+    res = await fetch(URL, {
+      method: "POST",
+      headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
+      body: JSON.stringify({ model: groqModel(), temperature: 0, response_format: { type: "json_object" }, messages }),
+    });
+    if (res.status !== 429 || attempt >= RATE_LIMIT_TRIES) break;
+    // Free tier: tokens-per-minute limit. Wait what Groq asks (plus a margin) and try again.
+    const wait = retryAfter(res, await res.text()) + 1;
+    console.error(`Groq rate limit, waiting ${wait.toFixed(1)} s (try ${attempt}/${RATE_LIMIT_TRIES})`);
+    await new Promise((r) => setTimeout(r, wait * 1000));
+  }
   if (!res.ok) throw new Error(`Groq answered ${res.status}: ${(await res.text()).slice(0, 300)}`);
   const body = (await res.json()) as { choices?: { message?: { content?: string } }[] };
   const content = body.choices?.[0]?.message?.content;
