@@ -1,18 +1,68 @@
+import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
+import { dirname, isAbsolute, join } from "node:path";
 import { Correction, type LearningContext, type Scene } from "@site/contracts";
+import { logLine } from "../log";
+import { REPO_ROOT } from "../paths";
 
 // Owner: A. Stored corrections and how they change the next run.
-// In memory for now; npm run demo starts from a clean store.
+// In memory by default; npm run demo starts from a clean store.
+// Opt-in: LEARNING_FILE=<path> loads the store at startup and writes it after every change.
 
 export { placesNamed, resolvePlaces, type Resolved, type Unresolved } from "./resolve";
 
 const corrections: Correction[] = [];
+/** Where the store is persisted, or undefined: in memory only, no file I/O. */
+let file: string | undefined;
+
+const StoreFile = Correction.array();
+
+/**
+ * Persistence from LEARNING_FILE (a relative path resolves against the repo root).
+ * Unset or empty: in memory only. Set: the store is replaced by the file's corrections;
+ * a missing file starts empty, a corrupt or invalid one logs one JSON line and starts empty.
+ */
+export function usePersistence(path: string | undefined): void {
+  corrections.length = 0;
+  file = path ? (isAbsolute(path) ? path : join(REPO_ROOT, path)) : undefined;
+  if (!file) return;
+  try {
+    const parsed = StoreFile.safeParse(JSON.parse(readFileSync(file, "utf8")));
+    if (!parsed.success) throw new Error(`invalid corrections: ${parsed.error.message}`);
+    corrections.push(...parsed.data);
+    logLine({ kind: "learning.loaded", file, corrections: corrections.length });
+  } catch (e) {
+    if ((e as NodeJS.ErrnoException).code === "ENOENT") return;
+    logLine({ kind: "learning.load_error", file, error: e instanceof Error ? e.message : String(e) });
+  }
+}
+
+/** Atomic write: temp file + rename. A failed write is logged, never thrown. */
+function save(): void {
+  if (!file) return;
+  const tmp = `${file}.tmp`;
+  try {
+    mkdirSync(dirname(file), { recursive: true });
+    writeFileSync(tmp, JSON.stringify(corrections, null, 2) + "\n");
+    renameSync(tmp, file);
+  } catch (e) {
+    logLine({ kind: "learning.save_error", file, error: e instanceof Error ? e.message : String(e) });
+  }
+}
 
 export function record(correction: Correction): void {
   corrections.push(Correction.parse(correction));
+  save();
 }
 
+/** Clears the store, and deletes the file when persistence is on. */
 export function reset(): void {
   corrections.length = 0;
+  if (!file) return;
+  try {
+    rmSync(file, { force: true });
+  } catch (e) {
+    logLine({ kind: "learning.save_error", file, error: e instanceof Error ? e.message : String(e) });
+  }
 }
 
 export function all(): Correction[] {
