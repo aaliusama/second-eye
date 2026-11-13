@@ -61,7 +61,8 @@ export interface Answer {
 /** GET /api/agent/log: what the system did on its own, per tick. */
 export interface AgentLogEntry {
   time: string;
-  actions: { type: string; crewId?: string; text: string; reason?: string }[];
+  /** Lane G actions carry `kind` (send_dm, escalate, follow_up, auto_resolve); `type` kept for older logs. */
+  actions: { kind?: string; type?: string; crewId?: string; text?: string; reason?: string; sourceMessageIds?: string[] }[];
   /** Actions waiting for the superintendent, when the server reports them. */
   queued?: unknown[];
 }

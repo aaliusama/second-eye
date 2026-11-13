@@ -240,9 +240,11 @@ export function AgentLog({ scene }: { scene: Scene }) {
             <p className="meta">{formatTime(entry.time)}</p>
             {entry.actions.map((a, j) => (
               <p key={j}>
-                <strong>{a.type.replace(/_/g, " ")}</strong>
-                {a.crewId ? ` · ${crewName(scene, a.crewId)}` : ""}: {a.text}
-                {a.reason && <span className="meta"> ({a.reason})</span>}
+                <strong>{(a.kind ?? a.type ?? "action").replace(/_/g, " ")}</strong>
+                {a.crewId ? ` · ${crewName(scene, a.crewId)}` : ""}
+                {a.text ? `: ${a.text}` : ""}
+                {a.reason && <span className="meta"> ({a.reason.replace(/_/g, " ")})</span>}
+                {a.sourceMessageIds?.length ? <span className="meta"> · {a.sourceMessageIds.join(", ")}</span> : null}
               </p>
             ))}
           </li>
