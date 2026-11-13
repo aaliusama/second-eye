@@ -26,6 +26,27 @@ const joinNames = (names: string[]) =>
 /** When the morning starts; a silent crew must answer before this. */
 const REPLY_BY = "07:00";
 
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+/**
+ * How a crew message cites its sources: people, threads and times ("Lena Hofer, office, Thu 14:02"),
+ * because a crew lead cannot look up a message id. Ids stay only when the message is not known.
+ * Pure: the weekday comes from the replay-time string, never the clock.
+ */
+export function cite(ids: string[], messages?: ChatMessage[]): string {
+  return ids
+    .map((id) => {
+      const m = messages?.find((x) => x.id === id);
+      if (!m) return id;
+      const d = new Date(`${m.time.slice(0, 10)}T00:00:00Z`);
+      const when = `${DAYS[d.getUTCDay()]} ${m.time.slice(11, 16)}`;
+      const who = m.senderName.replace(/\s*\(.*\)$/, "");
+      const where = m.thread.startsWith("dm:") ? "direct message" : m.thread.replace(/-/g, " ");
+      return `${who}, ${where}, ${when}`;
+    })
+    .join("; ");
+}
+
 /**
  * The time the risk entered the record: the earliest evidence message found in `messages`,
  * else the finding's source message. Undefined if neither is in `messages`.
@@ -61,7 +82,7 @@ export function proposeFixes(findings: Finding[], scene: Scene, messages?: ChatM
     f.taskIds.map((id) => scene.tasks.find((t) => t.id === id)).filter((t): t is PlanTask => t !== undefined);
 
   return findings.map((f) => {
-    const sources = (f.evidenceMessageIds.length > 0 ? f.evidenceMessageIds : [f.sourceMessageId]).join(", ");
+    const sources = cite(f.evidenceMessageIds.length > 0 ? f.evidenceMessageIds : [f.sourceMessageId], messages);
     const tasks = tasksOf(f);
     const mainElementId = f.ghost?.elementId ?? f.elementIds[0];
     const element = elementName(mainElementId);

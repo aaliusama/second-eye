@@ -3,7 +3,7 @@ import { Fix as FixSchema, Rehearsal as RehearsalSchema } from "@site/contracts"
 import type { ChatMessage, Finding, Plan, PlanTask, Scene } from "@site/contracts";
 import { fixtureFinding, fixtureFix, fixtureMessages, fixtureScene } from "@site/contracts/fixtures";
 import { rehearse } from "./rehearse";
-import { proposeFixes } from "./fixes";
+import { cite, proposeFixes } from "./fixes";
 
 const base = fixtureScene.tasks[0]!;
 const task = (over: Partial<PlanTask>): PlanTask => ({ ...base, ...over });
@@ -132,9 +132,15 @@ describe("proposeFixes", () => {
       expect(fix!.messages).toEqual([
         {
           crewId: "crew-plumbing",
-          text: "Are you still planning rough in the 204 bathroom along the east wall in the morning? Unit 204 bathroom east wall moved 0.4 m east per the record (m-001). Reply before 07:00.",
+          text: "Are you still planning rough in the 204 bathroom along the east wall in the morning? Unit 204 bathroom east wall moved 0.4 m east per the record (Lena Hofer, office, Thu 14:02). Reply before 07:00.",
         },
       ]);
+    });
+
+    it("cites people, threads and times; an unknown id stays an id", () => {
+      expect(cite(["m-001"], [change])).toBe("Lena Hofer, office, Thu 14:02");
+      expect(cite(["m-001", "m-404"], [change])).toBe("Lena Hofer, office, Thu 14:02; m-404");
+      expect(cite(["m-001"])).toBe("m-001");
     });
 
     it("crew that posted after the change gets the normal fix", () => {
