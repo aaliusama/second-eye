@@ -6,10 +6,13 @@ import {
   EvalResults,
   PostMessageRequest,
   ReplayTime,
+  type AgentLogResponse,
   type FixesResponse,
   type HealthResponse,
   type RehearsalResponse,
+  type ResetResponse,
   type StateResponse,
+  type UnresolvedResponse,
 } from "@site/contracts";
 import { rehearse } from "../checks/index";
 import * as learning from "../learning/index";
@@ -148,8 +151,9 @@ export async function handle(req: IncomingMessage, res: ServerResponse): Promise
     }
 
     if (route === "GET /api/unresolved") {
-      // Not a contract shape yet: places the superintendent still has to map.
-      return send(res, 200, { items: await getUnresolved() });
+      // Places the superintendent still has to map.
+      const body: UnresolvedResponse = { items: await getUnresolved() };
+      return send(res, 200, body);
     }
 
     if (route === "GET /api/fixes") {
@@ -180,12 +184,14 @@ export async function handle(req: IncomingMessage, res: ServerResponse): Promise
       resetSession({ keepLearning });
       const s = await getSession();
       logLine({ kind: "api.reset", keepLearning, learnedCrews, findings: s.findings.length });
-      return send(res, 200, { ok: true, keepLearning, learnedCrews, t: sessionNow(s) });
+      const body: ResetResponse = { ok: true, keepLearning, learnedCrews, t: sessionNow(s) };
+      return send(res, 200, body);
     }
 
     if (route === "GET /api/agent/log") {
       const s = await getSession();
-      return send(res, 200, { timeline: s.agentLog, escalations: s.escalations });
+      const body: AgentLogResponse = { timeline: s.agentLog, escalations: s.escalations };
+      return send(res, 200, body);
     }
 
     // Lane E: POST /api/ask, GET /api/briefing, GET /api/digest. Answers come from the record.

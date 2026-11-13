@@ -327,6 +327,219 @@ export const FixesResponse = z.object({ fixes: z.array(Fix) });
 export const ApproveFixResponse = z.object({ fix: Fix, sent: z.array(ChatMessage) });
 export const ApiError = z.object({ error: z.string() });
 
+// ---------- Crew questions (server/query) ----------
+
+/** A crew (or anyone) texting the system. */
+export const Question = z.object({
+  id: Id,
+  time: ReplayTime,
+  crewId: Id.optional(),
+  text: z.string().min(1),
+});
+
+/**
+ * What the question asks, as facts the rules can answer. The LLM (or the keyword fallback) only
+ * fills this in; every answer is computed by rules from the record.
+ */
+export const StructuredQuery = z.discriminatedUnion("kind", [
+  /** "What's planned in 204 tomorrow?" */
+  z.object({ kind: z.literal("whats_planned"), placeId: Id.optional(), day: Day.optional(), crewId: Id.optional() }),
+  /** "Where is the 204 bath east wall now?" */
+  z.object({ kind: z.literal("where_is"), elementId: Id }),
+  /** "Anything changed in 204 since Wednesday?" */
+  z.object({
+    kind: z.literal("what_changed"),
+    elementId: Id.optional(),
+    placeId: Id.optional(),
+    since: ReplayTime.optional(),
+  }),
+  /** "Who's in 206 Saturday morning?" */
+  z.object({ kind: z.literal("who_is_in"), placeId: Id, day: Day, slot: Slot.optional() }),
+  /** "Can we start roughing in 204 tomorrow morning?" Answered HOLD or CLEAR by the four checks. */
+  z.object({ kind: z.literal("can_i_start"), crewId: Id, taskType: TaskType, placeId: Id, day: Day, slot: Slot }),
+  /** Anything that needs someone to decide (design change, tile choice). Always escalated, never decided. */
+  z.object({ kind: z.literal("decision_needed"), topic: z.string().min(1) }),
+]);
+
+export const Answer = z.object({
+  questionId: Id,
+  kind: z.enum(["answer", "escalated", "not_found"]),
+  /** For the crew's phone. Leads with HOLD or CLEAR for can_i_start. Worded "per the record". */
+  text: z.string(),
+  /** Messages the answer rests on. Empty only for not_found and escalations with no record. */
+  sourceMessageIds: z.array(Id),
+  elementIds: z.array(Id),
+  /** The query the answer was computed from, so a judge can see what was understood. */
+  query: StructuredQuery.optional(),
+  /** Findings from the checks (can_i_start). */
+  findings: z.array(Finding).optional(),
+  escalation: z.object({ to: z.literal("superintendent"), reason: z.string() }).optional(),
+});
+
+/** A crew's morning briefing for one day. Every line cites its source. */
+export const CrewBriefing = z.object({
+  crewId: Id,
+  day: z.string(),
+  tasks: z.array(
+    z.object({
+      taskId: Id,
+      slot: z.string(),
+      order: z.number(),
+      description: z.string(),
+      placeId: Id,
+      sourceMessageId: Id,
+      holds: z.array(
+        z.object({
+          findingId: Id,
+          check: CheckName,
+          severity: Finding.shape.severity,
+          summary: z.string(),
+          sourceMessageIds: z.array(Id),
+        }),
+      ),
+    }),
+  ),
+  /** Changes to elements their tasks touch, after the crew last posted. `heard` = said in a thread they read. */
+  changes: z.array(
+    z.object({
+      elementId: Id,
+      name: z.string(),
+      version: z.number(),
+      time: z.string(),
+      sourceMessageId: Id,
+      thread: z.string(),
+      heard: z.boolean(),
+    }),
+  ),
+  /** When the crew last posted, if ever. */
+  lastPosted: z.string().optional(),
+  text: z.string(),
+});
+
+/** The superintendent's evening digest for one day. */
+export const Digest = z.object({
+  day: z.string(),
+  counts: z.record(CheckName, z.object({ hold: z.number(), warn: z.number() })),
+  openDecisions: z.array(z.object({ elementId: Id, name: z.string(), sourceMessageId: Id.optional() })),
+  /** Crews with a finding on this day who have posted nothing since the risk entered the record. */
+  silentCrews: z.array(z.object({ crewId: Id, name: z.string(), since: z.string() })),
+  pendingFixes: z.array(z.object({ fixId: Id, kind: Fix.shape.kind, description: z.string() })),
+  text: z.string(),
+});
+
+// ---------- Site agent (server/agent) ----------
+// Every action cites at least one source message. No source, no action.
+
+const actionBase = {
+  /** Deterministic: same situation, same id. Used to dedupe across clock steps. */
+  id: Id,
+  /** Replay time the action may run. Later than `now` when quiet hours push it to 06:00. */
+  due: ReplayTime,
+  sourceMessageIds: z.array(Id).min(1),
+};
+
+export const DmReason = z.enum([
+  /** Listen step: a silent crew is asked to confirm its plan (an ask_crew fix). */
+  "listen_question",
+  /** The superintendent approved a fix; the crew is reminded at the start of the work day. */
+  "approved_fix_reminder",
+  /** CLEAR at 06:00: the crew's day has no open issues per the record. */
+  "morning_briefing",
+  /** CLEAR after the record shows a risk is gone. */
+  "clear",
+  /** Learning loop: a crew on watch gets a change the moment it lands, before it states intent. */
+  "watch_crew_change",
+]);
+
+export const EscalateAction = z.object({
+  ...actionBase,
+  kind: z.literal("escalate"),
+  to: z.literal("superintendent"),
+  findingId: Id.optional(),
+  fixId: Id.optional(),
+  text: z.string().min(1),
+  urgency: z.enum(["now", "tonight"]),
+});
+
+export const Action = z.discriminatedUnion("kind", [
+  z.object({
+    ...actionBase,
+    kind: z.literal("send_dm"),
+    crewId: Id,
+    text: z.string().min(1),
+    reason: DmReason,
+    findingId: Id.optional(),
+  }),
+  EscalateAction,
+  z.object({
+    ...actionBase,
+    kind: z.literal("follow_up"),
+    crewId: Id,
+    findingId: Id,
+    /** The agent message that asked the question. */
+    questionMessageId: Id,
+    text: z.string().min(1),
+  }),
+  z.object({
+    ...actionBase,
+    kind: z.literal("auto_resolve"),
+    findingId: Id,
+    reason: z.string().min(1),
+  }),
+]);
+
+export const CrewProfile = z.object({
+  crewId: Id,
+  /** latest_change findings against this crew (one per element). */
+  missedChanges: z.number().int().nonnegative(),
+  /** Agent questions this crew never answered. */
+  unansweredQuestions: z.number().int().nonnegative(),
+  approvedFixes: z.number().int().nonnegative(),
+  risk: z.enum(["normal", "watch"]),
+  /** Messages that justify the profile. */
+  evidenceMessageIds: z.array(Id),
+});
+
+export const TimelineStep = z.object({
+  time: ReplayTime,
+  /** Actions that ran at this step. */
+  actions: z.array(Action),
+  /** Actions decided now but held until later (quiet hours). */
+  queued: z.array(Action),
+});
+
+// ---------- Learning: places the record could not tell ----------
+
+/** A message whose place could not be resolved; the superintendent maps the nickname. */
+export const Unresolved = z.object({
+  messageId: Id,
+  crewId: Id.optional(),
+  text: z.string(),
+});
+
+// ---------- HTTP API (added routes) ----------
+
+/** GET /api/unresolved */
+export const UnresolvedResponse = z.object({ items: z.array(Unresolved) });
+/** GET /api/agent/log */
+export const AgentLogResponse = z.object({ timeline: z.array(TimelineStep), escalations: z.array(EscalateAction) });
+/** POST /api/ask body. */
+export const AskRequest = z.object({ crewId: Id.optional(), text: z.string().min(1).max(500) });
+/** POST /api/ask */
+export const AskResponse = Answer;
+/** GET /api/briefing?crew=&day= */
+export const BriefingResponse = CrewBriefing;
+/** GET /api/digest?day= */
+export const DigestResponse = Digest;
+/** POST /api/reset {keepLearning} */
+export const ResetResponse = z.object({
+  ok: z.literal(true),
+  keepLearning: z.boolean(),
+  /** crew_misread corrections stored from the run that just ended. */
+  learnedCrews: z.number().int().nonnegative(),
+  t: ReplayTime,
+});
+
 // ---------- Types ----------
 
 export type Id = z.infer<typeof Id>;
@@ -374,3 +587,21 @@ export type RehearsalResponse = z.infer<typeof RehearsalResponse>;
 export type FixesResponse = z.infer<typeof FixesResponse>;
 export type ApproveFixResponse = z.infer<typeof ApproveFixResponse>;
 export type ApiError = z.infer<typeof ApiError>;
+export type Question = z.infer<typeof Question>;
+export type StructuredQuery = z.infer<typeof StructuredQuery>;
+export type Answer = z.infer<typeof Answer>;
+export type CrewBriefing = z.infer<typeof CrewBriefing>;
+export type Digest = z.infer<typeof Digest>;
+export type DmReason = z.infer<typeof DmReason>;
+export type EscalateAction = z.infer<typeof EscalateAction>;
+export type Action = z.infer<typeof Action>;
+export type CrewProfile = z.infer<typeof CrewProfile>;
+export type TimelineStep = z.infer<typeof TimelineStep>;
+export type Unresolved = z.infer<typeof Unresolved>;
+export type UnresolvedResponse = z.infer<typeof UnresolvedResponse>;
+export type AgentLogResponse = z.infer<typeof AgentLogResponse>;
+export type AskRequest = z.infer<typeof AskRequest>;
+export type AskResponse = z.infer<typeof AskResponse>;
+export type BriefingResponse = z.infer<typeof BriefingResponse>;
+export type DigestResponse = z.infer<typeof DigestResponse>;
+export type ResetResponse = z.infer<typeof ResetResponse>;

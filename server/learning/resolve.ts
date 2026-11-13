@@ -1,4 +1,4 @@
-import type { ChatMessage, ExtractResult, Id, LearningContext, Scene } from "@site/contracts";
+import type { ChatMessage, ExtractResult, Id, LearningContext, Scene, Unresolved } from "@site/contracts";
 
 // Owner: A. Learning applied to extraction output, by rule, after the LLM (or its cache).
 // An intent whose place the extraction could not tell gets one if the message names exactly one
@@ -6,11 +6,8 @@ import type { ChatMessage, ExtractResult, Id, LearningContext, Scene } from "@si
 // No match or more than one match: the intent stays without a place and is reported unresolved,
 // so the superintendent can map the nickname (POST /api/corrections) and the next run knows it.
 
-export interface Unresolved {
-  messageId: Id;
-  crewId?: Id;
-  text: string;
-}
+/** The shape lives in contracts/ (GET /api/unresolved); re-exported for existing imports. */
+export type { Unresolved };
 
 export interface Resolved {
   result: ExtractResult;
