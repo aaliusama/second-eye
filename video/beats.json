@@ -8,7 +8,7 @@
   "blueRoomCrew": "Walsh Drywall",
   "blueRoomPlace": "Unit 204",
   "phone": {
-    "ghost": "[[from data/scenario.md Phone script: plumbing states tomorrow's rough-in in the 204 bath]]",
-    "blueRoom": "[[from data/scenario.md Phone script: a crew names \"the blue room\"]]"
+    "ghost": "tomorrow morning we rough in the 204 bath along the east wall",
+    "blueRoom": "tmrw afternoon we start boarding the blue room, ceiling first"
   }
 }

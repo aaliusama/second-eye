@@ -10,7 +10,7 @@ import { extractBatch, llmProvenance, writeCacheEntry } from "./index";
 import { groqModel } from "./llm";
 
 // Owner: B. Fill data/llm-cache/ with real Groq extraction for every golden-replay message and phone text.
-// Run: npx tsx server/extract/build-cache.ts [--force]
+// Run: npx tsx server/extract/build-cache.ts [--force] [--only=message-id,other-id]
 // Needs GROQ_API_KEY in .env (never printed). Entries already from the LLM are kept unless --force.
 // Then compares each entry with the hand-written expectation in data/expected/ and writes data/extraction-report.json.
 
@@ -26,6 +26,9 @@ if (!process.env.GROQ_API_KEY) {
   process.exit(1);
 }
 const force = process.argv.includes("--force");
+const onlyArg = process.argv.find((arg) => arg.startsWith("--only="));
+const only = onlyArg ? new Set(onlyArg.slice("--only=".length).split(",").filter(Boolean)) : undefined;
+if (only && only.size === 0) throw new Error("--only needs at least one message id");
 
 async function readJson(path: string): Promise<any | undefined> {
   try {
@@ -60,11 +63,16 @@ console.log(`Model ${groqModel()}: ${messages.length} replay messages + ${phone.
 
 // Replay in time order; the floor moves as the chat goes, so a move is measured from where the element is then.
 const all = [...messages, ...phone];
+if (only) {
+  const knownIds = new Set(all.map((m) => m.id));
+  const unknown = [...only].filter((id) => !knownIds.has(id));
+  if (unknown.length > 0) throw new Error(`Unknown --only message ids: ${unknown.join(", ")}`);
+}
 let wrote = 0;
 for (let i = 0; i < all.length; i += BATCH) {
   const batch = all.slice(i, i + BATCH);
   const todo: ChatMessage[] = [];
-  for (const m of batch) if (force || !(await isLlm(m.id))) todo.push(m);
+  for (const m of batch) if ((!only || only.has(m.id)) && (force || !(await isLlm(m.id)))) todo.push(m);
   if (todo.length > 0) {
     const results = await extractBatch(todo, scene);
     for (const r of results) await writeCacheEntry(r.result, llmProvenance(), r.facts);

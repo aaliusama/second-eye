@@ -2,23 +2,15 @@
   "note": "Simulated site data. LLM extraction compared with the hand-written expectation in data/expected/, fact by fact.",
   "model": "openai/gpt-oss-120b",
   "messages": 192,
-  "messagesExact": 187,
+  "messagesExact": 189,
   "facts": {
     "expected": 38,
-    "extracted": 36,
-    "matched": 33,
+    "extracted": 38,
+    "matched": 35,
     "extra": 3,
-    "missed": 5
+    "missed": 3
   },
   "mismatches": [
-    {
-      "messageId": "m-043",
-      "text": "202 kitchen lights: suggesting the slim LED track, waiting on owner sign-off",
-      "expected": [
-        "status light-202-kitchen proposed"
-      ],
-      "llm": []
-    },
     {
       "messageId": "m-092",
       "text": "fri morning we stage the tile in the corridor, ok?",
@@ -48,14 +40,6 @@
       "llm": [
         "plan crew-painting 2026-11-14 morning paint room-206 [W-22]"
       ]
-    },
-    {
-      "messageId": "m-177",
-      "text": "and kev does layout in 201 sat afternoon",
-      "expected": [
-        "plan crew-drywall 2026-11-14 afternoon layout room-201 []"
-      ],
-      "llm": []
     }
   ]
 }

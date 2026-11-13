@@ -8,8 +8,8 @@
       "falseAlarms": 0
     },
     "space_clash": {
-      "caught": 3,
-      "missed": 1,
+      "caught": 4,
+      "missed": 0,
       "falseAlarms": 0
     },
     "order_of_work": {
@@ -18,14 +18,14 @@
       "falseAlarms": 0
     },
     "open_decision": {
-      "caught": 3,
-      "missed": 1,
+      "caught": 4,
+      "missed": 0,
       "falseAlarms": 0
     }
   },
   "total": {
-    "caught": 13,
-    "missed": 2,
+    "caught": 15,
+    "missed": 0,
     "falseAlarms": 0
   }
 }
