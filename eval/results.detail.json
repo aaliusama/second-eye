@@ -1,0 +1,136 @@
+{
+  "replayId": "golden-slice-1",
+  "rule": "live + rehearsal pooled; one count per incident (check, source message or clash pair, elements)",
+  "findings": {
+    "live": 1,
+    "rehearsal": 1,
+    "incidents": 1
+  },
+  "perTrigger": {
+    "live": {
+      "caught": 1,
+      "missed": 0,
+      "falseAlarms": 0
+    },
+    "rehearsal": {
+      "caught": 1,
+      "missed": 0,
+      "falseAlarms": 0
+    }
+  },
+  "perCrew": {
+    "crew-plumbing": {
+      "caught": 1,
+      "missed": 0,
+      "falseAlarms": 0
+    }
+  },
+  "cases": [
+    {
+      "id": "case-001",
+      "check": "latest_change",
+      "triggerMessageId": "m-002",
+      "caught": true,
+      "caughtBy": "both",
+      "incidentKeys": [
+        "latest_change|m-002|W-12"
+      ],
+      "findingIds": [
+        "f-latest_change-m-002-W-12"
+      ]
+    }
+  ],
+  "falseAlarms": [],
+  "thresholds": [
+    {
+      "threshold": 0.5,
+      "total": {
+        "caught": 1,
+        "missed": 0,
+        "falseAlarms": 0
+      },
+      "perCheck": {
+        "latest_change": {
+          "caught": 1,
+          "missed": 0,
+          "falseAlarms": 0
+        },
+        "space_clash": {
+          "caught": 0,
+          "missed": 0,
+          "falseAlarms": 0
+        },
+        "order_of_work": {
+          "caught": 0,
+          "missed": 0,
+          "falseAlarms": 0
+        },
+        "open_decision": {
+          "caught": 0,
+          "missed": 0,
+          "falseAlarms": 0
+        }
+      }
+    },
+    {
+      "threshold": 0.7,
+      "total": {
+        "caught": 1,
+        "missed": 0,
+        "falseAlarms": 0
+      },
+      "perCheck": {
+        "latest_change": {
+          "caught": 1,
+          "missed": 0,
+          "falseAlarms": 0
+        },
+        "space_clash": {
+          "caught": 0,
+          "missed": 0,
+          "falseAlarms": 0
+        },
+        "order_of_work": {
+          "caught": 0,
+          "missed": 0,
+          "falseAlarms": 0
+        },
+        "open_decision": {
+          "caught": 0,
+          "missed": 0,
+          "falseAlarms": 0
+        }
+      }
+    },
+    {
+      "threshold": 0.9,
+      "total": {
+        "caught": 0,
+        "missed": 1,
+        "falseAlarms": 0
+      },
+      "perCheck": {
+        "latest_change": {
+          "caught": 0,
+          "missed": 1,
+          "falseAlarms": 0
+        },
+        "space_clash": {
+          "caught": 0,
+          "missed": 0,
+          "falseAlarms": 0
+        },
+        "order_of_work": {
+          "caught": 0,
+          "missed": 0,
+          "falseAlarms": 0
+        },
+        "open_decision": {
+          "caught": 0,
+          "missed": 0,
+          "falseAlarms": 0
+        }
+      }
+    }
+  ]
+}

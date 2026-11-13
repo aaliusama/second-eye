@@ -160,7 +160,17 @@ function orderOfWork(ctx: Ctx, work: Work): Finding[] {
   if (!rule || work.placeId === undefined) return [];
   const prereqs = ctx.tasks.filter((t) => t.placeId === work.placeId && t.taskType === rule.before && t.id !== work.taskId);
   if (prereqs.length === 0 && !rule.mandatory) return [];
-  const satisfied = prereqs.some((t) => t.status === "done" || strictlyBefore(t.day, t.slot, work.day, work.slot));
+  // The crew's own position in the day: the plan task itself, or the lowest order among its matching tasks (live).
+  const ownOrders = ctx.tasks
+    .filter((t) => work.taskIds.includes(t.id) && t.crewId === work.crewId && t.taskType === work.taskType)
+    .map((t) => t.order);
+  const ownOrder = ownOrders.length > 0 ? Math.min(...ownOrders) : undefined;
+  // Same crew, same day and slot, earlier in its own order: the crew does the prerequisite first itself.
+  const sameCrewEarlier = (t: PlanTask) =>
+    ownOrder !== undefined && t.crewId === work.crewId && t.day === work.day && t.slot === work.slot && t.order < ownOrder;
+  const satisfied = prereqs.some(
+    (t) => t.status === "done" || strictlyBefore(t.day, t.slot, work.day, work.slot) || sameCrewEarlier(t),
+  );
   if (satisfied) return [];
   const place = elementName(ctx.scene, work.placeId);
   const summary =
