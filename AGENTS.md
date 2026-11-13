@@ -27,7 +27,8 @@ Stack (confirmed): TypeScript everywhere, npm workspaces, Node server, Vite + Re
 - `npm run eval` - runs the labelled test set, prints caught / missed / false alarms
 - `npm run typecheck` - run before every commit
 
-<FILL IN: correct any command that differs once the repo is scaffolded>
+Node 22.12+. First run: `npm install`, then `npm run demo` and open http://localhost:5173. One folder's tests: `npm test -- server/checks`.
+Contracts in `contracts/` are a DRAFT until A confirms them at kickoff. Folder-specific rules: `web/AGENTS.md` for `web/`.
 
 ## Map and owners
 Only edit files inside the directory you were asked to work in. If a change is needed elsewhere, say so and stop.

@@ -1,0 +1,27 @@
+{
+  "name": "site-rehearsal",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "workspaces": [
+    "contracts",
+    "server",
+    "eval",
+    "web"
+  ],
+  "scripts": {
+    "demo": "concurrently -k -n server,web -c blue,magenta \"npm run start -w @site/server\" \"npm run dev -w @site/web\"",
+    "dev": "concurrently -k -n server,web -c blue,magenta \"npm run dev -w @site/server\" \"npm run dev -w @site/web\"",
+    "test": "vitest run",
+    "eval": "npm run eval -w @site/eval",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "concurrently": "^10.0.7",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
+  }
+}

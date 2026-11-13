@@ -1,0 +1,57 @@
+/* Owner: D. Colours come from tokens.ts as CSS variables. */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font);
+  font-variant-numeric: tabular-nums;
+}
+
+.app {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100vh;
+}
+
+.app header {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--ink-soft);
+}
+
+.app h1 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.label {
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.model {
+  padding: 20px;
+}
+
+.model svg {
+  width: 100%;
+  height: 100%;
+}
+
+.queue {
+  padding: 20px;
+  border-left: 1px solid var(--ink-soft);
+}
+
+.queue h2 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}

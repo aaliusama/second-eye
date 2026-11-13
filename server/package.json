@@ -1,0 +1,22 @@
+{
+  "name": "@site/server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./replay": "./model/replay.ts",
+    "./load": "./model/load.ts",
+    "./paths": "./paths.ts"
+  },
+  "scripts": {
+    "start": "tsx index.ts",
+    "dev": "tsx watch index.ts",
+    "typecheck": "tsc --noEmit -p ."
+  },
+  "devDependencies": {
+    "tsx": "^4.23.15"
+  },
+  "dependencies": {
+    "@site/contracts": "^0.0.0"
+  }
+}

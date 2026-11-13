@@ -1,0 +1,14 @@
+{
+  "name": "@site/eval",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "eval": "tsx run.ts",
+    "typecheck": "tsc --noEmit -p ."
+  },
+  "dependencies": {
+    "@site/contracts": "^0.0.0",
+    "@site/server": "^0.0.0"
+  }
+}
