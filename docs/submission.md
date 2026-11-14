@@ -27,8 +27,12 @@ Site Rehearsal runs one loop over the chats the site already uses:
 3. **Listen.** Every statement of intent is checked as it is said. A crew at risk that has gone silent gets a question instead of an order.
 4. **Compare.** Four deterministic checks run against the model: a change the crew never heard, two crews in one room at once, work out of order, and work on an undecided item. A mismatch shows as a red ghost: where the crew thinks the wall is, next to where it is per the record, with the distance between them.
 5. **Rehearse.** Every evening it plays tomorrow forward on the model, slot by slot.
-6. **Fix.** It proposes a correction and the message to send. The superintendent approves with one tap; the crew gets a sourced HOLD for a confirmed conflict or a request to confirm an uncertain record.
-7. **Learn.** Corrections are stored and change the next run. A nickname like "the blue room" is asked about once, then resolved on its own.
+6. **Fix.** It proposes a correction and the message to send. The superintendent approves with one tap; the crew gets a sourced HOLD for a confirmed conflict or a request to confirm an uncertain record. **Sent is not heard:** the risk stays open (amber) until the crew confirms the specific revision in a reply. A confirmation of an older revision cannot clear a newer change, duplicates count once, and every step has a receipt: who said what, in which thread, when, who approved, what was sent and when it was confirmed.
+7. **Learn.** Corrections are stored and change the next run. A nickname like "the blue room" is asked about once, then resolved on its own. A superintendent's review of an exact incident is remembered with its reason and can be undone; it comes back for review if the evidence changes. This is stored, inspectable decisions, not model retraining.
+
+**Sheet revisions.** Office and architect messages that issue a sheet revision ("Rev C ... sheet A-201") and crew statements of the revision they hold ("we're on A-201 rev B") are parsed deterministically from text and compared. The comparison says which basis it used: the revision a crew stated, or the threads it reads. No drawing files are read.
+
+**06:30 huddle.** The evening digest ranks open risks by what cannot be undone (work that closes up an uninspected wall first), counts each incident once, and shows three, not the whole queue.
 
 Crews can also text a question and get an answer from the record, while design decisions go to the superintendent. AI agents and robots can query the same record through a read-only MCP server, for example "is unit 204 clear tomorrow morning?"
 
@@ -61,7 +65,9 @@ These are results on this synthetic labelled scenario, not field validation or a
 - One floor, chat only. No photos, drawings files, BIM/IFC, or real WhatsApp/Procore integration.
 - The model reflects what was said in the record, not what was built.
 - Plan slots are morning / afternoon / full day, not clock times.
-- Who heard a change is inferred from which threads a crew reads.
+- Who heard a change is inferred from which threads a crew reads, unless the crew stated which sheet revision it holds. Thread membership is a proxy, not proof.
+- Crew confirmation in the demo is a simulated reply. It confirms receipt of a revision, not completed or correct work. "Clear" means no conflict found in the record, never physical safety or permission to enter.
+- The recorded demo runs offline from cached extraction. Unseen text needs `npm run demo:live` (Groq key in `.env`). [[Live challenge result, exactly as printed.]]
 - The frozen scene contract has no decision-category field. Dependencies inferred from a room use conservative material/fixture words in the recorded element names; explicitly named dependencies remain sourced.
 
 ## Links
