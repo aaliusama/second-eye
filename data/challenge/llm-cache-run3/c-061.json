@@ -1,0 +1,66 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "c-061",
+  "operations": [
+    {
+      "id": "op-c-061-1",
+      "time": "2026-11-17T15:40:00",
+      "sourceMessageId": "c-061",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-c-061-1",
+        "crewId": "crew-drywall",
+        "day": "2026-11-18",
+        "slot": "afternoon",
+        "order": 0,
+        "taskType": "finish_drywall",
+        "description": "tape the 206 niche wall",
+        "placeId": "room-206",
+        "elementIds": [
+          "W-22"
+        ],
+        "status": "planned",
+        "sourceMessageId": "c-061",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-c-061-1",
+      "crewId": "crew-drywall",
+      "time": "2026-11-17T15:40:00",
+      "sourceMessageId": "c-061",
+      "confidence": 1,
+      "day": "2026-11-18",
+      "slot": "afternoon",
+      "taskType": "finish_drywall",
+      "description": "tape the 206 niche wall",
+      "placeId": "room-206",
+      "elementIds": [
+        "W-22"
+      ]
+    }
+  ],
+  "facts": {
+    "id": "c-061",
+    "plans": [
+      {
+        "day": "2026-11-18",
+        "slot": "afternoon",
+        "taskType": "finish_drywall",
+        "placeId": "room-206",
+        "placeSaid": null,
+        "elementIds": [
+          "W-22"
+        ],
+        "description": "tape the 206 niche wall",
+        "status": "planned",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

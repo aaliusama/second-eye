@@ -1,0 +1,93 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "c-057",
+  "operations": [
+    {
+      "id": "op-c-057-1",
+      "time": "2026-11-17T14:20:00",
+      "sourceMessageId": "c-057",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-c-057-1",
+        "crewId": "crew-painting",
+        "day": "2026-11-18",
+        "slot": "morning",
+        "order": 0,
+        "taskType": "layout",
+        "description": "layout for unit 205",
+        "placeId": "room-205",
+        "elementIds": [],
+        "status": "cancelled",
+        "sourceMessageId": "c-057",
+        "confidence": 1
+      }
+    },
+    {
+      "id": "op-c-057-2",
+      "time": "2026-11-17T14:20:00",
+      "sourceMessageId": "c-057",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-c-057-2",
+        "crewId": "crew-painting",
+        "day": "2026-11-18",
+        "slot": "afternoon",
+        "order": 1,
+        "taskType": "layout",
+        "description": "layout for unit 205 moved to Wednesday afternoon",
+        "placeId": "room-205",
+        "elementIds": [],
+        "status": "planned",
+        "sourceMessageId": "c-057",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-c-057-2",
+      "crewId": "crew-painting",
+      "time": "2026-11-17T14:20:00",
+      "sourceMessageId": "c-057",
+      "confidence": 1,
+      "day": "2026-11-18",
+      "slot": "afternoon",
+      "taskType": "layout",
+      "description": "layout for unit 205 moved to Wednesday afternoon",
+      "placeId": "room-205",
+      "elementIds": []
+    }
+  ],
+  "facts": {
+    "id": "c-057",
+    "plans": [
+      {
+        "day": "2026-11-18",
+        "slot": "morning",
+        "taskType": "layout",
+        "placeId": "room-205",
+        "placeSaid": null,
+        "elementIds": [],
+        "description": "layout for unit 205",
+        "status": "cancelled",
+        "confidence": 1
+      },
+      {
+        "day": "2026-11-18",
+        "slot": "afternoon",
+        "taskType": "layout",
+        "placeId": "room-205",
+        "placeSaid": null,
+        "elementIds": [],
+        "description": "layout for unit 205 moved to Wednesday afternoon",
+        "status": "planned",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "c-023",
+  "operations": [],
+  "intents": [],
+  "facts": {
+    "id": "c-023",
+    "plans": [
+      {
+        "day": "2026-11-18",
+        "slot": "morning",
+        "taskType": "inspection",
+        "placeId": "room-204",
+        "placeSaid": null,
+        "elementIds": [],
+        "description": "inspection for 204 rough in",
+        "status": "planned",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

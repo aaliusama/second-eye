@@ -1,0 +1,60 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "c-054",
+  "operations": [
+    {
+      "id": "op-c-054-1",
+      "time": "2026-11-17T13:10:00",
+      "sourceMessageId": "c-054",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-c-054-1",
+        "crewId": "crew-painting",
+        "day": "2026-11-18",
+        "slot": "morning",
+        "order": 0,
+        "taskType": "layout",
+        "description": "wednesday morning we cut in 205",
+        "placeId": "room-205",
+        "elementIds": [],
+        "status": "planned",
+        "sourceMessageId": "c-054",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-c-054-1",
+      "crewId": "crew-painting",
+      "time": "2026-11-17T13:10:00",
+      "sourceMessageId": "c-054",
+      "confidence": 1,
+      "day": "2026-11-18",
+      "slot": "morning",
+      "taskType": "layout",
+      "description": "wednesday morning we cut in 205",
+      "placeId": "room-205",
+      "elementIds": []
+    }
+  ],
+  "facts": {
+    "id": "c-054",
+    "plans": [
+      {
+        "day": "2026-11-18",
+        "slot": "morning",
+        "taskType": "layout",
+        "placeId": "room-205",
+        "placeSaid": null,
+        "elementIds": [],
+        "description": "wednesday morning we cut in 205",
+        "status": "planned",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

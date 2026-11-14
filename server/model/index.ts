@@ -33,6 +33,13 @@ export function applyOperations(scene: Scene, operations: Operation[]): Scene {
     switch (op.type) {
       case "plan_task": {
         const task = structuredClone(op.task);
+        if (task.status === "cancelled") {
+          // The crew dropped or moved a plan: the planned task it names (same crew, day and place,
+          // and slot unless a full day is dropped) is cancelled. The cancellation itself is recorded too.
+          for (const t of next.tasks) {
+            if (t.status === "planned" && t.crewId === task.crewId && t.day === task.day && t.placeId === task.placeId && (task.slot === "full_day" || t.slot === task.slot || t.slot === "full_day")) t.status = "cancelled";
+          }
+        }
         const i = next.tasks.findIndex((t) => t.id === task.id);
         if (i >= 0) next.tasks[i] = task;
         else next.tasks.push(task);

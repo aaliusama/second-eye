@@ -1,0 +1,66 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "c-055",
+  "operations": [
+    {
+      "id": "op-c-055-1",
+      "time": "2026-11-17T13:40:00",
+      "sourceMessageId": "c-055",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-c-055-1",
+        "crewId": "crew-tiling",
+        "day": "2026-11-18",
+        "slot": "morning",
+        "order": 0,
+        "taskType": "tile",
+        "description": "wed morning we tile the 205 bath",
+        "placeId": "room-205",
+        "elementIds": [
+          "tile-205-bath"
+        ],
+        "status": "planned",
+        "sourceMessageId": "c-055",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-c-055-1",
+      "crewId": "crew-tiling",
+      "time": "2026-11-17T13:40:00",
+      "sourceMessageId": "c-055",
+      "confidence": 1,
+      "day": "2026-11-18",
+      "slot": "morning",
+      "taskType": "tile",
+      "description": "wed morning we tile the 205 bath",
+      "placeId": "room-205",
+      "elementIds": [
+        "tile-205-bath"
+      ]
+    }
+  ],
+  "facts": {
+    "id": "c-055",
+    "plans": [
+      {
+        "day": "2026-11-18",
+        "slot": "morning",
+        "taskType": "tile",
+        "placeId": "room-205",
+        "placeSaid": null,
+        "elementIds": [
+          "tile-205-bath"
+        ],
+        "description": "wed morning we tile the 205 bath",
+        "status": "planned",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

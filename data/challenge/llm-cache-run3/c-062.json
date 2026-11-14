@@ -1,0 +1,66 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "c-062",
+  "operations": [
+    {
+      "id": "op-c-062-1",
+      "time": "2026-11-17T16:00:00",
+      "sourceMessageId": "c-062",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-c-062-1",
+        "crewId": "crew-electrical",
+        "day": "2026-11-18",
+        "slot": "afternoon",
+        "order": 0,
+        "taskType": "install_fixtures",
+        "description": "hang the 202 kitchen lights",
+        "placeId": "room-202",
+        "elementIds": [
+          "light-202-kitchen"
+        ],
+        "status": "planned",
+        "sourceMessageId": "c-062",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-c-062-1",
+      "crewId": "crew-electrical",
+      "time": "2026-11-17T16:00:00",
+      "sourceMessageId": "c-062",
+      "confidence": 1,
+      "day": "2026-11-18",
+      "slot": "afternoon",
+      "taskType": "install_fixtures",
+      "description": "hang the 202 kitchen lights",
+      "placeId": "room-202",
+      "elementIds": [
+        "light-202-kitchen"
+      ]
+    }
+  ],
+  "facts": {
+    "id": "c-062",
+    "plans": [
+      {
+        "day": "2026-11-18",
+        "slot": "afternoon",
+        "taskType": "install_fixtures",
+        "placeId": "room-202",
+        "placeSaid": null,
+        "elementIds": [
+          "light-202-kitchen"
+        ],
+        "description": "hang the 202 kitchen lights",
+        "status": "planned",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

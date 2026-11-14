@@ -1,0 +1,42 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "c-014",
+  "operations": [
+    {
+      "id": "op-c-014-1",
+      "time": "2026-11-16T10:40:00",
+      "sourceMessageId": "c-014",
+      "thread": "dm:crew-plumbing",
+      "confidence": 1,
+      "type": "move",
+      "elementId": "W-03",
+      "to": {
+        "kind": "segment",
+        "from": [
+          3.3,
+          2
+        ],
+        "to": [
+          3.3,
+          5
+        ],
+        "thickness": 0.12
+      },
+      "note": "30 cm east"
+    }
+  ],
+  "intents": [],
+  "facts": {
+    "id": "c-014",
+    "plans": [],
+    "changes": [
+      {
+        "kind": "move",
+        "elementId": "W-03",
+        "direction": "east",
+        "metres": 0.3,
+        "confidence": 1
+      }
+    ]
+  }
+}

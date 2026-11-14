@@ -17,6 +17,8 @@ export const PlanFact = z.object({
   placeSaid: z.string().nullable().optional(),
   elementIds: z.array(z.string()).default([]),
   description: z.string(),
+  /** "cancelled": the crew drops or moves away from a plan it stated before. */
+  status: z.enum(["planned", "cancelled"]).optional(),
   confidence: Conf,
 });
 

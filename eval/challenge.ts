@@ -37,6 +37,8 @@ function facts(r: ExtractResult | undefined): string[] {
   for (const op of r.operations) {
     if (op.type === "move") out.push(`move ${op.elementId} ${op.note ?? ""}`.trim());
     if (op.type === "set_status") out.push(`status ${op.elementId} ${op.state}`);
+    // The expectation file writes a dropped plan as "cancel crew day slot place".
+    if (op.type === "plan_task" && op.task.status === "cancelled") out.push(`cancel ${op.task.crewId} ${op.task.day} ${op.task.slot} ${op.task.placeId}`);
   }
   for (const i of r.intents) {
     out.push(`plan ${i.crewId} ${i.day} ${i.slot} ${i.taskType} ${i.placeId ?? "(no place)"}`);

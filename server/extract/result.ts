@@ -31,9 +31,25 @@ export function dayAfter(t: string): string {
   return d.toISOString().slice(0, 10);
 }
 
+/**
+ * Grounding. An element whose name carries a unit number ("Unit 202 corridor wall") counts only when
+ * the message says that number or one of the element's nicknames. The model picking a neighbouring
+ * unit's wall is dropped, not corrected: no id is ever mapped to something close.
+ */
+export function grounded(text: string, el: { name: string; aliases: string[] }): boolean {
+  const unit = /\b(\d{3})\b/.exec(el.name)?.[1];
+  if (!unit) return true;
+  const said = text.toLowerCase();
+  return new RegExp(`\\b${unit}\\b`).test(said) || el.aliases.some((a) => said.includes(a.toLowerCase()));
+}
+
 export function toResult(message: ChatMessage, facts: MessageFacts, scene: Scene): ExtractResult {
   const byId = new Map(scene.elements.map((e) => [e.id, e]));
   const isPlace = (id: string | null) => id !== null && ["room", "zone"].includes(byId.get(id)?.type ?? "");
+  const said = (id: string) => {
+    const el = byId.get(id);
+    return el !== undefined && grounded(message.text, el);
+  };
   const operations: Operation[] = [];
   const intents: CrewIntent[] = [];
   let n = 0;
@@ -44,7 +60,7 @@ export function toResult(message: ChatMessage, facts: MessageFacts, scene: Scene
 
   for (const c of facts.changes) {
     const el = byId.get(c.elementId);
-    if (!el) continue;
+    if (!el || !said(el.id)) continue;
     if (c.kind === "status") {
       operations.push({ ...base(c.confidence), type: "set_status", elementId: el.id, state: c.state });
     } else if (c.direction && c.metres) {
@@ -66,10 +82,18 @@ export function toResult(message: ChatMessage, facts: MessageFacts, scene: Scene
     const crewId = message.crewId;
     const tomorrow = dayAfter(message.time);
     facts.plans.filter((p) => p.day === tomorrow).forEach((p, order) => {
-      const elementIds = [...new Set(p.elementIds.filter((id) => byId.has(id)))];
+      const elementIds = [...new Set(p.elementIds.filter((id) => byId.has(id) && said(id)))];
       const shared = { crewId, day: p.day, slot: p.slot, taskType: p.taskType, description: p.description, elementIds, confidence: p.confidence };
       const b = base(p.confidence);
       const suffix = b.id.slice(3);
+      if (p.status === "cancelled") {
+        // A dropped plan cancels what is on record; it is not an intent to work. Needs a clear place.
+        if (isPlace(p.placeId)) {
+          const task = { id: `task-${suffix}`, ...shared, order, placeId: p.placeId!, status: "cancelled" as const, sourceMessageId: message.id };
+          operations.push({ ...b, type: "plan_task", task });
+        }
+        return;
+      }
       if (isPlace(p.placeId)) {
         const task = { id: `task-${suffix}`, ...shared, order, placeId: p.placeId!, status: "planned" as const, sourceMessageId: message.id };
         operations.push({ ...b, type: "plan_task", task });
