@@ -67,7 +67,7 @@ async function caption(page, text) {
       el.id = "rec-caption";
       el.setAttribute("aria-hidden", "true");
       Object.assign(el.style, {
-        position: "fixed", left: "50%", bottom: "200px", transform: "translateX(-50%)", zIndex: "9999",
+        position: "fixed", left: "50%", bottom: "16px", transform: "translateX(-50%)", zIndex: "9999",
         maxWidth: "900px", padding: "10px 18px", background: "rgba(20,22,28,.88)", color: "#fff",
         font: "500 22px/1.35 system-ui, sans-serif", textAlign: "center", pointerEvents: "none",
       });
