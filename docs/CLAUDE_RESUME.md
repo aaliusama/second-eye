@@ -2,7 +2,16 @@
 
 ## Latest completed batch: acknowledgement, sheet text and dismissal memory
 
-This section supersedes the earlier remaining-lanes list below. All three scoped lanes are implemented and integrated on the current uncommitted `win/integration` checkout. No Codex agent is still editing these files. Preserve the existing working tree and inspect diffs before resuming.
+This section supersedes the earlier remaining-lanes list below. Both implementation batches are committed as `5a9fd3b` and pushed to `origin/win/integration`. They are not merged into main. No Codex agent is still editing these files. Fetch and inspect branch/worktree status before resuming; preserve any later local edits.
+
+### Proposed next parallel batch (not started)
+
+- **Visual/demo lane:** own `web/` and `docs/demo-script.md`; rehearse all eleven beats, verify clean start and amber-to-confirmed transition, improve ghost zoom/readability, and review N/O/P selectively. Produce screenshots before claiming visual completion.
+- **Extraction/evidence lane:** own `server/extract/`, `eval/`, and separately named challenge fixtures in `data/`; diagnose live service availability, score new paraphrases and negatives, and report unavailable cases separately. Do not tune against golden labels or call the known-failure development set a blind holdout.
+- **Pitch/submission lane:** own `docs/pitch.md` and submission documentation; align the story with actual confirmation and sheet-text behavior, prepare the recording shot list, verify official form/eligibility requirements, and map demonstrated evidence to rubric criteria. No submission or external messages without authorization.
+- **Integrator:** reserve shared contracts, routes, root scripts and handoff docs; review lane changes and run combined checks. Queue grouping is a subsequent scoped change after the visual lane identifies actual clutter, not an overlapping fourth UI implementation.
+
+These are recommendations awaiting the user's next instruction, not active assignments. No score or win is guaranteed. Read the limitations below before making claims.
 
 ### Implemented behavior
 

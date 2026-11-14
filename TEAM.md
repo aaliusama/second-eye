@@ -21,7 +21,7 @@ Shared: `docs/decisions.md`. Anyone appends one line per decision; on a merge co
 
 ## Status (updated on every merge to main)
 
-Local uncommitted progress on `win/integration`: acknowledgement/receipt, explicit sheet revision comparisons and reversible exact-incident review memory implemented in parallel. Current validation: 310 root tests, 24 HTTP demo tests, 30 MCP tests, typecheck and web build pass; golden eval 15/0/0. This is working-tree evidence, not a claim of merge/submission or visual QA. Read `docs/CLAUDE_RESUME.md` before resuming agents.
+Implementation committed as `5a9fd3b` and pushed to `origin/win/integration`: acknowledgement/receipt, explicit sheet revision comparisons, reversible exact-incident review memory, huddle and live-demo support. Current validation: 310 root tests, 24 HTTP demo tests, 30 MCP tests, typecheck and web build pass; golden eval 15/0/0. Not merged into main, submitted, or visually verified. Read `docs/CLAUDE_RESUME.md` before resuming agents; its proposed next lanes have not started.
 
 Audit handoff (14 November): the status below predates the full-data integration audit and contains stale unchecked tasks. Read `docs/WINNING_BRIEF.md` for the current prioritized execution handoff and `docs/winning-assessment.md` for the verified baseline at commit `2b00719`. Verify the current branch before updating this board; implementation, automated tests, visual rehearsal, recording and submission are separate completion states.
 

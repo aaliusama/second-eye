@@ -1,6 +1,6 @@
 # Parallel implementation status
 
-Final status: second batch complete and integrated. Read the TOP of `docs/CLAUDE_RESUME.md` for completed features, final checks and continuation instructions. All three agents finished; no exclusive edit locks remain. Historical in-progress notes below are retained as history, not current assignments.
+Final status: both batches committed as `5a9fd3b` and pushed to `origin/win/integration`; not merged into main. Read the TOP of `docs/CLAUDE_RESUME.md` for completed features, final checks and proposed next lanes. All agents finished; no exclusive edit locks remain. Proposed lanes have not started. Historical in-progress notes below are retained as history, not current assignments.
 
 ## Second implementation batch in progress
 
