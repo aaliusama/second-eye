@@ -28,6 +28,9 @@ interface SiteStore {
   phoneOpen: boolean;
   /** Presenter beat on screen (presenter mode only). Drives what the plan emphasises; never changes data. */
   focus?: string;
+  /** Draw the floor as this crew knows it (crew id). Undefined = the record. Display only. */
+  lens?: string;
+  setLens: (crewId: string | undefined) => void;
   /**
    * A message the presenter sends from the phone. The Phone component picks it up and submits it
    * through its own send path (same API calls as typing), then calls `done`.
@@ -149,6 +152,7 @@ export const useSite = create<SiteStore>((set, get) => ({
 
   setPhoneOpen: (phoneOpen) => set({ phoneOpen }),
   setFocus: (focus) => set({ focus }),
+  setLens: (lens) => set({ lens }),
 
   phoneSend: (crewId, text) =>
     new Promise<void>((resolve) => {

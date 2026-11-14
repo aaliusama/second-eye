@@ -40,6 +40,107 @@ export function sourceLabel(id: string): string | undefined {
   return `Drawing ${id.slice("drawing:".length).replace(/-/g, " ")}`;
 }
 
+// ---------- Who knows what: each crew's version of the floor ----------
+// Same rule as server/checks/geometry.ts (heardThread, knownGeometryEntry). Keep them in step.
+
+/** Whether a crew could have heard a change said in this thread. "drawing" is the shared baseline. */
+export function heardThread(thread: string, crew: Crew): boolean {
+  return thread === "drawing" || crew.threads.includes(thread) || thread === `dm:${crew.id}`;
+}
+
+const byVersion = (el: Element) => [...el.history].sort((a, b) => a.version - b.version);
+
+/** Where this crew believes the element is: the latest geometry it has heard. */
+export function beliefGeometry(el: Element, crew: Crew | undefined): Geometry {
+  if (!crew) return el.geometry;
+  const h = byVersion(el);
+  for (let i = h.length - 1; i >= 0; i--) if (h[i].geometry && heardThread(h[i].thread, crew)) return h[i].geometry!;
+  return h.find((x) => x.geometry)?.geometry ?? el.geometry;
+}
+
+/** The changes to this element after the drawing that the crew has not heard. */
+export function unheardChanges(el: Element, crew: Crew) {
+  return byVersion(el).filter((h) => h.thread !== "drawing" && !heardThread(h.thread, crew));
+}
+
+/** The state this crew last heard for the element. */
+export function beliefState(el: Element, crew: Crew | undefined): Element["state"] {
+  if (!crew) return el.state;
+  const h = byVersion(el);
+  for (let i = h.length - 1; i >= 0; i--) if (h[i].state && heardThread(h[i].thread, crew)) return h[i].state!;
+  return h.find((x) => x.state)?.state ?? el.state;
+}
+
+export function sameGeometry(a: Geometry, b: Geometry): boolean {
+  const pa = pointsOf(a);
+  const pb = pointsOf(b);
+  return a.kind === b.kind && pa.length === pb.length && pa.every((p, i) => Math.abs(p[0] - pb[i][0]) < 1e-6 && Math.abs(p[1] - pb[i][1]) < 1e-6);
+}
+
+/** Dimension label, belief to record, x east and y north, to 0.1 m. Same wording as the server's moveLabel. */
+export function offsetLabel(from: Geometry, to: Geometry): string {
+  const [gx, gy] = midpoint(from);
+  const [cx, cy] = midpoint(to);
+  const f = (v: number) => (Math.round(Math.abs(v) * 10) / 10).toFixed(1);
+  const parts: string[] = [];
+  if (f(cy - gy) !== "0.0") parts.push(`${f(cy - gy)} m ${cy > gy ? "north" : "south"}`);
+  if (f(cx - gx) !== "0.0") parts.push(`${f(cx - gx)} m ${cx > gx ? "east" : "west"}`);
+  return parts.length ? parts.join(", ") : "changed shape";
+}
+
+/** "office" -> "Office thread", "dm:crew-drywall" -> "Direct message to Walsh Drywall". */
+export function threadLabel(scene: Scene, thread: string): string {
+  if (thread.startsWith("dm:")) return `Direct message to ${crewName(scene, thread.slice(3))}`;
+  const name = thread.replace(/[-_]/g, " ");
+  return `${name.charAt(0).toUpperCase()}${name.slice(1)} thread`;
+}
+
+export type KnowledgeRow = {
+  elementId: string;
+  name: string;
+  version: number;
+  time: string;
+  thread: string;
+  sourceMessageId: string;
+  what: string;
+  /** Per crew, in scene order: heard, not heard, or not heard while the crew's planned work touches it. */
+  cells: { crewId: string; heard: boolean; exposed: boolean }[];
+};
+
+/** "crewId|elementId" for every open finding: where the checks say a crew's work meets an element. */
+export function flaggedPairs(findings: Finding[]): Set<string> {
+  return new Set(findings.flatMap((f) => f.crewIds.flatMap((c) => [...f.elementIds, ...(f.ghost ? [f.ghost.elementId] : [])].map((e) => `${c}|${e}`))));
+}
+
+/**
+ * Every change since the drawing, against every crew. Pure function of the scene; `flagged` (from the
+ * open findings) marks an unheard change red only where the checks found that crew's work meets it.
+ */
+export function knowledgeMatrix(scene: Scene, flagged: Set<string> = new Set()): { rows: KnowledgeRow[]; versions: number } {
+  const touches = (crewId: string, el: Element) => flagged.has(`${crewId}|${el.id}`);
+  const rows: KnowledgeRow[] = scene.elements.flatMap((el) =>
+    el.history
+      .filter((h) => h.thread !== "drawing")
+      .map((h) => ({
+        elementId: el.id,
+        name: el.name,
+        version: h.version,
+        time: h.time,
+        thread: h.thread,
+        sourceMessageId: h.sourceMessageId,
+        what: h.geometry ? (h.operationType === "add" ? "added" : "moved") : h.state ? `now ${h.state}` : h.operationType.replace(/_/g, " "),
+        cells: scene.crews.map((c) => {
+          const heard = heardThread(h.thread, c);
+          return { crewId: c.id, heard, exposed: !heard && touches(c.id, el) };
+        }),
+      })),
+  );
+  rows.sort((a, b) => (a.time < b.time ? -1 : a.time > b.time ? 1 : a.elementId.localeCompare(b.elementId)));
+  // Crews that heard exactly the same changes share one version of the floor.
+  const versions = new Set(scene.crews.map((_, i) => rows.map((r) => (r.cells[i].heard ? 1 : 0)).join(""))).size;
+  return { rows, versions };
+}
+
 /** Sending a confirmation request does not resolve the uncertainty it asks about. */
 export function resolvedFindingIds(fixes: Fix[], findings: Finding[]): Set<string> {
   const warnings = new Set(findings.filter((f) => f.severity === "warn" || f.check === "latest_change").map((f) => f.id));

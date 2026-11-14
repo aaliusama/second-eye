@@ -1,7 +1,13 @@
-import { useEffect, useMemo, useState, type KeyboardEvent, type ReactNode } from "react";
-import type { Element, ElementState, Finding, Geometry, PlanTask, Point, Scene } from "@site/contracts";
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
+import type { Crew, Element, ElementState, Finding, Geometry, PlanTask, Point, Scene } from "@site/contracts";
 import {
+  beliefGeometry,
+  beliefState,
   blendGeometry,
+  offsetLabel,
+  sameGeometry,
+  threadLabel,
+  unheardChanges,
   boxOf,
   containingPlace,
   crewById,
@@ -46,6 +52,34 @@ export interface FlatViewProps {
   focusElementId?: string;
   onSelect: (s: Selection) => void;
   reveal: { key?: string; elapsed: number };
+  /** Draw the floor as this crew knows it. The record is drawn behind wherever they differ. */
+  lens?: Crew;
+  /** Elements this crew's planned work touches: an unheard change there is drawn in redline. */
+  exposedIds?: Set<string>;
+}
+
+const LENS_MS = 520;
+
+/** 0..1 progress of the glide between the previous lens and the current one. Answers a user action. */
+function useLensGlide(lens: Crew | undefined): { from?: Crew; t: number } {
+  const prev = useRef<Crew | undefined>(lens);
+  const [state, setState] = useState<{ from?: Crew; t: number }>({ t: 1 });
+  useEffect(() => {
+    const from = prev.current;
+    prev.current = lens;
+    if (from?.id === lens?.id) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return setState({ t: 1 });
+    let raf = 0;
+    const start = performance.now();
+    const step = (now: number) => {
+      const t = Math.min(1, (now - start) / LENS_MS);
+      setState({ from, t });
+      if (t < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [lens]);
+  return state;
 }
 
 type Look = { stroke: string; width: number; dash?: string; fill: string; fillOpacity: number };
@@ -274,7 +308,8 @@ function RoomLabel({ el, tasks, scene }: { el: Element; tasks: PlanTask[]; scene
 }
 
 export function FlatView(props: FlatViewProps) {
-  const { scene, ghosts, conflictIds, clearIds, activeTasks, selection, onSelect, reveal, sentIds, tight = false } = props;
+  const { scene, ghosts, conflictIds, clearIds, activeTasks, selection, onSelect, reveal, sentIds, tight = false, lens, exposedIds } = props;
+  const glide = useLensGlide(lens);
   const [whole, setWhole] = useState<string | undefined>(undefined);
   const [comparison, setComparison] = useState<"compare" | "earlier" | "latest">("compare");
   useEffect(() => setComparison("compare"), [reveal.key, tight]);
@@ -325,18 +360,27 @@ export function FlatView(props: FlatViewProps) {
   const r = drawing.bubbleRadius;
   const vb = { x: box.minX - r * 3.4, y: -box.maxY - r * 3.4, w: box.maxX - box.minX + r * 3.6, h: box.maxY - box.minY + r * 3.6 };
 
-  const stateOf = (el: Element): ElementState => (conflictIds.has(el.id) ? "conflict" : el.state);
+  // Through a crew's eyes, conflicts and fixes are the record's business: draw what they believe, plainly.
+  const stateOf = (el: Element): ElementState => (lens ? beliefState(el, lens) : conflictIds.has(el.id) ? "conflict" : el.state);
   const selectedId = selection?.kind === "element" ? selection.id : undefined;
   const areas = scene.elements.filter((e) => e.type === "room" || e.type === "zone");
   const solids = scene.elements.filter((e) => !(e.type === "room" || e.type === "zone"));
+  const geomOf = (el: Element): Geometry => {
+    const to = beliefGeometry(el, lens);
+    if (glide.t >= 1) return to;
+    return blendGeometry(beliefGeometry(el, glide.from), to, easeInOut(glide.t));
+  };
+  // Where this crew's floor differs from the record: geometry they have not heard.
+  const differs = lens ? solids.filter((el) => !sameGeometry(beliefGeometry(el, lens), el.geometry)) : [];
 
   const drawEl = (el: Element): ReactNode => {
     const l = look(stateOf(el), el.type);
-    const lk = clearIds.has(el.id) && !conflictIds.has(el.id) ? { ...l, stroke: color.clear, width: drawing.heavy } : l;
+    const lk = !lens && clearIds.has(el.id) && !conflictIds.has(el.id) ? { ...l, stroke: color.clear, width: drawing.heavy } : l;
+    const g = geomOf(el);
     return (
       <g key={el.id}>
-        <Shape g={el.geometry} l={lk} />
-        {selectedId === el.id && <Shape g={el.geometry} l={{ stroke: color.ink, width: drawing.heavy, dash: "0.12 0.12", fill: "none", fillOpacity: 0 }} />}
+        <Shape g={g} l={lk} />
+        {selectedId === el.id && <Shape g={g} l={{ stroke: color.ink, width: drawing.heavy, dash: "0.12 0.12", fill: "none", fillOpacity: 0 }} />}
       </g>
     );
   };
@@ -372,7 +416,27 @@ export function FlatView(props: FlatViewProps) {
             onClick={() => onSelect({ kind: "element", id: el.id })}
           />
         ))}
-        {(comparison === "latest" ? [] : ghosts).map((f) => {
+        {lens && differs.map((el) => {
+          const belief = beliefGeometry(el, lens);
+          const exposed = exposedIds?.has(el.id) ?? false;
+          const tone = exposed ? color.redline : color.inkSoft;
+          const opacity = easeOut(Math.max(0, (glide.t - 0.55) / 0.45));
+          const last = unheardChanges(el, lens).filter((h) => h.geometry).at(-1);
+          const m = midpoint(el.geometry);
+          const east = m[0] >= midpoint(belief)[0];
+          const [lx, ly] = P([m[0] + (east ? 0.35 : -0.35), m[1]]);
+          return (
+            <g key={`unheard-${el.id}`} opacity={opacity} pointerEvents="none">
+              <Shape g={el.geometry} l={{ stroke: tone, width: drawing.outline, dash: "0.2 0.12", fill: tone, fillOpacity: exposed ? drawing.ghostOpacity : 0.06 }} />
+              <Dimension ghost={belief} truth={el.geometry} label={offsetLabel(belief, el.geometry)} opacity={1} tone={tone} />
+              {exposed && <text x={lx} y={ly} className="ghost-note" fontSize={drawing.smallLabel * 0.8} style={{ textAnchor: east ? "start" : "end", fill: tone }}>
+                <tspan x={lx}>Per the record, where they work</tspan>
+                <tspan x={lx} dy="1.2em">{last ? `${threadLabel(scene, last.thread)}, not heard` : "Not heard"}</tspan>
+              </text>}
+            </g>
+          );
+        })}
+        {(comparison === "latest" || lens ? [] : ghosts).map((f) => {
           const truth = elementById(scene, f.ghost!.elementId);
           if (!truth) return null;
           const key = findingKey(f);
@@ -434,7 +498,7 @@ export function FlatView(props: FlatViewProps) {
         })}
 
       </svg>
-      {ghosts.length > 0 && <div className="comparison-tools" role="group" aria-label="Compare recorded positions">
+      {ghosts.length > 0 && !lens && <div className="comparison-tools" role="group" aria-label="Compare recorded positions">
         {([ ["earlier", "Earlier position"], ["compare", "Compare"], ["latest", "Latest record"] ] as const).map(([mode, label]) => <button type="button" key={mode} aria-pressed={comparison === mode} onClick={() => setComparison(mode)}>{label}</button>)}
         <span>Display only · recorded geometry</span>
       </div>}

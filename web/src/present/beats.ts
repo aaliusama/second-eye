@@ -53,7 +53,7 @@ export const BEATS: Beat[] = [
   { id: "clean", title: "Problem", note: "0:00 Site decisions live in group chats. A change in the office thread never reaches the plumber." },
   { id: "build", title: "Build", note: "0:20 Chat becomes the model: the wall as of the architect's Rev C, every row quotes its message." },
   { id: "ghost", title: "Ghost wall", note: "0:45 Plumbing says what it does tomorrow. Red: where plumbing thinks the wall is." },
-  { id: "why", title: "Why", note: "1:20 What was said, and what Novak Plumbing did not hear." },
+  { id: "why", title: "Why", note: "1:20 The floor as Novak Plumbing knows it. Each crew hears different threads, so each works from its own version." },
   { id: "rehearse", title: "Rehearse", note: "1:35 Tomorrow, played forward. Redline on the track marks the clash." },
   { id: "fix", title: "Send", note: "1:55 Correction sent. The recorded risk stays open until the crew confirms the revision." },
   { id: "confirm", title: "Confirm", note: "2:05 Simulate the crew confirming the sent revision. Recheck the record; this is not proof of completed work." },

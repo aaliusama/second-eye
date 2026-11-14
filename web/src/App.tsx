@@ -5,6 +5,8 @@ import {
   findingKey,
   formatTime,
   frameAt,
+  flaggedPairs,
+  knowledgeMatrix,
   messageMap,
   onDay,
   oneGhostPerIncident,
@@ -16,6 +18,7 @@ import {
 import { FlatView } from "./FlatView";
 import { Huddle } from "./Huddle";
 import { IncidentFocus } from "./IncidentFocus";
+import { Knowledge } from "./Knowledge";
 import { Acknowledgements } from "./Acknowledgements";
 import { Sheets } from "./Sheets";
 import { Dismissals } from "./Dismissals";
@@ -105,13 +108,15 @@ function Main() {
   const refresh = useSite((s) => s.refresh);
   const [view, setView] = useState<"flat" | "3d">("flat");
   const [no3D, setNo3D] = useState(false);
-  const [workspace, setWorkspace] = useState<"today" | "record" | "learning" | "crew">("today");
+  const [workspace, setWorkspace] = useState<"today" | "knows" | "record" | "learning" | "crew">("today");
+  const lens = useSite((s) => s.lens);
+  const setLens = useSite((s) => s.setLens);
   const phoneOpen = useSite((s) => s.phoneOpen);
   const setPhoneOpen = useSite((s) => s.setPhoneOpen);
   const focus = useSite((s) => s.focus);
   const story = focus !== undefined && STORY_BEATS.has(focus);
   useEffect(() => {
-    setWorkspace(focus === "learn" ? "learning" : focus === "ghost" || focus === "ask" || focus === "run2" ? "crew" : focus === "numbers" ? "record" : "today");
+    setWorkspace(focus === "learn" ? "learning" : focus === "why" ? "knows" : focus === "ask" || focus === "run2" || focus === "ghost" ? "crew" : focus === "numbers" ? "record" : "today");
   }, [focus]);
   useEffect(() => { if (phoneOpen) setWorkspace("crew"); }, [phoneOpen]);
 
@@ -142,6 +147,17 @@ function Main() {
 
   const reveal = useReveal(d?.ghosts.map(findingKey) ?? [], run);
   const msgMap = useMemo(() => messageMap(messages), [messages]);
+  // Who knows what: the floor as one crew knows it, and where their unheard changes meet their work.
+  const knowledge = useMemo(() => {
+    if (!state || !d) return undefined;
+    const flagged = flaggedPairs(d.visible);
+    const { rows } = knowledgeMatrix(state.scene, flagged);
+    const crew = state.scene.crews.find((c) => c.id === lens);
+    const i = crew ? state.scene.crews.indexOf(crew) : -1;
+    const unheard = i < 0 ? 0 : rows.filter((r) => !r.cells[i].heard).length;
+    const exposedIds = new Set(i < 0 ? [] : rows.filter((r) => r.cells[i].exposed).map((r) => r.elementId));
+    return { crew, unheard, exposedIds, flagged };
+  }, [state, lens, d]);
 
   if (status === "loading" || !state || !d)
     return (
@@ -171,8 +187,11 @@ function Main() {
       focusElementId={selectedId}
       onSelect={(value) => { select(value); if (value) setWorkspace("today"); }}
       reveal={reveal}
+      lens={knowledge?.crew}
+      exposedIds={knowledge?.exposedIds}
     />
   );
+  const lensCrew = knowledge?.crew;
   const backToFlat = () => {
     setNo3D(true);
     setView("flat");
@@ -206,8 +225,22 @@ function Main() {
       <main className="model" id="site-workspace" tabIndex={-1}>
         <div className="model-caption">
           <div><p className="meta">{asOf ? "Site history" : "Work preparation"}</p>
-          <h2>{story ? "The 204 bathroom wall" : state.scene.name}</h2></div>
-          <span className="record-basis">{asOf ? formatTime(asOf) : "Plans and changes, per the record"}</span>
+          <h2>{lensCrew ? <>The floor as <em className="lens-name">{lensCrew.name}</em> knows it</> : story ? "The 204 bathroom wall" : state.scene.name}</h2></div>
+          {view === "flat" || no3D ? (
+            <div className="lens-control">
+              <span className="lens-label" id="lens-label">See the floor as</span>
+              <div className="lens-switch" role="group" aria-labelledby="lens-label">
+                <button type="button" aria-pressed={!lens} onClick={() => setLens(undefined)}>Record</button>
+                {state.scene.crews.map((c) => (
+                  <button key={c.id} type="button" className="lens-crew" aria-pressed={lens === c.id} title={`${c.name} knows it`} onClick={() => setLens(lens === c.id ? undefined : c.id)}>
+                    {c.letter}<span className="visually-hidden"> {c.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <span className="record-basis">{asOf ? formatTime(asOf) : "Plans and changes, per the record"}</span>
+          )}
         </div>
         {(asOf || error) && (
           <div className="banner">
@@ -242,17 +275,26 @@ function Main() {
         )}
         {focus === "numbers" && <MeasuredLarge />}
         <Presenter />
-        <div className="drawing-legend" aria-label="Drawing legend">
-          <span><i className="legend-line" />Recorded</span>
-          <span><i className="legend-line ghost-line" />Conflict</span>
-          <span><i className="legend-line pending-line" />Awaiting reply</span>
-        </div>
+        {lensCrew && (view === "flat" || no3D) ? (
+          <div className="drawing-legend lens-legend" aria-live="polite">
+            <span><i className="legend-line" />What {lensCrew.name} believes</span>
+            <span><i className="legend-line soft-line" />Record, not heard</span>
+            <span><i className="legend-line ghost-line" />Not heard, meets their work</span>
+            <strong>{knowledge!.unheard} of the record's changes never reached them</strong>
+          </div>
+        ) : (
+          <div className="drawing-legend" aria-label="Drawing legend">
+            <span><i className="legend-line" />Recorded</span>
+            <span><i className="legend-line ghost-line" />Conflict</span>
+            <span><i className="legend-line pending-line" />Awaiting reply</span>
+          </div>
+        )}
       </main>
 
       <aside className="side">
         <div className="workspace-heading"><h2>Before work starts</h2><p className="meta">Which crew is about to work from old information, and who to tell.</p></div>
         <nav className="workspace-nav" aria-label="Site desk sections">
-          {([ ["today", "Priorities"], ["crew", "Crew"], ["record", "Record"], ["learning", "Learning"] ] as const).map(([id, label]) =>
+          {([ ["today", "Priorities"], ["knows", "Who knows"], ["crew", "Crew"], ["record", "Record"], ["learning", "Learning"] ] as const).map(([id, label]) =>
             <button key={id} type="button" aria-pressed={workspace === id} aria-controls={`desk-${id}`} onClick={() => { setWorkspace(id); if (id === "crew") setPhoneOpen(true); }}>{label}</button>
           )}
         </nav>
@@ -273,6 +315,9 @@ function Main() {
           <Queue scene={state.scene} fixes={state.fixes} findings={d.all} messages={messages} />
         </section>
         </details>
+        </div>
+        <div id="desk-knows" hidden={workspace !== "knows"}>
+          <Knowledge scene={state.scene} flagged={knowledge?.flagged} lens={lens} selectedElementId={selectedId} onLens={(id) => { setLens(id); if (view === "3d") setView("flat"); }} onSelectElement={(id) => select({ kind: "element", id })} />
         </div>
         <div id="desk-record" hidden={workspace !== "record"}>
         {!asOf && <Huddle day={rehearsal?.day} messages={messages} revision={`${state.t}:${messages.length}:${state.fixes.map((f) => `${f.id}-${f.status}`).join(",")}`} />}

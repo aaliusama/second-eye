@@ -36,6 +36,8 @@ const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ b
 /** Restores what the audience sees for a beat. Safe to run any number of times. */
 async function view(id: BeatId): Promise<string | undefined> {
   const s = useSite.getState();
+  // Only the Why beat looks through a crew's eyes; every other beat shows the record.
+  s.setLens(id === "why" ? PHONE.plumbingIntent.crewId : undefined);
   switch (id) {
     case "clean":
       // Start before the architect's W-12 revision so no ghost is visible before the
