@@ -492,6 +492,10 @@ export function FlatView(props: FlatViewProps) {
           const same = (g: Finding) => g.measure?.clearance && c &&
             JSON.stringify([g.measure.clearance.believedFace, g.measure.clearance.workZone]) === JSON.stringify([c.believedFace, c.workZone]);
           if (c && !f.measure?.overlap && measured.slice(0, i).some((g) => !g.measure?.overlap && same(g))) return null;
+          // A clash whose work is already drawn as a ghost would bury the ghost under a second drawing in the same
+          // spot: show it only while that clash is selected (it stays listed under Priorities).
+          const clashOnGhost = f.measure?.overlap && ghosts.some((g) => g.taskIds.some((t) => f.taskIds.includes(t)));
+          if (clashOnGhost && !(selection?.kind === "finding" && selection.key === findingKey(f))) return null;
           // The revealed ghost's numbers arrive with its dimension line, not before.
           const key = findingKey(f);
           const ghostKey = f.ghost ? ghosts.find((g) => g.id === f.id || g.ghost?.elementId === f.ghost?.elementId) : undefined;
