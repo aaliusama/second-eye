@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { CircleCheck, Clock } from "lucide-react";
 import type { ChatMessage, IncidentReceipt, Scene } from "@site/contracts";
 import { api, onChange } from "./api";
 import { buildChains, type Chain, type ChainStatus } from "./autonomyChain";
 import { crewName, elementById } from "./derive";
 import { describeSource, shortTime, sourceLine } from "./sources";
 import { useSite } from "./store";
+import "./tabs.css";
 import "./autonomy.css";
 
 // On its own: one card per risk the site agent handled, its steps in replay-clock order, from
@@ -24,12 +27,28 @@ const FILTER_LABEL: Record<Filter, string> = { all: "All", needs_you: "Needs you
 const inFilter = (c: Chain, f: Filter) =>
   f === "all" || (f === "closed" ? c.status === "confirmed" || c.status === "settled" : c.status === f);
 
+/** The time gutter: day small above, clock time tabular below. Open steps have no time yet. */
+function StepTime({ open, time }: { open?: boolean; time?: string }) {
+  if (open) return <span className="chain-time" />;
+  if (!time) return <span className="chain-time missing">time not found</span>;
+  const label = shortTime(time);
+  if (!label) return <span className="chain-time" />;
+  const [day, clock] = label.split(" ");
+  return (
+    <span className="chain-time">
+      <span className="chain-day">{day}</span> <span className="chain-clock">{clock}</span>
+    </span>
+  );
+}
+
 export function Autonomy({ scene, messages, asOf }: { scene: Scene; messages: ChatMessage[]; asOf?: string }) {
   const log = useSite((s) => s.agentLog);
   const findings = useSite((s) => s.state?.findings);
   const fixes = useSite((s) => s.state?.fixes);
   const [receipts, setReceipts] = useState<IncidentReceipt[] | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
+  // Cards glide when the filter changes; auto-animate turns itself off under prefers-reduced-motion.
+  const [listRef] = useAutoAnimate<HTMLOListElement>({ duration: 200, easing: "ease-out" });
 
   // Receipts change when a fix is sent or a crew confirms. Refetch on either, and on any announced change.
   const revision = `${messages.length}:${(fixes ?? []).map((f) => `${f.id}-${f.status}`).join(",")}`;
@@ -106,7 +125,7 @@ export function Autonomy({ scene, messages, asOf }: { scene: Scene; messages: Ch
       )}
 
       {shown.length === 0 && <p className="meta">Nothing of this kind on record.</p>}
-      <ol className="chain-list">
+      <ol className="chain-list" ref={listRef}>
         {shown.map((c) => (
           <li key={c.findingId} className={`chain-card ${c.status}${c.lead ? " lead" : ""}`}>
             <header className="chain-head">
@@ -118,16 +137,20 @@ export function Autonomy({ scene, messages, asOf }: { scene: Scene; messages: Ch
                   {c.ghost && <> · ghost <span className="chain-ghost">{c.ghost}</span></>}
                 </p>
               </div>
-              <span className={`chain-status ${c.status}`}>{STATUS[c.status]}</span>
+              <span className={`chain-status ${c.status}`}>
+                {(c.status === "confirmed" || c.status === "settled") && <CircleCheck size={14} strokeWidth={1.5} aria-hidden="true" />}
+                {c.status === "waiting_crew" && <Clock size={14} strokeWidth={1.5} aria-hidden="true" />}
+                {STATUS[c.status]}
+              </span>
             </header>
             <ol className="chain-steps">
               {c.steps.map((s) => (
                 <li key={s.key} className={`chain-step ${s.kind}${s.open ? " open" : ""}${s.heldUntil !== undefined ? " held" : ""}`}>
+                  <StepTime open={s.open} time={s.time} />
                   <span className="chain-mark" aria-hidden="true" />
                   <div className="chain-body">
                     <p className="chain-step-head">
                       <strong>{s.title}</strong>
-                      <span className="chain-time">{s.open ? "" : s.time ? shortTime(s.time) : "time not found"}</span>
                     </p>
                     {s.heldUntil !== undefined && (
                       <p className="chain-held">Held until {s.heldUntil ? shortTime(s.heldUntil) : "the morning"}: quiet hours</p>

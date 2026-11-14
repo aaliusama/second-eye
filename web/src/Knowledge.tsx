@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import type { Scene } from "@site/contracts";
 import { crewHue, formatTime, knowledgeMatrix, threadLabel } from "./derive";
+import "./tabs.css";
 
 // Who knows what. Every change since the drawing, against every crew, from the threads each crew
 // reads. The same rule the checks use: a change said in a thread a crew does not read has not

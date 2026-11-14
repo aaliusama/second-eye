@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { DismissalsResponse } from "../../contracts/src/dismissals";
 import { useSite } from "./store";
 import { announceChange, onChange } from "./api";
+import "./tabs.css";
 
 export function Dismissals() {
   const state = useSite((s) => s.state);
@@ -35,22 +36,22 @@ export function Dismissals() {
     } catch (e) { setError(String(e)); }
     finally { setBusy(false); }
   }
-  return <section className="panel" aria-label="What this site has learned">
-    <h2>What this site has learned</h2>
-    <p className="meta">Review memory only. Dismissing an alert does not clear work or change the recorded checks. New evidence brings the alert back.</p>
-    {error && <p role="alert">{error}</p>}
+  return <section className="panel dismissals-panel" aria-label="What this site has learned">
+    <h2 className="tab-title">What this site has learned</h2>
+    <p className="meta tab-lede">Review memory only. Dismissing an alert does not clear work or change the recorded checks. New evidence brings the alert back.</p>
+    {error && <p role="alert" className="error">{error}</p>}
     <label>Alert to mark reviewed<select value={selected} onChange={(e) => setSelected(e.target.value)}>
       <option value="">Choose a recorded alert</option>
       {candidates.map((f) => <option key={f.id} value={f.id}>{f.summary}</option>)}
     </select></label>
     <label>Why is this alert not useful?<textarea value={reason} maxLength={500} onChange={(e) => setReason(e.target.value)} /></label>
-    <button disabled={busy || !selected || reason.trim().length < 3} onClick={() => void change("/api/dismissals", { findingId: selected, reason })}>Remember this review</button>
-    {data?.rules.filter((r) => r.active).map((r) => <article key={r.id}>
-      <p>{r.summary}</p><p>{r.reason}</p>
+    <button type="button" className="dismiss-save" disabled={busy || !selected || reason.trim().length < 3} onClick={() => void change("/api/dismissals", { findingId: selected, reason })}>Remember this review</button>
+    {data?.rules.filter((r) => r.active).map((r) => <article key={r.id} className="dismiss-rule">
+      <p className="dismiss-summary">{r.summary}</p><p className="dismiss-reason">{r.reason}</p>
       <p className="meta">{data.matches.some((m) => m.ruleId === r.id) ? "Same recorded incident: marked reviewed" : "No current match: changed evidence remains active"}. Recorded {r.time.replace("T", " ")}.</p>
-      <button disabled={busy} onClick={() => void change(`/api/dismissals/${encodeURIComponent(r.id)}/undo`)}>Undo learned review</button>
+      <button type="button" className="quiet dismiss-undo" disabled={busy} onClick={() => void change(`/api/dismissals/${encodeURIComponent(r.id)}/undo`)}>Undo learned review</button>
     </article>)}
-    {data && data.rules.every((r) => !r.active) && <p>No active learned reviews.</p>}
+    {data && data.rules.every((r) => !r.active) && <p className="meta">No active learned reviews.</p>}
     <span className="sim">Simulated site data</span>
   </section>;
 }

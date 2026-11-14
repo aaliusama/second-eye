@@ -1,63 +1,173 @@
-/* On its own: one card per risk, its steps as a drafted chain. Colours and sizes from tokens.ts only.
-   Redline marks the risk itself (conflict), never a button or badge. */
+/* On its own: one card per risk, its steps drawn as a vertical timeline instrument.
+   Three columns per step: time gutter (tabular), the spine with its node, the step itself.
+   Colours from tokens only. Redline marks the risk itself (conflict), never a button or badge.
+   Selectors are scoped under .autonomy so they win over the older base rules in index.css. */
 
-.chain-count { font-variant-numeric: tabular-nums; opacity: 0.7; }
+.autonomy .chain-count { font-variant-numeric: tabular-nums; opacity: 0.7; margin-left: 2px; }
 
-.chain-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--gap); }
-
-.chain-card {
-  background: var(--surface);
-  border-radius: var(--radius-large);
-  box-shadow: var(--depth-ring);
-  padding: var(--gap) var(--pad) 6px;
+/* Readout strip: one hairline-ruled instrument row, big tabular numbers, condensed labels. */
+.autonomy .auto-stats {
+  gap: 0;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  border-top: var(--rule) solid var(--paper-rule);
+  border-bottom: var(--rule) solid var(--paper-rule);
 }
-.chain-card.lead { box-shadow: var(--depth-lift); border-left: 3px solid var(--redline); }
-
-.chain-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--gap); padding-bottom: 8px; border-bottom: var(--rule) solid var(--paper-rule); }
-.chain-lead { margin: 0 0 2px; font-size: var(--small); font-weight: 650; color: var(--redline); }
-.chain-title { margin: 0; font-size: var(--heading); font-weight: 650; letter-spacing: -0.02em; line-height: 1.25; }
-.chain-crews { margin: 2px 0 0; font-size: var(--small); color: var(--ink-soft); }
-.chain-ghost { color: var(--redline); font-weight: 650; font-variant-numeric: tabular-nums; }
-
-.chain-status {
-  flex: none;
-  font-size: var(--small);
+.autonomy .auto-stats > div { background: transparent; padding: 10px 8px 8px; gap: 4px; min-width: 0; }
+.autonomy .auto-stats > div + div { border-left: var(--rule) solid var(--paper-rule); }
+.autonomy .auto-stats dt {
+  font-size: 10.5px;
+  font-stretch: var(--condensed);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
   font-weight: 600;
-  padding: 2px 8px;
+  line-height: 1.25;
+  color: var(--ink-soft);
+}
+.autonomy .auto-stats dd { font-size: 26px; font-weight: 600; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; color: var(--ink); }
+
+/* Filter: a segmented control, hairline, small radius. */
+.autonomy .auto-filter { gap: 0; flex-wrap: wrap; border: var(--rule) solid var(--paper-rule); border-radius: var(--radius); align-self: flex-start; overflow: hidden; }
+.autonomy .auto-filter button {
+  background: transparent;
+  color: var(--ink-soft);
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  min-height: 30px;
+  padding: 0 10px;
+  font-size: var(--small);
+  font-weight: 550;
+  transition: background-color var(--answer) var(--ease-out), color var(--answer) var(--ease-out);
+}
+.autonomy .auto-filter button + button { border-left: var(--rule) solid var(--paper-rule); }
+.autonomy .auto-filter button:hover:not(:disabled) { background: color-mix(in srgb, var(--ink) 6%, transparent); color: var(--ink); }
+.autonomy .auto-filter button[aria-pressed="true"] { background: color-mix(in srgb, var(--ink) 12%, transparent); color: var(--ink); box-shadow: inset 0 -2px 0 var(--ink); }
+
+.autonomy .chain-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--gap); }
+
+.autonomy .chain-card {
+  background: var(--surface);
+  border: var(--rule) solid var(--paper-rule);
   border-radius: var(--radius);
-  color: var(--ink);
+  box-shadow: none;
+  padding: 12px 14px 8px;
+}
+/* The ghost-wall chain leads: a redline edge and kicker, because it is the risk. */
+.autonomy .chain-card.lead { border-left: 2px solid var(--redline); }
+
+.autonomy .chain-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--gap); padding-bottom: 10px; border-bottom: var(--rule) solid var(--paper-rule); }
+.autonomy .chain-lead {
+  margin: 0 0 4px;
+  font-size: 10.5px;
+  font-weight: 650;
+  font-stretch: var(--condensed);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--redline);
+}
+.autonomy .chain-title { margin: 0; font-size: 15px; font-weight: 620; letter-spacing: -0.015em; line-height: 1.3; color: var(--ink); }
+.autonomy .chain-crews { margin: 3px 0 0; font-size: var(--small); color: var(--ink-soft); }
+.autonomy .chain-ghost { color: var(--redline); font-weight: 650; font-variant-numeric: tabular-nums; }
+
+.autonomy .chain-status {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  font-weight: 650;
+  font-stretch: var(--condensed);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 7px;
+  border-radius: var(--radius);
+  color: var(--ink-soft);
+  background: transparent;
   box-shadow: inset 0 0 0 var(--rule) var(--paper-rule);
   white-space: nowrap;
 }
-.chain-status.needs_you { background: var(--ink); color: var(--surface); box-shadow: var(--depth-ink-highlight); }
-.chain-status.waiting_crew { box-shadow: inset 0 0 0 var(--rule) var(--pending); }
-.chain-status.confirmed,
-.chain-status.settled { color: var(--clear); box-shadow: inset 0 0 0 var(--rule) var(--clear); }
+/* Open decision and waiting are amber; confirmed and settled green. Never red: red is the risk. */
+.autonomy .chain-status.needs_you { color: var(--pending); box-shadow: inset 0 0 0 var(--rule) var(--pending); background: color-mix(in srgb, var(--pending) 10%, transparent); }
+.autonomy .chain-status.waiting_crew { color: var(--pending); box-shadow: inset 0 0 0 var(--rule) color-mix(in srgb, var(--pending) 55%, transparent); }
+.autonomy .chain-status.confirmed,
+.autonomy .chain-status.settled { color: var(--clear); box-shadow: inset 0 0 0 var(--rule) color-mix(in srgb, var(--clear) 60%, transparent); }
 
-.chain-steps { list-style: none; margin: 0; padding: 8px 0 0; position: relative; }
-.chain-steps::before { content: ""; position: absolute; left: 5px; top: 18px; bottom: 18px; width: var(--rule); background: var(--paper-rule); }
-.chain-step { position: relative; display: grid; grid-template-columns: 11px minmax(0, 1fr); gap: var(--gap); padding: 6px 0; }
-.chain-mark { width: 11px; height: 11px; margin-top: 4px; border-radius: 50%; background: var(--surface); box-shadow: inset 0 0 0 2px var(--ink-soft); position: relative; z-index: 1; }
+/* The timeline: time gutter | spine | step. */
+.autonomy .chain-steps { --gutter: 44px; --node: 9px; list-style: none; margin: 0; padding: 6px 0 0; position: relative; }
+.autonomy .chain-steps::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--gutter) + 10px + (var(--node) / 2) - 0.5px);
+  top: 20px;
+  bottom: 18px;
+  width: var(--rule);
+  background: color-mix(in srgb, var(--ink-soft) 45%, transparent);
+}
+.autonomy .chain-step {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--gutter) var(--node) minmax(0, 1fr);
+  column-gap: 10px;
+  padding: 7px 0;
+}
 
-.chain-step.noticed .chain-mark { box-shadow: inset 0 0 0 2px var(--redline); }
-.chain-step.told .chain-mark,
-.chain-step.sent .chain-mark,
-.chain-step.asked .chain-mark { box-shadow: inset 0 0 0 2px var(--ink); }
-.chain-step.no_reply .chain-mark { box-shadow: inset 0 0 0 2px var(--pending); }
-.chain-step.brought .chain-mark { background: var(--ink); box-shadow: 0 0 0 3px var(--surface); }
-.chain-step.approved .chain-mark { background: var(--ink); border-radius: 2px; box-shadow: 0 0 0 3px var(--surface); }
-.chain-step.declined .chain-mark { background: var(--ink-soft); border-radius: 2px; }
-.chain-step.confirmed .chain-mark,
-.chain-step.settled .chain-mark { background: var(--clear); box-shadow: 0 0 0 3px var(--surface); }
-.chain-step.open .chain-mark { background: var(--surface); box-shadow: none; border: 2px dashed var(--pending); box-sizing: border-box; }
-.chain-step.held .chain-mark { background: repeating-linear-gradient(45deg, var(--pending) 0 2px, var(--surface) 2px 4px); }
+.autonomy .chain-time {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding-top: 1px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+  color: var(--ink-soft);
+  text-align: right;
+}
+.autonomy .chain-day { font-size: 10px; font-stretch: var(--condensed); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+.autonomy .chain-clock { font-size: 13px; font-weight: 600; color: var(--ink); letter-spacing: -0.01em; }
+.autonomy .chain-time.missing { font-size: 10px; font-stretch: var(--condensed); text-transform: uppercase; letter-spacing: 0.04em; }
 
-.chain-body { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-.chain-step-head { margin: 0; display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
-.chain-step-head strong { font-weight: 650; font-size: var(--text); }
-.chain-step.open .chain-step-head strong { color: var(--ink-soft); font-weight: 600; }
-.chain-time { flex: none; font-size: var(--small); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
-.chain-text { margin: 0; font-size: var(--small); line-height: 1.5; color: var(--ink); }
-.chain-why { margin: 0; font-size: var(--small); color: var(--ink); background: var(--paper); border-radius: var(--radius); padding: 3px 8px; align-self: flex-start; }
-.chain-held { margin: 0; font-size: var(--small); color: var(--ink); font-weight: 550; }
-.chain-source { margin: 0; font-size: var(--small); color: var(--ink-soft); line-height: 1.45; }
+/* Nodes: shape as well as colour. Ring = noticed or spoken, filled = decided, square = you acted. */
+.autonomy .chain-mark {
+  width: var(--node);
+  height: var(--node);
+  margin-top: 5px;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1.5px var(--ink-soft), 0 0 0 3px var(--surface);
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+}
+.autonomy .chain-step.noticed .chain-mark { box-shadow: inset 0 0 0 1.5px var(--redline), 0 0 0 3px var(--surface); }
+.autonomy .chain-step.told .chain-mark,
+.autonomy .chain-step.sent .chain-mark,
+.autonomy .chain-step.asked .chain-mark { box-shadow: inset 0 0 0 1.5px var(--ink), 0 0 0 3px var(--surface); }
+.autonomy .chain-step.no_reply .chain-mark { box-shadow: inset 0 0 0 1.5px var(--pending), 0 0 0 3px var(--surface); }
+.autonomy .chain-step.brought .chain-mark { background: var(--ink); box-shadow: 0 0 0 3px var(--surface); }
+.autonomy .chain-step.approved .chain-mark { background: var(--ink); border-radius: 1px; box-shadow: 0 0 0 3px var(--surface); }
+.autonomy .chain-step.declined .chain-mark { background: var(--ink-soft); border-radius: 1px; box-shadow: 0 0 0 3px var(--surface); }
+.autonomy .chain-step.confirmed .chain-mark,
+.autonomy .chain-step.settled .chain-mark { background: var(--clear); box-shadow: 0 0 0 3px var(--surface); }
+.autonomy .chain-step.open .chain-mark { background: var(--surface); box-shadow: 0 0 0 3px var(--surface); border: 1.5px dashed var(--pending); }
+.autonomy .chain-step.held .chain-mark { background: repeating-linear-gradient(45deg, var(--pending) 0 1.5px, var(--surface) 1.5px 3px); box-shadow: 0 0 0 3px var(--surface); }
+
+.autonomy .chain-body { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.autonomy .chain-step-head { margin: 0; }
+.autonomy .chain-step-head strong { font-weight: 600; font-size: 13.5px; line-height: 1.35; color: var(--ink); }
+.autonomy .chain-step.open .chain-step-head strong { color: var(--ink-soft); font-weight: 550; }
+.autonomy .chain-text { margin: 0; font-size: var(--small); line-height: 1.5; color: var(--ink); }
+.autonomy .chain-why {
+  margin: 2px 0 0;
+  font-size: var(--small);
+  line-height: 1.45;
+  color: var(--ink);
+  background: transparent;
+  border-radius: 0;
+  padding: 0 0 0 8px;
+  box-shadow: inset 1.5px 0 0 var(--ink-soft);
+  align-self: stretch;
+}
+.autonomy .chain-held { margin: 0; font-size: var(--small); color: var(--pending); font-weight: 550; }
+/* Sources stay quiet: small, soft, below the step. */
+.autonomy .chain-source { margin: 1px 0 0; font-size: 11.5px; color: var(--ink-soft); line-height: 1.45; }

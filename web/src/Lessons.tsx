@@ -2,6 +2,8 @@ import type { ChatMessage, Correction, Scene } from "@site/contracts";
 import { crewName, elementById, formatTime } from "./derive";
 import { describeSource, sourceLine } from "./sources";
 import { useSite } from "./store";
+import { Undo2 } from "lucide-react";
+import "./tabs.css";
 import "./lessons.css";
 
 // What it has learned, as a before and after side by side. Both sides come from the record only:
@@ -27,8 +29,20 @@ function Undo({ c, what }: { c: Correction; what: string }) {
       aria-label={`Undo: forget ${what} and run again without it`}
       title="Removes this lesson and runs again, so the next run behaves as before it was learned"
     >
+      <Undo2 size={14} strokeWidth={1.5} aria-hidden="true" />
       {mine ? "Undoing…" : "Undo"}
     </button>
+  );
+}
+
+/** A drafting divider between before and after: a hairline with end ticks and a direction mark. */
+function LessonDivider() {
+  return (
+    <div className="lesson-divider" aria-hidden="true">
+      <span className="lesson-divider-mark">
+        <svg width="10" height="10" viewBox="0 0 10 10"><path d="M1 5h7M5.5 2.5 8 5 5.5 7.5" fill="none" stroke="currentColor" strokeWidth="1.25" /></svg>
+      </span>
+    </div>
   );
 }
 
@@ -77,7 +91,8 @@ function AliasLesson({ c, scene, messages, unresolved }: { c: Alias; scene: Scen
           <p>“{c.alias}” matched no known place, so it asked you instead of guessing.</p>
           {before.kind !== "unknown" && <p className="lesson-src">{sourceLine(before)}</p>}
         </div>
-        <div className="lesson-side after">
+        <LessonDivider />
+        <div className={`lesson-side after${handled.length > 0 ? " used" : ""}`}>
           <p className="lesson-label">After · {applied ? "this run" : "next run"}</p>
           {handled.length > 0 ? (
             <ul className="lesson-uses">
@@ -124,7 +139,8 @@ function WatchLesson({ c, scene, messages }: { c: Watch; scene: Scene; messages:
           <p className="lesson-label">Before · the run that taught it</p>
           <p>{c.note}</p>
         </div>
-        <div className="lesson-side after">
+        <LessonDivider />
+        <div className={`lesson-side after${sent.length > 0 ? " used" : ""}`}>
           <p className="lesson-label">After · this run</p>
           {sent.length > 0 ? (
             <ul className="lesson-uses">
