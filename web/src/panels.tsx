@@ -229,9 +229,11 @@ export function Learning({ scene, items }: { scene: Scene; items: UnresolvedItem
 
 // ---------- Agent log ----------
 
-export function AgentLog({ scene, messages }: { scene: Scene; messages: ChatMessage[] }) {
-  const log = useSite((s) => s.agentLog);
-  if (!log) return null;
+export function AgentLog({ scene, messages, asOf }: { scene: Scene; messages: ChatMessage[]; asOf?: string }) {
+  const all = useSite((s) => s.agentLog);
+  if (!all) return null;
+  // The record shown as of an earlier time must not list what the agent did later.
+  const log = asOf ? all.filter((entry) => entry.time <= asOf) : all;
   return (
     <section className="panel">
       <h2>What the system did on its own</h2>
@@ -289,6 +291,53 @@ export function Record({ scene, messages }: { scene: Scene; messages: ChatMessag
 }
 
 // ---------- Eval ----------
+
+/** The Numbers beat: the same eval results, large enough to read in a recording. */
+export function MeasuredLarge() {
+  const results = useSite((s) => s.evalResults);
+  return (
+    <section className="measured-large" aria-label="Measured results">
+      <h2>Measured</h2>
+      {!results ? (
+        <p className="meta">Not found: no eval results on record. Run npm run eval.</p>
+      ) : (
+        <>
+          <p className="caveat">
+            npm run eval · replay {results.replayId} · {results.cases} labelled {results.cases === 1 ? "case" : "cases"}. Synthetic labelled scenario, not field
+            results.
+          </p>
+          <table className="numbers">
+            <thead>
+              <tr>
+                <th scope="col">Check</th>
+                <th scope="col">Caught</th>
+                <th scope="col">Missed</th>
+                <th scope="col">False alarms</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(results.perCheck).map(([check, c]) => (
+                <tr key={check}>
+                  <th scope="row">{check.replace(/_/g, " ")}</th>
+                  <td>{c.caught}</td>
+                  <td>{c.missed}</td>
+                  <td>{c.falseAlarms}</td>
+                </tr>
+              ))}
+              <tr className="total">
+                <th scope="row">Total</th>
+                <td>{results.total.caught}</td>
+                <td>{results.total.missed}</td>
+                <td>{results.total.falseAlarms}</td>
+              </tr>
+            </tbody>
+          </table>
+        </>
+      )}
+      <span className="sim">Simulated site data</span>
+    </section>
+  );
+}
 
 export function Measured() {
   const results = useSite((s) => s.evalResults);
