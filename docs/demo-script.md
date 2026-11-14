@@ -8,7 +8,7 @@ Say at Send: "The superintendent sends the correction. We are still waiting for 
 
 Two supporting demonstrations are available in the live side panel, outside the three-minute core unless rehearsed to fit: "Which sheet is the crew using?" records an architect issuance and a crew revision statement without reading attachments; "What this site has learned" remembers an exact reviewed alert with a reason and Undo. Changed evidence brings the alert back into review. This preference does not remove safety findings or alter evaluation results.
 
-The legacy video recorder has not been updated/visually verified for this eleven-beat sequence. Use the presenter and review the entire take. Browser automation was unavailable during this implementation pass; HTTP tests are not visual QA.
+Use `video/record-present.mjs` (presenter-driven, fails loudly); the legacy `record.mjs` predates the eleven beats.
 
 Owner: D (presenter mode: L). Read before any task that touches what a judge sees.
 
@@ -38,18 +38,23 @@ Every beat calls the same code as the buttons (store actions, the phone's own se
 
 ## Beats
 
-| Time | Beat (key →) | What happens | Say | Manual fallback |
+Visually rehearsed from a clean start on Sat 14 Nov (screenshots of every beat, 1440x900, merged `win/integration`). Cue times match `video/record-present.mjs` and `docs/pitch.md`.
+
+| Time | Beat (key →) | What appears | Say | Manual fallback |
 |---|---|---|---|---|
-| 0:00 | 1 Problem | Run starts clean; whole floor; phone closed. | "Site decisions live in group chats. A change made in the office thread never reaches the plumber who starts tomorrow." | **Start clean** in Learning. |
-| 0:20 | 2 Build | Model shown as of the architect's Rev C (m-001); the inspector opens on the wall that message moved, every history row quoting its message. | "Chat becomes the model. Every element has a source." | In **The record**, **Model after this message** on m-001, then click the 204 east wall. |
-| 0:45 | 3 Ghost wall | Back to now. The phone (as Novak Plumbing) sends `PHONE.plumbingIntent`; the phone answers HOLD with one reason and the source. The plan frames unit 204, draws the true wall, grows the red ghost to where plumbing thinks the wall is, then "0.4 m east". Everything holds still. | "Plumbing says what it does tomorrow. Red is where plumbing thinks the wall is: 40 cm off." | **Crew phone**, pick Novak Plumbing, type the text, Send. |
-| 1:20 | 4 Why | Inspector on the ghost: what was said, and "What Novak Plumbing did not hear" quoting the office-thread change. | "The change was said in a thread plumbing does not read." | Click the ghost. |
-| 1:35 | 5 Rehearse | Slider jumps to the first clash on tomorrow's track; held rooms outline in redline. | "Tomorrow, played forward the evening before." | Drag the slider to the redline mark. |
-| 2:00 | 6 Fix | The current W-12 ghost's fix is approved: "Fix sent" with the exact text, the wall turns green, the ghost is gone, the phone shows the HOLD message from the system. | "One tap. The crew gets the message, the model knows they heard it." | **Send fix to Novak Plumbing** for the W-12 ghost. |
-| 2:10 | 7 Ask | The phone asks `PHONE.question`; the answer comes from the record with sources (CLEAR now that the fix reached them). | "Crews text a question and get an answer from the record. Decisions still go to the superintendent." | Type the question in the phone. |
-| 2:20 | 8 Learn | The phone sends `PHONE.blueRoom`; run 1 cannot place "the blue room", it appears under **Learning**. | "Crews have nicknames. The record does not guess." | Type the text in the phone. |
-| 2:35 | 9 Run 2 | "The blue room" is mapped to Unit 204, the run starts again with what was learned, and the same words are sent again: resolved on its own. The agent log shows the crew on watch warned as soon as the wall moved. | "The superintendent answered once. The next run knows." | **Remember this place**, **Run again with what we learned**, send the text again. |
-| 2:45 | 10 Numbers | Side column scrolls to **Measured**. | Say the numbers exactly as shown. Close with the anchor sentence. | Scroll to **Measured**. |
+| 0:00 | 1 Problem | The record as of Thu 13:01: whole floor, no ghost, agent log "Nothing yet". | Pitch "Problem". State that it is simulated site data. | **Start clean** in Learning. |
+| 0:20 | 2 Build | The record as of the architect's Rev C (Thu 14:02); inspector on the 204 east wall, every history row quoting its message. | "Every message becomes a change to one record, and keeps its source." | **Model after this message** on m-001, click the 204 east wall. |
+| 0:40 | 3 Ghost wall | Back to now. The phone (Novak Plumbing) sends the scripted intent and answers HOLD with the source. The plan frames the 204 bathroom wall: black true wall, one red dashed ghost, "0.4 m east" large. Nothing else is red. | "Red is where plumbing will measure from. Black is the wall per the record. Forty centimetres." Hold still. | **Crew phone**, Novak Plumbing, type the text, Send. |
+| 1:10 | 4 Why | Inspector on the ghost: what plumbing said, and "What Novak Plumbing did not hear" quoting the office-thread change. | "The change was said in the office thread. Plumbing doesn't read it." | Click the ghost. |
+| 1:25 | 5 Rehearse | Whole floor, Saturday played forward; clash rooms outlined, redline on the timeline; 06:30 huddle shows the top three. | "Every evening, tomorrow is played forward. What can't be undone comes first." | Drag the slider. |
+| 1:45 | 6 Send | The W-12 fix is sent. Ghost and dimension turn **amber**: "sent, not confirmed". Crew confirmation panel: "Sent · awaiting crew confirmation". | "One tap sends it. Sent isn't heard. It stays amber." | **Send fix to Novak Plumbing** on the W-12 card. |
+| 2:00 | 7 Confirm | Simulated crew reply confirms revision 2 of the wall; record rechecked; ghost gone; panel "Crew confirmed · record rechecked". | "The crew confirms this exact revision. That proves the information arrived, not the work." | **Simulate Novak Plumbing confirming receipt**. |
+| 2:15 | 8 Ask | Phone asks "can we start the 204 bath tomorrow morning?": "CLEAR: no conflict found in the record…", citing the confirmation. | "Answers come from the record, with sources. Decisions go to the superintendent." | Type the question. |
+| 2:25 | 9 Learn | Walsh Drywall sends the blue-room text; run 1 cannot place it; it appears under **Learning**. | "The record doesn't guess." | Type the text. |
+| 2:35 | 10 Run 2 | Mapped to Unit 204, run again with what was learned, same words resent: Unit 204 shows "the blue room", the phone answers for that place. | "The superintendent answered once. The next run knows." | **Remember this place**, **Run again with what we learned**, resend. |
+| 2:45 | 11 Numbers | Large Measured overlay from `/api/eval` with the synthetic caveat. | Say the numbers exactly as shown, then "See tomorrow's mistake before it gets built." | Scroll to **Measured**. |
+
+Recording: `cd video && node record-present.mjs --captions` with the demo running (`DEMO_URL` for another port). The take is named `...-FAILED.webm` and exits 1 if any beat fails; watch the whole take anyway.
 
 ## Fallbacks
 
