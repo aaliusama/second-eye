@@ -1,0 +1,65 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "c-033",
+  "operations": [
+    {
+      "id": "op-c-033-1",
+      "time": "2026-11-16T16:05:00",
+      "sourceMessageId": "c-033",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-c-033-1",
+        "crewId": "crew-drywall",
+        "day": "2026-11-17",
+        "slot": "morning",
+        "order": 0,
+        "taskType": "close_wall",
+        "description": "board up the 204 corridor wall",
+        "placeId": "room-204",
+        "elementIds": [
+          "W-05"
+        ],
+        "status": "planned",
+        "sourceMessageId": "c-033",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-c-033-1",
+      "crewId": "crew-drywall",
+      "time": "2026-11-16T16:05:00",
+      "sourceMessageId": "c-033",
+      "confidence": 1,
+      "day": "2026-11-17",
+      "slot": "morning",
+      "taskType": "close_wall",
+      "description": "board up the 204 corridor wall",
+      "placeId": "room-204",
+      "elementIds": [
+        "W-05"
+      ]
+    }
+  ],
+  "facts": {
+    "id": "c-033",
+    "plans": [
+      {
+        "day": "2026-11-17",
+        "slot": "morning",
+        "taskType": "close_wall",
+        "placeId": "room-204",
+        "placeSaid": null,
+        "elementIds": [
+          "W-05"
+        ],
+        "description": "board up the 204 corridor wall",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

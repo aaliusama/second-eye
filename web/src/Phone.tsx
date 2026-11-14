@@ -28,7 +28,14 @@ function replyFor(r: PostMessageResponse, cite: Cite): string {
   if (r.intents.length > 0) {
     return `CLEAR: nothing on record conflicts with “${r.intents[0].description}”. Source: ${cite([r.message.id])}.`;
   }
-  return `No plan was extracted, so this message has not been cleared. The offline demo only understands prepared messages; other wording needs live extraction and a working connection. Source: ${cite([r.message.id])}.`;
+  const how = (r as PostMessageResponse & { extraction?: string }).extraction;
+  const why =
+    how === "cache_miss_offline"
+      ? "Live reading is off: the offline demo only reads prepared messages. Start it with npm run demo:live to read any wording."
+      : how === "live_failed"
+        ? "Live reading failed (no answer from the language model in time). Nothing was guessed."
+        : "No plan for a future day was read from these words.";
+  return `Not checked: ${why} This message has not been cleared. Source: ${cite([r.message.id])}.`;
 }
 
 function answerText(a: Answer, cite: Cite): string {
@@ -94,7 +101,9 @@ export function Phone({
     lines.push(l);
     lines.push(...(local[l.id] ?? []));
   }
-  for (const [after, extra] of Object.entries(local)) if (!thread.some((l) => l.id === after)) lines.push(...extra);
+  // Questions and errors have no message to sit after: show only this crew's own.
+  for (const [after, extra] of Object.entries(local))
+    if (!thread.some((l) => l.id === after) && after.startsWith(`${crewId}|`)) lines.push(...extra);
 
   /** One send path for typed and presenter-scripted messages: the same API calls either way. */
   async function submit(body: string, as: { id: string; name: string } | undefined): Promise<void> {
@@ -104,7 +113,7 @@ export function Phone({
       if (isQuestion(body)) {
         const answer = await api.ask(as.id, body);
         if (answer) {
-          const key = `q-${Date.now()}`;
+          const key = `${as.id}|q-${Date.now()}`;
           setLocal((s) => ({
             ...s,
             [key]: [
@@ -131,7 +140,7 @@ export function Phone({
       announceChange();
       onPosted?.();
     } catch (err) {
-      setLocal((s) => ({ ...s, [`err-${Date.now()}`]: [{ id: `err-${Date.now()}`, from: "system", text: `Not sent: ${String(err)}` }] }));
+      setLocal((s) => ({ ...s, [`${as.id}|err-${Date.now()}`]: [{ id: `err-${Date.now()}`, from: "system", text: `Not sent: ${String(err)}` }] }));
     } finally {
       setSending(false);
     }

@@ -24,6 +24,7 @@ vi.mock("../extract/index", () => ({
     const hit = src && fixtureExtractResults.find((r) => r.messageId === src.id);
     return structuredClone(hit ?? { messageId: message.id, operations: [], intents: [] });
   },
+  extractStatus: () => "cached",
 }));
 
 // Checks are being built in parallel; pin them to the ghost-wall fixture so these tests test the API.

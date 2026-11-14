@@ -1,5 +1,5 @@
 import type { ChatMessage, Element, Finding, Fix, LearningContext, PlanTask, Rehearsal, Scene } from "@site/contracts";
-import { heardThread } from "../checks/geometry";
+import { heardThread, moveLabel } from "../checks/geometry";
 import { runChecks } from "../checks/index";
 import { getPlan } from "../model/index";
 import { crewPostedAfter, onWatch } from "./profiles";
@@ -244,7 +244,7 @@ export function decide(input: AgentInput): Action[] {
         due: dueFor(),
         crewId: crew.id,
         reason: "watch_crew_change",
-        text: `Change to ${el.name} per the record (${change.sourceMessageId}, ${change.thread} thread): ${describeChange(change)}. Work to the latest version.`,
+        text: `Change to ${el.name} per the record: ${describeChange(el, change)} (${whereSaid(change.thread)}, ${shortTime(change.time)}). Work to the new line and reply to confirm.`,
         sourceMessageIds: [change.sourceMessageId],
       });
     }
@@ -285,10 +285,22 @@ function latestUnheardChange(el: Element, crew: Scene["crews"][number], now: str
   return last;
 }
 
-function describeChange(h: Element["history"][number]): string {
-  if (h.operationType === "move") return "it moved";
-  return `its status is now ${h.state ?? "changed"}`;
+/** What changed, in site words: distance and direction for a move when the record has both lines. */
+function describeChange(el: Element, h: Element["history"][number]): string {
+  if (h.operationType === "move") {
+    const before = [...el.history].filter((x) => x.geometry && x.version < h.version).sort((a, b) => b.version - a.version)[0];
+    return before?.geometry && h.geometry ? `moved ${moveLabel(before.geometry, h.geometry)}` : "moved";
+  }
+  return `status is now ${h.state ?? "changed"}`;
 }
+
+/** Where it was said, without exposing another crew's private thread id. */
+const whereSaid = (thread: string) =>
+  thread.startsWith("dm:") ? "passed on by the superintendent" : thread === "drawing" ? "on the drawings" : `said in the ${thread.replace(/-/g, " ")} thread`;
+
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+/** "Thu 14:02" from an ISO replay time (no wall clock). */
+const shortTime = (iso: string) => `${DAYS[new Date(`${iso.slice(0, 10)}T12:00:00Z`).getUTCDay()]} ${iso.slice(11, 16)}`;
 
 /**
  * New record entries after the finding that could explain the risk going away, known by `now`:

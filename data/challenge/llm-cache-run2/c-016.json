@@ -1,0 +1,29 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "c-016",
+  "operations": [
+    {
+      "id": "op-c-016-1",
+      "time": "2026-11-16T10:50:00",
+      "sourceMessageId": "c-016",
+      "thread": "office",
+      "confidence": 1,
+      "type": "set_status",
+      "elementId": "vanity-203",
+      "state": "proposed"
+    }
+  ],
+  "intents": [],
+  "facts": {
+    "id": "c-016",
+    "plans": [],
+    "changes": [
+      {
+        "kind": "status",
+        "elementId": "vanity-203",
+        "state": "proposed",
+        "confidence": 1
+      }
+    ]
+  }
+}

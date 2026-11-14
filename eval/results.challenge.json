@@ -1,0 +1,441 @@
+{
+  "note": "Simulated site data. Separate challenge set written and committed before any run (data/challenge/). Extracted once with live Groq; outputs stored with provenance and not edited. Scored with the golden rules (eval/score.ts). Not field performance.",
+  "model": "openai/gpt-oss-120b",
+  "provenance": [
+    "llm: groq openai/gpt-oss-120b"
+  ],
+  "replayId": "challenge",
+  "messages": 64,
+  "cases": 14,
+  "perCheck": {
+    "latest_change": {
+      "caught": 3,
+      "missed": 1,
+      "falseAlarms": 1
+    },
+    "space_clash": {
+      "caught": 0,
+      "missed": 3,
+      "falseAlarms": 1
+    },
+    "order_of_work": {
+      "caught": 0,
+      "missed": 4,
+      "falseAlarms": 2
+    },
+    "open_decision": {
+      "caught": 3,
+      "missed": 0,
+      "falseAlarms": 1
+    }
+  },
+  "total": {
+    "caught": 6,
+    "missed": 8,
+    "falseAlarms": 5
+  },
+  "perTrigger": {
+    "live": {
+      "caught": 6,
+      "missed": 8,
+      "falseAlarms": 5
+    },
+    "rehearsal": {
+      "caught": 6,
+      "missed": 8,
+      "falseAlarms": 4
+    }
+  },
+  "missedBy": {
+    "extractionFailure": 8,
+    "checkMiss": 0
+  },
+  "extraction": {
+    "messagesWithExpectedFacts": 37,
+    "messagesReadExactly": 50,
+    "facts": {
+      "expected": 49,
+      "extracted": 39,
+      "matched": 34,
+      "extra": 5,
+      "missed": 15
+    }
+  },
+  "caseResults": [
+    {
+      "id": "CH-LC1",
+      "check": "latest_change",
+      "kind": "unseen phrasing of a real incident",
+      "caughtBy": "none",
+      "outcome": "missed: extraction failure",
+      "misreadMessages": [
+        "c-009",
+        "c-035"
+      ]
+    },
+    {
+      "id": "CH-LC2",
+      "check": "latest_change",
+      "kind": "second revision after an earlier correction",
+      "caughtBy": "both",
+      "outcome": "caught",
+      "misreadMessages": []
+    },
+    {
+      "id": "CH-LC3",
+      "check": "latest_change",
+      "kind": "unseen phrasing of a real incident",
+      "caughtBy": "both",
+      "outcome": "caught",
+      "misreadMessages": []
+    },
+    {
+      "id": "CH-LC4",
+      "check": "latest_change",
+      "kind": "unseen phrasing of a real incident",
+      "caughtBy": "both",
+      "outcome": "caught",
+      "misreadMessages": []
+    },
+    {
+      "id": "CH-SC1",
+      "check": "space_clash",
+      "kind": "unseen phrasing of a real incident",
+      "caughtBy": "none",
+      "outcome": "missed: extraction failure",
+      "misreadMessages": [
+        "c-027"
+      ]
+    },
+    {
+      "id": "CH-SC2",
+      "check": "space_clash",
+      "kind": "unseen phrasing of a real incident",
+      "caughtBy": "none",
+      "outcome": "missed: extraction failure",
+      "misreadMessages": [
+        "c-054",
+        "c-055"
+      ]
+    },
+    {
+      "id": "CH-SC3",
+      "check": "space_clash",
+      "kind": "plan correction that creates a different clash",
+      "caughtBy": "none",
+      "outcome": "missed: extraction failure",
+      "misreadMessages": [
+        "c-053",
+        "c-057"
+      ]
+    },
+    {
+      "id": "CH-OW1",
+      "check": "order_of_work",
+      "kind": "unseen phrasing of a real incident",
+      "caughtBy": "none",
+      "outcome": "missed: extraction failure",
+      "misreadMessages": [
+        "c-027"
+      ]
+    },
+    {
+      "id": "CH-OW2",
+      "check": "order_of_work",
+      "kind": "unseen phrasing of a real incident",
+      "caughtBy": "none",
+      "outcome": "missed: extraction failure",
+      "misreadMessages": [
+        "c-033"
+      ]
+    },
+    {
+      "id": "CH-OW3",
+      "check": "order_of_work",
+      "kind": "unseen phrasing of a real incident",
+      "caughtBy": "none",
+      "outcome": "missed: extraction failure",
+      "misreadMessages": [
+        "c-053",
+        "c-054"
+      ]
+    },
+    {
+      "id": "CH-OW4",
+      "check": "order_of_work",
+      "kind": "plan correction that creates a different clash",
+      "caughtBy": "none",
+      "outcome": "missed: extraction failure",
+      "misreadMessages": [
+        "c-053",
+        "c-057"
+      ]
+    },
+    {
+      "id": "CH-OD1",
+      "check": "open_decision",
+      "kind": "unseen phrasing of a real incident",
+      "caughtBy": "both",
+      "outcome": "caught",
+      "misreadMessages": []
+    },
+    {
+      "id": "CH-OD2",
+      "check": "open_decision",
+      "kind": "uncertain move",
+      "caughtBy": "both",
+      "outcome": "caught",
+      "misreadMessages": [
+        "c-048"
+      ]
+    },
+    {
+      "id": "CH-OD3",
+      "check": "open_decision",
+      "kind": "unseen phrasing of a real incident",
+      "caughtBy": "both",
+      "outcome": "caught",
+      "misreadMessages": []
+    }
+  ],
+  "falseAlarms": [
+    {
+      "key": "latest_change|c-037|W-03",
+      "check": "latest_change",
+      "triggers": [
+        "live",
+        "rehearsal"
+      ],
+      "fromPlantedNonCase": true,
+      "restsOnMisreadMessage": false
+    },
+    {
+      "key": "open_decision|c-062|light-202-kitchen",
+      "check": "open_decision",
+      "triggers": [
+        "live",
+        "rehearsal"
+      ],
+      "fromPlantedNonCase": true,
+      "restsOnMisreadMessage": false
+    },
+    {
+      "key": "order_of_work|c-033|W-11,corridor",
+      "check": "order_of_work",
+      "triggers": [
+        "live"
+      ],
+      "fromPlantedNonCase": false,
+      "restsOnMisreadMessage": true
+    },
+    {
+      "key": "order_of_work|c-059|W-05,room-202",
+      "check": "order_of_work",
+      "triggers": [
+        "live",
+        "rehearsal"
+      ],
+      "fromPlantedNonCase": true,
+      "restsOnMisreadMessage": false
+    },
+    {
+      "key": "space_clash|c-026,c-032|room-203",
+      "check": "space_clash",
+      "triggers": [
+        "live",
+        "rehearsal"
+      ],
+      "fromPlantedNonCase": true,
+      "restsOnMisreadMessage": false
+    }
+  ],
+  "nonCases": [
+    {
+      "kind": "unambiguous harmless look-alike",
+      "messageIds": [
+        "c-011",
+        "c-029"
+      ],
+      "raisedFalseAlarm": false
+    },
+    {
+      "kind": "already informed crew",
+      "messageIds": [
+        "c-013",
+        "c-014",
+        "c-037"
+      ],
+      "raisedFalseAlarm": true
+    },
+    {
+      "kind": "cancellation",
+      "messageIds": [
+        "c-026",
+        "c-028",
+        "c-032"
+      ],
+      "raisedFalseAlarm": true
+    },
+    {
+      "kind": "ambiguous room nickname",
+      "messageIds": [
+        "c-036"
+      ],
+      "raisedFalseAlarm": false
+    },
+    {
+      "kind": "unambiguous harmless look-alike",
+      "messageIds": [
+        "c-019",
+        "c-047",
+        "c-062"
+      ],
+      "raisedFalseAlarm": true
+    },
+    {
+      "kind": "unambiguous harmless look-alike",
+      "messageIds": [
+        "c-049",
+        "c-058"
+      ],
+      "raisedFalseAlarm": false
+    },
+    {
+      "kind": "unambiguous harmless look-alike",
+      "messageIds": [
+        "c-051",
+        "c-059"
+      ],
+      "raisedFalseAlarm": true
+    }
+  ],
+  "extractionMismatches": [
+    {
+      "messageId": "c-009",
+      "text": "item 3, the 205 bath east partition shifts 15cm to the west, shower tray didnt fit",
+      "expected": [
+        "move W-16 15 cm west"
+      ],
+      "extracted": []
+    },
+    {
+      "messageId": "c-014",
+      "text": "Marek heads up, the 201 bath east wall moved 30 cm east this morning (Lena, bulletin 4). Work to the new line",
+      "expected": [
+        "move W-03 30 cm east"
+      ],
+      "extracted": []
+    },
+    {
+      "messageId": "c-023",
+      "text": "inspector confirmed for the 204 rough in, wednesday 10am",
+      "expected": [
+        "plan crew-plumbing 2026-11-18 morning inspection room-204"
+      ],
+      "extracted": []
+    },
+    {
+      "messageId": "c-027",
+      "text": "we'll be in 202 all day tuesday, ceilings then walls",
+      "expected": [
+        "plan crew-painting 2026-11-17 full_day paint room-202"
+      ],
+      "extracted": []
+    },
+    {
+      "messageId": "c-028",
+      "text": "change of plan, we're not doing 203 tomorrow, van is in the garage. thursday instead",
+      "expected": [
+        "cancel crew-tiling 2026-11-17 morning room-203"
+      ],
+      "extracted": []
+    },
+    {
+      "messageId": "c-033",
+      "text": "tomorrow first thing we board up the 204 corridor wall",
+      "expected": [
+        "on crew-drywall 2026-11-17 W-11",
+        "plan crew-drywall 2026-11-17 morning close_wall room-204"
+      ],
+      "extracted": [
+        "on crew-drywall 2026-11-17 W-11",
+        "plan crew-drywall 2026-11-17 morning close_wall (no place)"
+      ]
+    },
+    {
+      "messageId": "c-035",
+      "text": "tmrw am we're on the 205 bathroom, setting out off the east partition",
+      "expected": [
+        "on crew-tiling 2026-11-17 W-16",
+        "plan crew-tiling 2026-11-17 morning layout room-205"
+      ],
+      "extracted": [
+        "plan crew-tiling 2026-11-17 morning layout room-205"
+      ]
+    },
+    {
+      "messageId": "c-036",
+      "text": "tomorrow morning we board the corner unit",
+      "expected": [
+        "plan crew-drywall 2026-11-17 morning finish_drywall (no place)"
+      ],
+      "extracted": [
+        "plan crew-drywall 2026-11-17 morning close_wall (no place)"
+      ]
+    },
+    {
+      "messageId": "c-047",
+      "text": "owner signed off the 202 kitchen pendants, approved",
+      "expected": [
+        "status light-202-kitchen approved"
+      ],
+      "extracted": []
+    },
+    {
+      "messageId": "c-048",
+      "text": "the 202 corridor wall will probably have to shift a bit, waiting on the structural engineer. tbc",
+      "expected": [
+        "status W-05 unconfirmed"
+      ],
+      "extracted": [
+        "status W-05 proposed"
+      ]
+    },
+    {
+      "messageId": "c-053",
+      "text": "wed arvo Kev finishes the tape in 205",
+      "expected": [
+        "plan crew-drywall 2026-11-18 afternoon finish_drywall room-205"
+      ],
+      "extracted": []
+    },
+    {
+      "messageId": "c-054",
+      "text": "wednesday morning we cut in 205",
+      "expected": [
+        "plan crew-painting 2026-11-18 morning paint room-205"
+      ],
+      "extracted": []
+    },
+    {
+      "messageId": "c-055",
+      "text": "wed morning we tile the 205 bath",
+      "expected": [
+        "plan crew-tiling 2026-11-18 morning tile room-205"
+      ],
+      "extracted": []
+    },
+    {
+      "messageId": "c-057",
+      "text": "ok we move 205 to wednesday afternoon instead",
+      "expected": [
+        "cancel crew-painting 2026-11-18 morning room-205",
+        "plan crew-painting 2026-11-18 afternoon paint room-205"
+      ],
+      "extracted": [
+        "on crew-painting 2026-11-18 tile-205-bath",
+        "plan crew-painting 2026-11-18 afternoon other (no place)"
+      ]
+    }
+  ]
+}

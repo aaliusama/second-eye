@@ -1,0 +1,65 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "c-034",
+  "operations": [
+    {
+      "id": "op-c-034-1",
+      "time": "2026-11-16T16:10:00",
+      "sourceMessageId": "c-034",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-c-034-1",
+        "crewId": "crew-plumbing",
+        "day": "2026-11-17",
+        "slot": "afternoon",
+        "order": 0,
+        "taskType": "install_fixtures",
+        "description": "fit the vanity in the 203 bath",
+        "placeId": "room-203",
+        "elementIds": [
+          "vanity-203"
+        ],
+        "status": "planned",
+        "sourceMessageId": "c-034",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-c-034-1",
+      "crewId": "crew-plumbing",
+      "time": "2026-11-16T16:10:00",
+      "sourceMessageId": "c-034",
+      "confidence": 1,
+      "day": "2026-11-17",
+      "slot": "afternoon",
+      "taskType": "install_fixtures",
+      "description": "fit the vanity in the 203 bath",
+      "placeId": "room-203",
+      "elementIds": [
+        "vanity-203"
+      ]
+    }
+  ],
+  "facts": {
+    "id": "c-034",
+    "plans": [
+      {
+        "day": "2026-11-17",
+        "slot": "afternoon",
+        "taskType": "install_fixtures",
+        "placeId": "room-203",
+        "placeSaid": null,
+        "elementIds": [
+          "vanity-203"
+        ],
+        "description": "fit the vanity in the 203 bath",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "c-045",
+  "operations": [
+    {
+      "id": "op-c-045-1",
+      "time": "2026-11-17T08:20:00",
+      "sourceMessageId": "c-045",
+      "thread": "dm:crew-electrical",
+      "confidence": 1,
+      "type": "move",
+      "elementId": "W-08",
+      "to": {
+        "kind": "segment",
+        "from": [
+          10,
+          2.15
+        ],
+        "to": [
+          15,
+          2.15
+        ],
+        "thickness": 0.2
+      },
+      "note": "15 cm north"
+    }
+  ],
+  "intents": [],
+  "facts": {
+    "id": "c-045",
+    "plans": [],
+    "changes": [
+      {
+        "kind": "move",
+        "elementId": "W-08",
+        "direction": "north",
+        "metres": 0.15,
+        "confidence": 1
+      }
+    ]
+  }
+}

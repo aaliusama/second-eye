@@ -1,0 +1,22 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "c-028",
+  "operations": [],
+  "intents": [],
+  "facts": {
+    "id": "c-028",
+    "plans": [
+      {
+        "day": "2026-11-19",
+        "slot": "full_day",
+        "taskType": "other",
+        "placeId": "room-203",
+        "placeSaid": null,
+        "elementIds": [],
+        "description": "do 203 work on Thursday",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

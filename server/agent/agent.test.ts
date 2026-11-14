@@ -248,6 +248,7 @@ describe("learning loop: crews on watch", () => {
       id: "pro~W-12~v2~crew-plumbing",
       crewId: "crew-plumbing",
       reason: "watch_crew_change",
+      text: "Change to Unit 204 bathroom east wall per the record: moved 0.4 m east (said in the office thread, Thu 14:02). Work to the new line and reply to confirm.",
       sourceMessageIds: ["m-001"],
       due: "2026-11-12T14:02:00",
     });

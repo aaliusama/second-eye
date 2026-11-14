@@ -1,0 +1,22 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "c-043",
+  "operations": [],
+  "intents": [],
+  "facts": {
+    "id": "c-043",
+    "plans": [
+      {
+        "day": "2026-11-20",
+        "slot": "full_day",
+        "taskType": "paint",
+        "placeId": null,
+        "placeSaid": null,
+        "elementIds": [],
+        "description": "painting the town red",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

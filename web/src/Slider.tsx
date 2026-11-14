@@ -13,6 +13,7 @@ export function Slider({
   step,
   onStep,
   resolved,
+  quiet = false,
 }: {
   scene: Scene;
   rehearsal: Rehearsal | undefined;
@@ -20,6 +21,8 @@ export function Slider({
   onStep: (s: number) => void;
   /** Finding ids whose fix was approved: no longer marked. */
   resolved: Set<string>;
+  /** Presenter story beats: draw the plan without redline, so the one ghost on the plan is the only red thing. */
+  quiet?: boolean;
 }) {
   if (!rehearsal || rehearsal.frames.length === 0) {
     return (
@@ -28,8 +31,8 @@ export function Slider({
       </div>
     );
   }
-  const open = (fs: Finding[]) => fs.filter((f) => !resolved.has(f.id));
-  const trouble = troubleSteps(rehearsal, resolved);
+  const open = (fs: Finding[]) => (quiet ? [] : fs.filter((f) => !resolved.has(f.id)));
+  const trouble = quiet ? new Set<number>() : troubleSteps(rehearsal, resolved);
   const frame = frameAt(rehearsal, step);
   const frameOpen = open(frame?.findings ?? []);
   const held = new Set(frameOpen.flatMap((f) => f.taskIds));
@@ -46,7 +49,11 @@ export function Slider({
           Rehearsal · {dayLabel} · <span className="clock">{sliderClock(step)}</span>
         </h2>
         <p className="meta">
-          {frame ? `${frame.activeTaskIds.length} on site, ${frameOpen.length} held per the record` : "Nothing planned at this time"}
+          {!frame
+            ? "Nothing planned at this time"
+            : quiet
+              ? `${frame.activeTaskIds.length} on site`
+              : `${frame.activeTaskIds.length} on site, ${frameOpen.length} held per the record`}
         </p>
       </div>
       <div className="lanes">

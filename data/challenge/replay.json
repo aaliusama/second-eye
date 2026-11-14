@@ -1,0 +1,824 @@
+{
+  "id": "challenge",
+  "events": [
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-001",
+        "time": "2026-11-16T06:35:00",
+        "thread": "site-group",
+        "senderName": "Dana Pierce",
+        "senderRole": "superintendent",
+        "text": "Morning. Hoist is down till 9, use the north stairs",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-002",
+        "time": "2026-11-16T06:41:00",
+        "thread": "site-group",
+        "senderName": "Sean (Walsh Drywall)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-drywall",
+        "text": "ok",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-003",
+        "time": "2026-11-16T06:58:00",
+        "thread": "site-group",
+        "senderName": "Jonas (Brandt Electric)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-electrical",
+        "text": "delivery of cable drums at 8, need the gate open",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-004",
+        "time": "2026-11-16T07:02:00",
+        "thread": "site-group",
+        "senderName": "Dana Pierce",
+        "senderRole": "superintendent",
+        "text": "gate will be open",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-005",
+        "time": "2026-11-16T07:30:00",
+        "thread": "site-group",
+        "senderName": "Luca (Sorel Tiling)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-tiling",
+        "text": "anyone seen my laser level",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-006",
+        "time": "2026-11-16T07:33:00",
+        "thread": "site-group",
+        "senderName": "Kev (Walsh Drywall)",
+        "senderRole": "crew",
+        "crewId": "crew-drywall",
+        "text": "its in the 203 corridor by the window",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-007",
+        "time": "2026-11-16T08:40:00",
+        "thread": "office",
+        "senderName": "Lena Hofer",
+        "senderRole": "architect",
+        "text": "Bulletin 4 item 1: the niche wall in the 206 living room comes 25 cm south, joinery needs the depth",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-008",
+        "time": "2026-11-16T08:50:00",
+        "thread": "office",
+        "senderName": "Lena Hofer",
+        "senderRole": "architect",
+        "text": "Bulletin 4 item 2: bathroom east wall in 204 has to go 20 cm west, riser clash",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-009",
+        "time": "2026-11-16T09:10:00",
+        "thread": "office",
+        "senderName": "Lena Hofer",
+        "senderRole": "architect",
+        "text": "item 3, the 205 bath east partition shifts 15cm to the west, shower tray didnt fit",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-010",
+        "time": "2026-11-16T09:12:00",
+        "thread": "office",
+        "senderName": "Priya Shah",
+        "senderRole": "office",
+        "text": "thanks Lena, logging bulletin 4",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-011",
+        "time": "2026-11-16T09:30:00",
+        "thread": "site-group",
+        "senderName": "Dana Pierce",
+        "senderRole": "superintendent",
+        "text": "FYI all: 206 kitchen partition moves 20 cm south per the architect. Sparks and boarders take note",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-012",
+        "time": "2026-11-16T09:31:00",
+        "thread": "site-group",
+        "senderName": "Jonas (Brandt Electric)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-electrical",
+        "text": "noted",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-013",
+        "time": "2026-11-16T10:05:00",
+        "thread": "office",
+        "senderName": "Lena Hofer",
+        "senderRole": "architect",
+        "text": "one more: 201 bath east wall goes 30cm east, client wants the bigger shower",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-014",
+        "time": "2026-11-16T10:40:00",
+        "thread": "dm:crew-plumbing",
+        "senderName": "Dana Pierce",
+        "senderRole": "superintendent",
+        "text": "Marek heads up, the 201 bath east wall moved 30 cm east this morning (Lena, bulletin 4). Work to the new line",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-015",
+        "time": "2026-11-16T10:42:00",
+        "thread": "dm:crew-plumbing",
+        "senderName": "Marek (Novak Plumbing)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-plumbing",
+        "text": "got it thx",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-016",
+        "time": "2026-11-16T10:50:00",
+        "thread": "office",
+        "senderName": "Priya Shah",
+        "senderRole": "office",
+        "text": "heads up the vanity for the 203 bath is back with the owner, they didnt like the oak one. no decision yet",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-017",
+        "time": "2026-11-16T11:15:00",
+        "thread": "site-group",
+        "senderName": "Tomek (Novak Plumbing)",
+        "senderRole": "crew",
+        "crewId": "crew-plumbing",
+        "text": "we roughed in the 202 bath this morning, all capped",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-018",
+        "time": "2026-11-16T11:20:00",
+        "thread": "office",
+        "senderName": "Priya Shah",
+        "senderRole": "office",
+        "text": "206 bath light: supplier offered an alternative fitting, sent to the owner for sign off, nothing agreed",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-019",
+        "time": "2026-11-16T11:45:00",
+        "thread": "office",
+        "senderName": "Priya Shah",
+        "senderRole": "office",
+        "text": "202 kitchen lights, electrician suggested a different pendant, waiting on the owner",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-020",
+        "time": "2026-11-16T12:00:00",
+        "thread": "site-group",
+        "senderName": "Dana Pierce",
+        "senderRole": "superintendent",
+        "text": "all: the niche wall in the 206 living room moved 25cm south this morning, bulletin 4 is in the site office",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-021",
+        "time": "2026-11-16T12:05:00",
+        "thread": "site-group",
+        "senderName": "Ivana (Kovac Painting)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-painting",
+        "text": "lunch van is here",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-022",
+        "time": "2026-11-16T12:30:00",
+        "thread": "site-group",
+        "senderName": "Kev (Walsh Drywall)",
+        "senderRole": "crew",
+        "crewId": "crew-drywall",
+        "text": "who moved the wall of plasterboard in the 204 corridor? need it back by the lift",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-023",
+        "time": "2026-11-16T13:00:00",
+        "thread": "site-group",
+        "senderName": "Marek (Novak Plumbing)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-plumbing",
+        "text": "inspector confirmed for the 204 rough in, wednesday 10am",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-024",
+        "time": "2026-11-16T13:20:00",
+        "thread": "site-group",
+        "senderName": "Jonas (Brandt Electric)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-electrical",
+        "text": "are the tilers in 201 tomorrow or not?",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-025",
+        "time": "2026-11-16T13:25:00",
+        "thread": "site-group",
+        "senderName": "Dana Pierce",
+        "senderRole": "superintendent",
+        "text": "not that I know of",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-026",
+        "time": "2026-11-16T14:00:00",
+        "thread": "site-group",
+        "senderName": "Luca (Sorel Tiling)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-tiling",
+        "text": "we measure up the 203 bath tomorrow morning",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-027",
+        "time": "2026-11-16T14:10:00",
+        "thread": "site-group",
+        "senderName": "Ivana (Kovac Painting)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-painting",
+        "text": "we'll be in 202 all day tuesday, ceilings then walls",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-028",
+        "time": "2026-11-16T14:30:00",
+        "thread": "site-group",
+        "senderName": "Luca (Sorel Tiling)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-tiling",
+        "text": "change of plan, we're not doing 203 tomorrow, van is in the garage. thursday instead",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-029",
+        "time": "2026-11-16T15:00:00",
+        "thread": "site-group",
+        "senderName": "Jonas (Brandt Electric)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-electrical",
+        "text": "tomorrow afternoon rough in on the 206 kitchen partition",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-030",
+        "time": "2026-11-16T15:20:00",
+        "thread": "site-group",
+        "senderName": "Ana (Brandt Electric)",
+        "senderRole": "crew",
+        "crewId": "crew-electrical",
+        "text": "2moro arvo first fix on the 204 bath east wall, sockets + shaver point",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-031",
+        "time": "2026-11-16T15:35:00",
+        "thread": "site-group",
+        "senderName": "Sean (Walsh Drywall)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-drywall",
+        "text": "Kev tapes and muds 202 tomorrow arvo",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-032",
+        "time": "2026-11-16T15:50:00",
+        "thread": "site-group",
+        "senderName": "Jonas (Brandt Electric)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-electrical",
+        "text": "tomorrow morning we pull cable in 203",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-033",
+        "time": "2026-11-16T16:05:00",
+        "thread": "site-group",
+        "senderName": "Sean (Walsh Drywall)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-drywall",
+        "text": "tomorrow first thing we board up the 204 corridor wall",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-034",
+        "time": "2026-11-16T16:10:00",
+        "thread": "site-group",
+        "senderName": "Tomek (Novak Plumbing)",
+        "senderRole": "crew",
+        "crewId": "crew-plumbing",
+        "text": "tmrw arvo me and marek fit the vanity in the 203 bath",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-035",
+        "time": "2026-11-16T16:20:00",
+        "thread": "site-group",
+        "senderName": "Luca (Sorel Tiling)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-tiling",
+        "text": "tmrw am we're on the 205 bathroom, setting out off the east partition",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-036",
+        "time": "2026-11-16T16:30:00",
+        "thread": "site-group",
+        "senderName": "Kev (Walsh Drywall)",
+        "senderRole": "crew",
+        "crewId": "crew-drywall",
+        "text": "tomorrow morning we board the corner unit",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-037",
+        "time": "2026-11-16T16:45:00",
+        "thread": "site-group",
+        "senderName": "Marek (Novak Plumbing)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-plumbing",
+        "text": "tomorrow morning supply lines in the 201 bath on the east wall",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-038",
+        "time": "2026-11-16T16:50:00",
+        "thread": "site-group",
+        "senderName": "Dana Pierce",
+        "senderRole": "superintendent",
+        "text": "plumbers are in 201 tomorrow morning, keep the corridor clear for them",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-039",
+        "time": "2026-11-16T17:10:00",
+        "thread": "site-group",
+        "senderName": "Ivana (Kovac Painting)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-painting",
+        "text": "we primed the 201 hall today, looks good",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-040",
+        "time": "2026-11-16T17:40:00",
+        "thread": "site-group",
+        "senderName": "Dana Pierce",
+        "senderRole": "superintendent",
+        "text": "locking up 18:00",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "rehearse",
+      "time": "2026-11-16T20:00:00",
+      "day": "2026-11-17"
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-041",
+        "time": "2026-11-17T06:40:00",
+        "thread": "site-group",
+        "senderName": "Dana Pierce",
+        "senderRole": "superintendent",
+        "text": "Morning. Hoist is back. Skip swap at 10, keep the yard clear",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-042",
+        "time": "2026-11-17T06:52:00",
+        "thread": "site-group",
+        "senderName": "Marek (Novak Plumbing)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-plumbing",
+        "text": "👍",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-043",
+        "time": "2026-11-17T07:15:00",
+        "thread": "site-group",
+        "senderName": "Kev (Walsh Drywall)",
+        "senderRole": "crew",
+        "crewId": "crew-drywall",
+        "text": "painting the town red on friday lads, who's in",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-044",
+        "time": "2026-11-17T07:16:00",
+        "thread": "site-group",
+        "senderName": "Sean (Walsh Drywall)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-drywall",
+        "text": "ha. me",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-045",
+        "time": "2026-11-17T08:20:00",
+        "thread": "dm:crew-electrical",
+        "senderName": "Dana Pierce",
+        "senderRole": "superintendent",
+        "text": "Jonas, the 203 corridor wall is moving 15cm north to clear the riser, Lena confirmed it last night",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-046",
+        "time": "2026-11-17T08:22:00",
+        "thread": "dm:crew-electrical",
+        "senderName": "Jonas (Brandt Electric)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-electrical",
+        "text": "ok will adjust the boxes",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-047",
+        "time": "2026-11-17T09:00:00",
+        "thread": "office",
+        "senderName": "Priya Shah",
+        "senderRole": "office",
+        "text": "owner signed off the 202 kitchen pendants, approved",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-048",
+        "time": "2026-11-17T09:30:00",
+        "thread": "office",
+        "senderName": "Lena Hofer",
+        "senderRole": "architect",
+        "text": "the 202 corridor wall will probably have to shift a bit, waiting on the structural engineer. tbc",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-049",
+        "time": "2026-11-17T10:00:00",
+        "thread": "site-group",
+        "senderName": "Marek (Novak Plumbing)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-plumbing",
+        "text": "203 rough in inspection is booked tomorrow 8am",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-050",
+        "time": "2026-11-17T10:15:00",
+        "thread": "office",
+        "senderName": "Lena Hofer",
+        "senderRole": "architect",
+        "text": "sorry all, niche wall in 206 living again: another 10 cm south, the joinery drawing was wrong",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-051",
+        "time": "2026-11-17T11:00:00",
+        "thread": "site-group",
+        "senderName": "Marek (Novak Plumbing)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-plumbing",
+        "text": "202 inspection passed this morning, inspector was happy",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-052",
+        "time": "2026-11-17T11:30:00",
+        "thread": "site-group",
+        "senderName": "Luca (Sorel Tiling)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-tiling",
+        "text": "need 2 more boxes of spacers if anyone is at the merchants",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-053",
+        "time": "2026-11-17T12:30:00",
+        "thread": "site-group",
+        "senderName": "Sean (Walsh Drywall)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-drywall",
+        "text": "wed arvo Kev finishes the tape in 205",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-054",
+        "time": "2026-11-17T13:10:00",
+        "thread": "site-group",
+        "senderName": "Ivana (Kovac Painting)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-painting",
+        "text": "wednesday morning we cut in 205",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-055",
+        "time": "2026-11-17T13:40:00",
+        "thread": "site-group",
+        "senderName": "Luca (Sorel Tiling)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-tiling",
+        "text": "wed morning we tile the 205 bath",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-056",
+        "time": "2026-11-17T14:00:00",
+        "thread": "site-group",
+        "senderName": "Dana Pierce",
+        "senderRole": "superintendent",
+        "text": "Ivana, Luca is in 205 wed morning, can you shift?",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-057",
+        "time": "2026-11-17T14:20:00",
+        "thread": "site-group",
+        "senderName": "Ivana (Kovac Painting)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-painting",
+        "text": "ok we move 205 to wednesday afternoon instead",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-058",
+        "time": "2026-11-17T14:30:00",
+        "thread": "site-group",
+        "senderName": "Sean (Walsh Drywall)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-drywall",
+        "text": "wed arvo we close up the 203 corridor wall",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-059",
+        "time": "2026-11-17T15:00:00",
+        "thread": "site-group",
+        "senderName": "Sean (Walsh Drywall)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-drywall",
+        "text": "tomorrow morning we close the 202 corridor wall",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-060",
+        "time": "2026-11-17T15:10:00",
+        "thread": "site-group",
+        "senderName": "Jonas (Brandt Electric)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-electrical",
+        "text": "wed morning we fit the 206 bathroom light",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-061",
+        "time": "2026-11-17T15:40:00",
+        "thread": "site-group",
+        "senderName": "Sean (Walsh Drywall)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-drywall",
+        "text": "wed afternoon we tape the 206 niche wall",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-062",
+        "time": "2026-11-17T16:00:00",
+        "thread": "site-group",
+        "senderName": "Jonas (Brandt Electric)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-electrical",
+        "text": "wed afternoon we hang the 202 kitchen lights",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-063",
+        "time": "2026-11-17T16:30:00",
+        "thread": "site-group",
+        "senderName": "Ana (Brandt Electric)",
+        "senderRole": "crew",
+        "crewId": "crew-electrical",
+        "text": "we finished the 204 bath first fix today, photos in the group",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "c-064",
+        "time": "2026-11-17T17:00:00",
+        "thread": "site-group",
+        "senderName": "Dana Pierce",
+        "senderRole": "superintendent",
+        "text": "good day all. locking up 18:00",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "rehearse",
+      "time": "2026-11-17T20:00:00",
+      "day": "2026-11-18"
+    }
+  ]
+}

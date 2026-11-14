@@ -26,6 +26,8 @@ interface SiteStore {
   busy?: string;
   /** Crew phone inset on the main screen. */
   phoneOpen: boolean;
+  /** Presenter beat on screen (presenter mode only). Drives what the plan emphasises; never changes data. */
+  focus?: string;
   /**
    * A message the presenter sends from the phone. The Phone component picks it up and submits it
    * through its own send path (same API calls as typing), then calls `done`.
@@ -40,6 +42,7 @@ interface SiteStore {
   runAgain: (keepLearning: boolean) => Promise<void>;
   teach: (item: UnresolvedItem, alias: string, elementId: string) => Promise<void>;
   setPhoneOpen: (open: boolean) => void;
+  setFocus: (focus: string | undefined) => void;
   /** Open the phone and send `text` as `crewId` through the phone's own send. Resolves when answered. */
   phoneSend: (crewId: string, text: string) => Promise<void>;
   /** Play the ghost reveal again for the ghosts on screen. */
@@ -145,6 +148,7 @@ export const useSite = create<SiteStore>((set, get) => ({
   },
 
   setPhoneOpen: (phoneOpen) => set({ phoneOpen }),
+  setFocus: (focus) => set({ focus }),
 
   phoneSend: (crewId, text) =>
     new Promise<void>((resolve) => {

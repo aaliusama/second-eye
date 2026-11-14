@@ -1,0 +1,59 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "c-026",
+  "operations": [
+    {
+      "id": "op-c-026-1",
+      "time": "2026-11-16T14:00:00",
+      "sourceMessageId": "c-026",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-c-026-1",
+        "crewId": "crew-tiling",
+        "day": "2026-11-17",
+        "slot": "morning",
+        "order": 0,
+        "taskType": "other",
+        "description": "measure up the 203 bath",
+        "placeId": "room-203",
+        "elementIds": [],
+        "status": "planned",
+        "sourceMessageId": "c-026",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-c-026-1",
+      "crewId": "crew-tiling",
+      "time": "2026-11-16T14:00:00",
+      "sourceMessageId": "c-026",
+      "confidence": 1,
+      "day": "2026-11-17",
+      "slot": "morning",
+      "taskType": "other",
+      "description": "measure up the 203 bath",
+      "placeId": "room-203",
+      "elementIds": []
+    }
+  ],
+  "facts": {
+    "id": "c-026",
+    "plans": [
+      {
+        "day": "2026-11-17",
+        "slot": "morning",
+        "taskType": "other",
+        "placeId": "room-203",
+        "placeSaid": null,
+        "elementIds": [],
+        "description": "measure up the 203 bath",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

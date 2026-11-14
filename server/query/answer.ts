@@ -282,7 +282,7 @@ function canIStart(q: Question, query: Extract<StructuredQuery, { kind: "can_i_s
   return {
     questionId: q.id,
     kind: "answer",
-    text: `CLEAR: per the record nothing blocks ${what} (checked latest changes, other crews, order of work, open decisions).${note}`,
+    text: `CLEAR: no conflict found in the record for ${what} (checked latest changes, other crews, order of work, open decisions). This is a check of the record, not of the site.${note}`,
     sourceMessageIds: sources,
     elementIds: uniq([query.placeId, ...intent.elementIds]),
     query,
