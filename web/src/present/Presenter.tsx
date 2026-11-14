@@ -87,7 +87,8 @@ async function view(id: BeatId): Promise<string | undefined> {
       scrollTo("learning");
       return;
     case "numbers":
-      scrollTo("measured");
+      // App shows the measured results large while this beat is on screen.
+      s.select(undefined);
       return;
   }
 }
@@ -167,6 +168,7 @@ export function Presenter() {
     setIndex(next);
     setNote(undefined);
     const beat = BEATS[next]!;
+    useSite.getState().setFocus(beat.id);
     try {
       let skipped: string | undefined;
       if (run && !done.current.has(beat.id)) {
@@ -211,6 +213,10 @@ export function Presenter() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [on, index, go]);
+
+  useEffect(() => {
+    if (!on) useSite.getState().setFocus(undefined);
+  }, [on]);
 
   if (!on || hidden) return null;
   const beat = BEATS[index];
