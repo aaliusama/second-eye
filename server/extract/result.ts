@@ -7,6 +7,9 @@ import type { MessageFacts } from "./facts";
 // - A move without a direction or distance becomes set_status "unconfirmed" with the confidence. Never guessed.
 // - Plans count only from a crew sender (the crew is the sender's crew), and only for the day after the message:
 //   the plan the evening rehearsal plays. "coat 2 monday" in a Friday progress report is not tomorrow's plan.
+// - A status that settles a decision (approved, or anything that takes an element out of "proposed") counts
+//   only from a sender who can decide (DECIDERS) and only when the message is not a question. Otherwise it is
+//   dropped: the element stays "proposed", so the open_decision check keeps holding the work. Fail closed.
 
 const STEP: Record<"north" | "south" | "east" | "west", [number, number]> = {
   north: [0, 1],
@@ -43,6 +46,23 @@ export function grounded(text: string, el: { name: string; aliases: string[] }):
   return new RegExp(`\\b${unit}\\b`).test(said) || el.aliases.some((a) => said.includes(a.toLowerCase()));
 }
 
+/** Roles that can settle a design decision. A crew or crew lead reporting "owner approved it" cannot. */
+export const DECIDERS: ReadonlySet<ChatMessage["senderRole"]> = new Set(["architect", "office", "superintendent"]);
+
+/** A question does not settle anything: "owner approved it right?" asks, it does not tell. */
+export const isQuestion = (text: string) => text.includes("?");
+
+/**
+ * Whether a status change from this message may stand. A change that would settle a decision
+ * (approved anywhere, or any other state on an element that is still proposed) needs a deciding
+ * sender and a statement, not a question. Everything else passes.
+ */
+export function maySettle(message: ChatMessage, current: Scene["elements"][number]["state"], next: string): boolean {
+  const settles = next === "approved" || (current === "proposed" && next !== "proposed");
+  if (!settles) return true;
+  return DECIDERS.has(message.senderRole) && !isQuestion(message.text);
+}
+
 export function toResult(message: ChatMessage, facts: MessageFacts, scene: Scene): ExtractResult {
   const byId = new Map(scene.elements.map((e) => [e.id, e]));
   const isPlace = (id: string | null) => id !== null && ["room", "zone"].includes(byId.get(id)?.type ?? "");
@@ -62,6 +82,7 @@ export function toResult(message: ChatMessage, facts: MessageFacts, scene: Scene
     const el = byId.get(c.elementId);
     if (!el || !said(el.id)) continue;
     if (c.kind === "status") {
+      if (!maySettle(message, el.state, c.state)) continue;
       operations.push({ ...base(c.confidence), type: "set_status", elementId: el.id, state: c.state });
     } else if (c.direction && c.metres) {
       const [sx, sy] = STEP[c.direction];
@@ -74,6 +95,7 @@ export function toResult(message: ChatMessage, facts: MessageFacts, scene: Scene
         note: `${cm} cm ${c.direction}`,
       });
     } else {
+      if (!maySettle(message, el.state, "unconfirmed")) continue;
       operations.push({ ...base(c.confidence), type: "set_status", elementId: el.id, state: "unconfirmed" });
     }
   }
