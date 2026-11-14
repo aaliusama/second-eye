@@ -80,6 +80,13 @@ chat message -> server/extract -> operations + intents -> server/model -> scene 
 - Crew phone: `/phone` route (`web/src/Phone.tsx`) and an inset on the main screen; posts to `POST /api/message`.
 - Presenter mode (lane L): `?present=1` or key P, `web/src/present/`. Each beat calls the same store actions and the phone's own send path.
 
+## Web: trace, 3D lens, drawings (lane D)
+
+- "How it decided" (`web/src/Trace.tsx`, pure logic in `web/src/howDecided.ts`): one finding traced as message -> facts the language model read (plan tasks and element history rows in the scene that carry that `sourceMessageId`, with their confidence) -> `finding.rule` -> the finding with `finding.measure` numbers -> its fixes. Fix status comes from `/api/fixes` plus `/api/acknowledgements`: sent is "waiting for reply" until a receipt says confirmed. A missing step says "not found" or "not recorded"; nothing is inferred. Opened from each incident card and from the inspector; store field `trace`.
+- 3D lens: `ModelView3D` takes `lens` and `exposedIds`. Elements are drawn from `beliefGeometry` / `beliefState` (same `derive.ts` helpers as the flat view); walls glide in `useFrame` by mutating refs (no setState, demand frameloop); the record where the crew differs is a dashed outline that is mounted once and toggled visible. Ghosts are hidden (not unmounted) under a lens, as in the flat view. The lens control is shown in both views.
+- Lane B/C drawings, only when the fields are present (`web/src/depth.ts`): flat view draws `measure.clearance` (work-zone hatch, recorded face in ink, believed face in redline unless within tolerance, note with the numbers) and `measure.overlap` (each crew's zone dashed in its hue, the shared area hatched in redline). The timeline draws `rehearsal.graph`: arrows between bars (critical path heavy ink, violated edges dashed redline), bars of one crew stacked when they share a slot, and a "If this slips" readout for a selected bar. Absent fields draw nothing extra.
+- Sample data for those fields lives in `web/src/fixtures/laneSamples.ts` (tests, and the dev-only `?sample=lanes` flag, which shows a banner). It is dynamically imported only in a dev build, never in the live data path.
+
 ## Tests, e2e, video (lane M)
 
 - `npm test`: unit tests in `contracts`, `server`, `eval` (root `vitest.config.ts`); `mcp` has its own.

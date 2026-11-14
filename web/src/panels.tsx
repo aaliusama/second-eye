@@ -94,12 +94,16 @@ export function Inspector({
 }
 
 function FindingBlock({ f, scene, messages }: { f: Finding; scene: Scene; messages: Map<string, ChatMessage> }) {
+  const setTrace = useSite((s) => s.setTrace);
   return (
     <section className="finding">
       <p className="severity">
         {f.severity === "hold" ? "Hold" : "Check"} · {f.check.replace(/_/g, " ")} · {f.trigger === "live" ? "live check" : "evening rehearsal"}
       </p>
       <p>{f.summary}</p>
+      <button type="button" className="quiet trace-open" onClick={() => setTrace(findingKey(f))}>
+        How it decided
+      </button>
       {f.ghost && <p className="meta">Ghost offset: {f.ghost.label}</p>}
       <h3>What was said</h3>
       <Source id={f.sourceMessageId} messages={messages} scene={scene} />

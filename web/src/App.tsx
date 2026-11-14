@@ -1,4 +1,5 @@
 import { Component, lazy, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
+import type { Rehearsal, StateResponse } from "@site/contracts";
 import { onChange } from "./api";
 import {
   elementById,
@@ -27,6 +28,7 @@ import { Phone } from "./Phone";
 import { Presenter } from "./present/Presenter";
 import { useReveal } from "./reveal";
 import { Slider } from "./Slider";
+import { Trace } from "./Trace";
 import { useSite } from "./store";
 
 // Owner: D. The model is the page. Flat SVG view always works; 3D is a second renderer (lane H).
@@ -46,6 +48,21 @@ class Fallback extends Component<{ onError: () => void; children: ReactNode }, {
   render() {
     return this.state.failed ? null : this.props.children;
   }
+}
+
+type Sampler = (state: StateResponse, rehearsal: Rehearsal | undefined) => { state: StateResponse; rehearsal: Rehearsal | undefined };
+
+/**
+ * Dev builds only: `?sample=lanes` draws sample lane B/C results (finding.measure, rehearsal.graph)
+ * over the live record, so the drawings can be seen before those lanes land. Production never loads it.
+ */
+function useLaneSamples(state: StateResponse | undefined, rehearsal: Rehearsal | undefined) {
+  const [sampler, setSampler] = useState<{ fn: Sampler }>();
+  useEffect(() => {
+    if (!import.meta.env.DEV || new URLSearchParams(window.location.search).get("sample") !== "lanes") return;
+    void import("./fixtures/laneSamples").then((m) => setSampler({ fn: m.withLaneSamples }));
+  }, []);
+  return useMemo(() => (sampler && state ? { ...sampler.fn(state, rehearsal), sampled: true } : { state, rehearsal, sampled: false }), [sampler, state, rehearsal]);
 }
 
 function useLiveRefresh() {
@@ -94,9 +111,10 @@ function Main() {
   useLiveRefresh();
   const status = useSite((s) => s.status);
   const error = useSite((s) => s.error);
-  const state = useSite((s) => s.state);
+  const liveState = useSite((s) => s.state);
   const messages = useSite((s) => s.messages);
-  const rehearsal = useSite((s) => s.rehearsal);
+  const liveRehearsal = useSite((s) => s.rehearsal);
+  const { state, rehearsal, sampled } = useLaneSamples(liveState, liveRehearsal);
   const unresolved = useSite((s) => s.unresolved);
   const asOf = useSite((s) => s.asOf);
   const setAsOf = useSite((s) => s.setAsOf);
@@ -114,6 +132,8 @@ function Main() {
   const phoneOpen = useSite((s) => s.phoneOpen);
   const setPhoneOpen = useSite((s) => s.setPhoneOpen);
   const focus = useSite((s) => s.focus);
+  const trace = useSite((s) => s.trace);
+  const setTrace = useSite((s) => s.setTrace);
   const story = focus !== undefined && STORY_BEATS.has(focus);
   useEffect(() => {
     setWorkspace(focus === "learn" ? "learning" : focus === "why" ? "knows" : focus === "ask" || focus === "run2" || focus === "ghost" ? "crew" : focus === "numbers" ? "record" : "today");
@@ -142,7 +162,9 @@ function Main() {
     const clearIds = new Set(all.filter((f) => resolved.has(f.id)).flatMap((f) => f.elementIds));
     const active = new Set(frame?.activeTaskIds ?? []);
     const activeTasks = state.scene.tasks.filter((t) => active.has(t.id));
-    return { all, visible, ghosts, conflictIds, clearIds, activeTasks, resolved, sent };
+    // Lane B's measured geometry. In the story beats, only the story wall, so one red thing stays on screen.
+    const measured = [...new Map(visible.filter((f) => f.measure && (!story || f.ghost?.elementId === STORY_ELEMENT)).map((f) => [f.id, f])).values()];
+    return { all, visible, ghosts, conflictIds, clearIds, activeTasks, resolved, sent, measured };
   }, [state, rehearsal, slider, asOf, story]);
 
   const reveal = useReveal(d?.ghosts.map(findingKey) ?? [], run);
@@ -189,6 +211,7 @@ function Main() {
       reveal={reveal}
       lens={knowledge?.crew}
       exposedIds={knowledge?.exposedIds}
+      measured={d.measured}
     />
   );
   const lensCrew = knowledge?.crew;
@@ -226,8 +249,7 @@ function Main() {
         <div className="model-caption">
           <div><p className="meta">{asOf ? "Site history" : "Work preparation"}</p>
           <h2>{lensCrew ? <>The floor as <em className="lens-name">{lensCrew.name}</em> knows it</> : story ? "The 204 bathroom wall" : state.scene.name}</h2></div>
-          {view === "flat" || no3D ? (
-            <div className="lens-control">
+          <div className="lens-control">
               <span className="lens-label" id="lens-label">See the floor as</span>
               <div className="lens-switch" role="group" aria-labelledby="lens-label">
                 <button type="button" aria-pressed={!lens} onClick={() => setLens(undefined)}>Record</button>
@@ -237,13 +259,11 @@ function Main() {
                   </button>
                 ))}
               </div>
-            </div>
-          ) : (
-            <span className="record-basis">{asOf ? formatTime(asOf) : "Plans and changes, per the record"}</span>
-          )}
+          </div>
         </div>
-        {(asOf || error) && (
+        {(asOf || error || sampled) && (
           <div className="banner">
+            {sampled && <span>Sample lane data for drawing checks (dev only), not measured</span>}
             {asOf && (
               <>
                 <span>Per the record as of {formatTime(asOf)}</span>
@@ -266,6 +286,8 @@ function Main() {
                   onSelect={select3D}
                   revealFindingKey={reveal.key}
                   onUnavailable={backToFlat}
+                  lens={lensCrew}
+                  exposedIds={knowledge?.exposedIds}
                 />
               </Suspense>
             </Fallback>
@@ -275,7 +297,7 @@ function Main() {
         )}
         {focus === "numbers" && <MeasuredLarge />}
         <Presenter />
-        {lensCrew && (view === "flat" || no3D) ? (
+        {lensCrew ? (
           <div className="drawing-legend lens-legend" aria-live="polite">
             <span><i className="legend-line" />What {lensCrew.name} believes</span>
             <span><i className="legend-line soft-line" />Record, not heard</span>
@@ -299,8 +321,12 @@ function Main() {
           )}
         </nav>
         <div id="desk-today" hidden={workspace !== "today"}>
-        <Inspector scene={state.scene} selection={selection} findings={d.all} messages={msgMap} onClose={() => select(undefined)} />
-        {!asOf && !story && !selection && <IncidentFocus scene={state.scene} findings={d.visible} fixes={state.fixes} messages={messages} onInspect={(finding) => { select({ kind: "finding", key: findingKey(finding) }); setWorkspace("today"); }} />}
+        {trace ? (
+          <Trace finding={d.all.find((f) => findingKey(f) === trace)} scene={state.scene} messages={messages} fixes={state.fixes} onClose={() => setTrace(undefined)} />
+        ) : (
+          <Inspector scene={state.scene} selection={selection} findings={d.all} messages={msgMap} onClose={() => select(undefined)} />
+        )}
+        {!asOf && !story && !selection && <IncidentFocus scene={state.scene} findings={d.visible} fixes={state.fixes} messages={messages} onInspect={(finding) => { select({ kind: "finding", key: findingKey(finding) }); setWorkspace("today"); }} onTrace={(finding) => { setTrace(findingKey(finding)); setWorkspace("today"); }} />}
         {(focus === "ghost" || focus === "why") && <section className="panel story-context">
           <h2>One change. Two versions.</h2>
           <p>The crew's intended work is checked against the latest recorded wall.</p>
@@ -317,7 +343,7 @@ function Main() {
         </details>
         </div>
         <div id="desk-knows" hidden={workspace !== "knows"}>
-          <Knowledge scene={state.scene} flagged={knowledge?.flagged} lens={lens} selectedElementId={selectedId} onLens={(id) => { setLens(id); if (view === "3d") setView("flat"); }} onSelectElement={(id) => select({ kind: "element", id })} />
+          <Knowledge scene={state.scene} flagged={knowledge?.flagged} lens={lens} selectedElementId={selectedId} onLens={setLens} onSelectElement={(id) => select({ kind: "element", id })} />
         </div>
         <div id="desk-record" hidden={workspace !== "record"}>
         {!asOf && <Huddle day={rehearsal?.day} messages={messages} revision={`${state.t}:${messages.length}:${state.fixes.map((f) => `${f.id}-${f.status}`).join(",")}`} />}
