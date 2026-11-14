@@ -92,6 +92,15 @@ export function ModelView3D(props: ModelView3DProps) {
   useEffect(() => {
     if (!available) onUnavailable?.();
   }, [available, onUnavailable]);
+  // Leaving 3D on purpose (Flat) unmounts the canvas, and three.js then drops its own WebGL context.
+  // That context loss is not a failure: without this, the app took it for "no WebGL" and hid the toggle.
+  const closing = useRef(false);
+  useLayoutEffect(() => {
+    closing.current = false;
+    return () => {
+      closing.current = true;
+    };
+  }, []);
   if (!available) return null;
 
   return (
@@ -104,7 +113,7 @@ export function ModelView3D(props: ModelView3DProps) {
         camera={{ fov: 30, near: 0.1, far: 600, position: [0, 80, 0.01] }}
         gl={{ antialias: true }}
         onCreated={({ gl }) => {
-          gl.domElement.addEventListener("webglcontextlost", () => onUnavailable?.(), { once: true });
+          gl.domElement.addEventListener("webglcontextlost", () => { if (!closing.current) onUnavailable?.(); }, { once: true });
         }}
         onPointerMissed={() => undefined}
         style={{ width: "100%", height: "100%", display: "block" }}
