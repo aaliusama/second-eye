@@ -1,0 +1,39 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "c-057",
+  "operations": [],
+  "intents": [
+    {
+      "id": "intent-c-057-1",
+      "crewId": "crew-painting",
+      "time": "2026-11-17T14:20:00",
+      "sourceMessageId": "c-057",
+      "confidence": 1,
+      "day": "2026-11-18",
+      "slot": "afternoon",
+      "taskType": "other",
+      "description": "move 205 to Wednesday afternoon",
+      "elementIds": [
+        "tile-205-bath"
+      ]
+    }
+  ],
+  "facts": {
+    "id": "c-057",
+    "plans": [
+      {
+        "day": "2026-11-18",
+        "slot": "afternoon",
+        "taskType": "other",
+        "placeId": null,
+        "placeSaid": "205",
+        "elementIds": [
+          "tile-205-bath"
+        ],
+        "description": "move 205 to Wednesday afternoon",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

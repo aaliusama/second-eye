@@ -1,0 +1,59 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "c-031",
+  "operations": [
+    {
+      "id": "op-c-031-1",
+      "time": "2026-11-16T15:35:00",
+      "sourceMessageId": "c-031",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-c-031-1",
+        "crewId": "crew-drywall",
+        "day": "2026-11-17",
+        "slot": "afternoon",
+        "order": 0,
+        "taskType": "finish_drywall",
+        "description": "tapes and muds in unit 202",
+        "placeId": "room-202",
+        "elementIds": [],
+        "status": "planned",
+        "sourceMessageId": "c-031",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-c-031-1",
+      "crewId": "crew-drywall",
+      "time": "2026-11-16T15:35:00",
+      "sourceMessageId": "c-031",
+      "confidence": 1,
+      "day": "2026-11-17",
+      "slot": "afternoon",
+      "taskType": "finish_drywall",
+      "description": "tapes and muds in unit 202",
+      "placeId": "room-202",
+      "elementIds": []
+    }
+  ],
+  "facts": {
+    "id": "c-031",
+    "plans": [
+      {
+        "day": "2026-11-17",
+        "slot": "afternoon",
+        "taskType": "finish_drywall",
+        "placeId": "room-202",
+        "placeSaid": null,
+        "elementIds": [],
+        "description": "tapes and muds in unit 202",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

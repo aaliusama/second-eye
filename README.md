@@ -15,9 +15,9 @@ npm run demo
 
 Open http://localhost:5173. The demo plays `data/replay.golden.json` with cached LLM output from `data/llm-cache/`, so it needs no API key and no network.
 
-For unscripted crew messages, set `GROQ_API_KEY` in `.env`, then run `npm run demo:live`. This enables the existing live extractor for uncached wording and requires network access. It can still fail or leave a message unresolved; no extraction is not a clearance. Stop your existing demo process before starting another on the same ports.
+For unscripted crew messages, set `GROQ_API_KEY` in `.env`, then run `npm run demo:live`. Prepared messages still read the golden cache; any other wording is read live by Groq (about 0.5-4 s per message in our runs), checked, and stored in the gitignored `data/llm-cache-live/`, never in the golden cache. A live call gives up after a 15 s timeout or two attempts, and the phone then says so: "Live reading failed ... Nothing was guessed." In plain `npm run demo` (offline), an unknown wording is answered "Not checked: Live reading is off", never cleared. Groq's free tier rate-limits bursts; one of eight rapid test messages failed this way and succeeded when resent 20 s later. Stop your existing demo process before starting another on the same ports.
 
-`npm run eval:paraphrase` evaluates the separate small paraphrase challenge set through uncached model calls and writes `eval/paraphrase-results.json`. It does not update the golden labels or extraction cache. An unavailable model is reported as unavailable, not as a successful negative case. These development challenge cases are not field validation.
+`npm run eval:paraphrase` runs the 3-case paraphrase set through uncached model calls (`eval/paraphrase-results.json`). `npm run eval:challenge` runs the separate challenge set in `data/challenge/` (see below). Neither touches the golden labels or cache. An unavailable model is reported as unavailable, not as a successful negative.
 
 - Presenter mode: http://localhost:5173/?present=1 (or press P). One key per demo beat: → next beat, ← back, R reset, H hide the bar.
 - Crew phone: http://localhost:5173/phone, sized for a real phone. Send a message as a crew and it is checked live.
@@ -67,7 +67,18 @@ The demo video recorder lives in `video/` (standalone, see `video/README.md`).
 | Open decision | 4 | 0 | 0 |
 | Total | 15 | 0 | 0 |
 
-These are synthetic-set results, not field performance or extraction accuracy. The results pool live and evening checks and retain alerts resolved later. See `eval/results.json`, `eval/results.detail.json` and `eval/README.md` for matching rules and limitations.
+These are synthetic-set results, not field performance or extraction accuracy. The results pool live and evening checks and retain alerts resolved later. See `eval/results.json`, `eval/results.detail.json` and `eval/README.md` for matching rules and limitations. The golden set was used during development, so it is a regression set, not a holdout. Live checks alone catch 14 of 15; case OW3 is caught only by the evening rehearsal.
+
+### Challenge set (written before any run)
+
+`data/challenge/` is a second run on the same floor: 64 messages over three new days, 14 labelled cases and 7 planted non-cases (an already informed crew, a cancellation, an ambiguous nickname, harmless look-alikes), committed before the system ever read it. It was extracted once with live Groq (outputs stored with provenance in `data/challenge/llm-cache/`) and scored with the same rules: `npm run eval:challenge`.
+
+| Run | Caught | Missed | False alarms | Messages read exactly |
+|---|---:|---:|---:|---:|
+| Run 1, unseen | 6 of 14 | 8 (all extraction failures) | 5 | 50 of 64 |
+| Run 2, after the calendar fix (not unseen) | 8 of 14 | 6 (5 extraction, 1 check) | 4 | 52 of 64 |
+
+Run 1 showed the model resolving weekday names to the wrong date ("wednesday" sent on a Tuesday read as Thursday), so plans for named days were dropped. The fix gives every message a computed seven-day calendar. Run 2 is reported separately because that fix was motivated by run 1. Remaining weaknesses seen in run 2: no way to express a cancellation (the schema has no cancel fact, so a withdrawn plan still clashes); an owner approval ("signed off ..., approved") and two wall moves were not read at all, so a settled decision still raised an alert; plans more than one day ahead are not kept; and a wall correctly recorded as unconfirmed did not stop drywall closing it (a check miss, not an extraction failure). Details per case: `eval/results.challenge.json`, `eval/results.challenge.run2.json`.
 
 ## How the LLM is used
 
@@ -110,7 +121,7 @@ The server listens on port 8787. The web app reaches it through the Vite proxy a
 
 ## Live phone messages and the cache
 
-A message posted live gets an id from its words: `live-<10 hex of sha256(normalised text + crewId)>`, ignoring case, extra spaces and trailing punctuation (`server/api/live-id.ts`). Extraction reads `data/llm-cache/<id>.json`, so a scripted phone message works offline once its cache entry exists. The same words twice in one session are stored as `<id>-2` but read the same entry. A message with no entry extracts nothing in demo mode (logged as `extract.cache_miss`). Every post logs `{"kind":"api.message","messageId":...,"cacheId":...}`.
+A message posted live gets an id from its words: `live-<10 hex of sha256(normalised text + crewId)>`, ignoring case, extra spaces and trailing punctuation (`server/api/live-id.ts`). Extraction reads `data/llm-cache/<id>.json`, then `data/llm-cache-live/<id>.json`, so a scripted phone message works offline once its cache entry exists. The same words twice in one session are stored as `<id>-2` but read the same entry. A message with no entry extracts nothing in demo mode (logged as `extract.cache_miss`). The reply to `POST /api/message` carries `extraction`: `cached`, `live`, `cache_miss_offline` or `live_failed`, and the phone words its answer from it. Every post logs `{"kind":"api.message","messageId":...,"cacheId":...}`.
 
 To get the file name for a scripted message:
 

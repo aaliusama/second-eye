@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { ChatMessage } from "@site/contracts";
 import { fixtureScene, W12_BEFORE } from "@site/contracts/fixtures";
 import { BatchReply, type MessageFacts } from "./facts";
-import { systemPrompt, userPrompt } from "./llm";
+import { calendar, systemPrompt, userPrompt } from "./llm";
 import { toResult, translate } from "./result";
 
 // Owner: B. The rule layer between the LLM's facts and the contract. No network.
@@ -101,6 +101,13 @@ describe("translate and prompt", () => {
     expect(p).toContain("room-204");
     expect(p).not.toContain("blue room");
     expect(p).toContain("Friday 2026-11-13 17:40");
+  });
+
+  it("each message carries a computed calendar, so the model looks days up instead of counting", () => {
+    expect(calendar("2026-11-17T12:30:00")).toBe(
+      "(calendar: tomorrow = Wednesday 2026-11-18, Thursday 2026-11-19, Friday 2026-11-20, Saturday 2026-11-21, Sunday 2026-11-22, Monday 2026-11-23, Tuesday 2026-11-24)",
+    );
+    expect(userPrompt([msg()], structuredClone(fixtureScene))).toContain("tomorrow = Saturday 2026-11-14");
   });
 
   it("the reply schema fills missing lists", () => {

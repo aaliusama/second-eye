@@ -28,7 +28,14 @@ function replyFor(r: PostMessageResponse, cite: Cite): string {
   if (r.intents.length > 0) {
     return `CLEAR: nothing on record conflicts with “${r.intents[0].description}”. Source: ${cite([r.message.id])}.`;
   }
-  return `No plan was extracted, so this message has not been cleared. The offline demo only understands prepared messages; other wording needs live extraction and a working connection. Source: ${cite([r.message.id])}.`;
+  const how = (r as PostMessageResponse & { extraction?: string }).extraction;
+  const why =
+    how === "cache_miss_offline"
+      ? "Live reading is off: the offline demo only reads prepared messages. Start it with npm run demo:live to read any wording."
+      : how === "live_failed"
+        ? "Live reading failed (no answer from the language model in time). Nothing was guessed."
+        : "No plan for a future day was read from these words.";
+  return `Not checked: ${why} This message has not been cleared. Source: ${cite([r.message.id])}.`;
 }
 
 function answerText(a: Answer, cite: Cite): string {

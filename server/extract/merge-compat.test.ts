@@ -35,7 +35,7 @@ describe("merged extraction behavior", () => {
       id: message.id, plans: [], changes: [{ kind: "move", elementId: "W-12", direction: "east", metres: 0.4, confidence: 0.9 }],
     }]);
     const result = await extract(message, ctx, scene);
-    expect(groqFacts).toHaveBeenCalledWith([message], scene);
+    expect(groqFacts).toHaveBeenCalledWith([message], scene, "interactive");
     expect(result.operations[0]).toMatchObject({ type: "move", sourceMessageId: message.id, to: { from: [20.4, 2], to: [20.4, 5] } });
   });
 

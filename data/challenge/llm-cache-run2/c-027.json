@@ -1,0 +1,59 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "c-027",
+  "operations": [
+    {
+      "id": "op-c-027-1",
+      "time": "2026-11-16T14:10:00",
+      "sourceMessageId": "c-027",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-c-027-1",
+        "crewId": "crew-painting",
+        "day": "2026-11-17",
+        "slot": "full_day",
+        "order": 0,
+        "taskType": "paint",
+        "description": "paint ceilings then walls in unit 202",
+        "placeId": "room-202",
+        "elementIds": [],
+        "status": "planned",
+        "sourceMessageId": "c-027",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-c-027-1",
+      "crewId": "crew-painting",
+      "time": "2026-11-16T14:10:00",
+      "sourceMessageId": "c-027",
+      "confidence": 1,
+      "day": "2026-11-17",
+      "slot": "full_day",
+      "taskType": "paint",
+      "description": "paint ceilings then walls in unit 202",
+      "placeId": "room-202",
+      "elementIds": []
+    }
+  ],
+  "facts": {
+    "id": "c-027",
+    "plans": [
+      {
+        "day": "2026-11-17",
+        "slot": "full_day",
+        "taskType": "paint",
+        "placeId": "room-202",
+        "placeSaid": null,
+        "elementIds": [],
+        "description": "paint ceilings then walls in unit 202",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

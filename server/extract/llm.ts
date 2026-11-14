@@ -17,6 +17,20 @@ function when(t: string): string {
   return `${day} ${t.slice(0, 10)} ${t.slice(11, 16)}`;
 }
 
+/**
+ * The dates of the next seven days, named, computed here rather than by the model.
+ * The model resolves "wed arvo" or "saturday" by looking it up, not by counting weekdays.
+ */
+export function calendar(t: string): string {
+  const days: string[] = [];
+  for (let i = 1; i <= 7; i++) {
+    const d = new Date(`${t.slice(0, 10)}T00:00:00Z`);
+    d.setUTCDate(d.getUTCDate() + i);
+    days.push(`${i === 1 ? "tomorrow = " : ""}${WEEKDAYS[d.getUTCDay()]} ${d.toISOString().slice(0, 10)}`);
+  }
+  return `(calendar: ${days.join(", ")})`;
+}
+
 export function systemPrompt(scene: Scene): string {
   const elements = scene.elements.map((e) => `- ${e.id} (${e.type}) "${e.name}"`).join("\n");
   const crews = scene.crews.map((c) => `- ${c.id}: ${c.name} (${c.trade})`).join("\n");
@@ -30,6 +44,7 @@ ${crews}
 For EACH message, give {"id": <message id>, "plans": [...], "changes": [...]}. Reply with JSON only: {"results": [ ...one entry per message, same order... ]}.
 
 plans: work the SENDER'S crew says it will do on a future day ("tomorrow", "fri arvo", "saturday morning").
+  day: take the date from the calendar line given with the message ("tomorrow", "wed", "saturday" are looked up there). Never count weekdays yourself.
   {"day":"YYYY-MM-DD","slot":"morning"|"afternoon"|"full_day","taskType":T,"placeId":id|null,"placeSaid":string|null,"elementIds":[ids],"description":string,"confidence":0..1}
   T is one of: layout, rough_in_plumbing, rough_in_electrical, inspection, close_wall, finish_drywall, paint, tile, install_fixtures, other.
   - placeId: the room or zone the work is in. "204", "unit 204", "the 204 bath" mean room-204. If the place is a nickname or unclear, placeId is null and placeSaid holds the words. Never guess a place.
@@ -52,7 +67,7 @@ export function userPrompt(messages: ChatMessage[], scene: Scene): string {
   return messages
     .map((m) => {
       const from = m.crewId ? `${m.senderName}, crew ${m.crewId} (${crewName(m.crewId) ?? "?"})` : `${m.senderName} (${m.senderRole})`;
-      return `[${m.id}] sent ${when(m.time)} in ${m.thread} by ${from}${m.kind === "voice" ? " (voice note)" : ""}:\n${m.text}`;
+      return `[${m.id}] sent ${when(m.time)} in ${m.thread} by ${from}${m.kind === "voice" ? " (voice note)" : ""}\n${calendar(m.time)}\n${m.text}`;
     })
     .join("\n\n");
 }
@@ -64,19 +79,37 @@ function retryAfter(res: Response, body: string): number {
   return m ? Number(m[1]) : 5;
 }
 
-async function call(messages: { role: string; content: string }[]): Promise<string> {
+/**
+ * patient (cache builders, evaluation): wait out rate limits, up to 8 tries.
+ * interactive (a live demo message): at most 2 tries and short waits, so a phone never hangs.
+ */
+export type CallMode = "patient" | "interactive";
+const LIMITS = {
+  patient: { tries: 8, timeoutMs: 60_000, maxWaitS: 60 },
+  interactive: { tries: 2, timeoutMs: 15_000, maxWaitS: 3 },
+} as const;
+
+async function call(messages: { role: string; content: string }[], mode: CallMode): Promise<string> {
   const key = process.env.GROQ_API_KEY;
   if (!key) throw new Error("GROQ_API_KEY is not set; live extraction needs it (see .env.example)");
+  const limit = LIMITS[mode];
   let res: Response | undefined;
   for (let attempt = 1; ; attempt++) {
-    res = await fetch(URL, {
-      method: "POST",
-      headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
-      body: JSON.stringify({ model: groqModel(), temperature: 0, reasoning_effort: "low", response_format: { type: "json_object" }, messages }),
-    });
-    if (res.status !== 429 || attempt >= 8) break;
-    const wait = retryAfter(res, await res.text()) + 1;
-    console.error(`Groq rate limit, waiting ${wait.toFixed(1)} s`);
+    try {
+      res = await fetch(URL, {
+        method: "POST",
+        headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
+        body: JSON.stringify({ model: groqModel(), temperature: 0, reasoning_effort: "low", response_format: { type: "json_object" }, messages }),
+        signal: AbortSignal.timeout(limit.timeoutMs),
+      });
+    } catch (err) {
+      // Timeout or network error: retry once within the limit, then give up honestly.
+      if (attempt >= limit.tries) throw new Error(`Groq request failed: ${(err as Error).name === "TimeoutError" ? `no answer within ${limit.timeoutMs / 1000} s` : String(err)}`);
+      continue;
+    }
+    if ((res.status !== 429 && res.status < 500) || attempt >= limit.tries) break;
+    const wait = Math.min(retryAfter(res, await res.text()) + 1, limit.maxWaitS);
+    console.error(`Groq answered ${res.status}, waiting ${wait.toFixed(1)} s`);
     await new Promise((r) => setTimeout(r, wait * 1000));
   }
   if (!res.ok) throw new Error(`Groq answered ${res.status}: ${(await res.text()).slice(0, 300)}`);
@@ -87,14 +120,14 @@ async function call(messages: { role: string; content: string }[]): Promise<stri
 }
 
 /** Facts for each message, in the same order. One retry with the validation error. */
-export async function groqFacts(messages: ChatMessage[], scene: Scene): Promise<MessageFacts[]> {
+export async function groqFacts(messages: ChatMessage[], scene: Scene, mode: CallMode = "patient"): Promise<MessageFacts[]> {
   const prompt = [
     { role: "system", content: systemPrompt(scene) },
     { role: "user", content: userPrompt(messages, scene) },
   ];
   let lastError = "";
   for (let attempt = 0; attempt < 2; attempt++) {
-    const content = await call(attempt === 0 ? prompt : [...prompt, { role: "user", content: `Your last reply was invalid: ${lastError}. Reply with valid JSON only, one result per message id.` }]);
+    const content = await call(attempt === 0 ? prompt : [...prompt, { role: "user", content: `Your last reply was invalid: ${lastError}. Reply with valid JSON only, one result per message id.` }], mode);
     try {
       const r = BatchReply.safeParse(JSON.parse(content));
       if (r.success) {

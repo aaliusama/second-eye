@@ -1,0 +1,11 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "c-052",
+  "operations": [],
+  "intents": [],
+  "facts": {
+    "id": "c-052",
+    "plans": [],
+    "changes": []
+  }
+}

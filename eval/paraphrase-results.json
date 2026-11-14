@@ -1,8 +1,44 @@
 {
-  "note": "Simulated site data. No accuracy score: the live extraction request failed before this case could be evaluated.",
-  "status": "unavailable",
+  "note": "Simulated site data. Separate development challenge set; not a blind holdout or field-performance estimate. Cases are not cache backed.",
   "model": "openai/gpt-oss-120b",
-  "case": "P1",
-  "casesScored": 0,
-  "error": "TypeError: fetch failed"
+  "cases": 3,
+  "passed": 2,
+  "failed": 1,
+  "falseIntents": 1,
+  "results": [
+    {
+      "id": "P1",
+      "expected": "latest_change",
+      "observed": "latest_change",
+      "pass": true,
+      "operations": 1,
+      "intents": 1,
+      "findings": [
+        "latest_change"
+      ],
+      "reason": "Unseen paraphrase of the cached plumber intent; it should identify next-day plumbing in Unit 204 and the outdated east wall."
+    },
+    {
+      "id": "P2",
+      "expected": "latest_change",
+      "observed": "latest_change",
+      "pass": true,
+      "operations": 1,
+      "intents": 1,
+      "findings": [
+        "latest_change"
+      ],
+      "reason": "Second independently worded intent variant; the crew still has not received the office-thread wall move."
+    },
+    {
+      "id": "N1",
+      "expected": "no_intent",
+      "observed": "other_intent",
+      "pass": false,
+      "operations": 1,
+      "intents": 1,
+      "findings": [],
+      "reason": "Harmless lookalike: a delivery and explicit no-work statement should not be turned into a crew work plan or hold."
+    }
+  ]
 }

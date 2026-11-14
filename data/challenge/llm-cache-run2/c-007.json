@@ -1,0 +1,42 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "c-007",
+  "operations": [
+    {
+      "id": "op-c-007-1",
+      "time": "2026-11-16T08:40:00",
+      "sourceMessageId": "c-007",
+      "thread": "office",
+      "confidence": 1,
+      "type": "move",
+      "elementId": "W-22",
+      "to": {
+        "kind": "segment",
+        "from": [
+          26,
+          7.75
+        ],
+        "to": [
+          29,
+          7.75
+        ],
+        "thickness": 0.12
+      },
+      "note": "25 cm south"
+    }
+  ],
+  "intents": [],
+  "facts": {
+    "id": "c-007",
+    "plans": [],
+    "changes": [
+      {
+        "kind": "move",
+        "elementId": "W-22",
+        "direction": "south",
+        "metres": 0.25,
+        "confidence": 1
+      }
+    ]
+  }
+}
