@@ -80,6 +80,17 @@ chat message -> server/extract -> operations + intents -> server/model -> scene 
 - Crew phone: `/phone` route (`web/src/Phone.tsx`) and an inset on the main screen; posts to `POST /api/message`.
 - Presenter mode (lane L): `?present=1` or key P, `web/src/present/`. Each beat calls the same store actions and the phone's own send path.
 
+## Plan graph (lane C)
+
+`server/checks/graph.ts`, pure. `rehearse()` returns `graph` (contracts `PlanGraph`) next to the frames whenever there is a frame; `GET /api/rehearsal` passes it through.
+
+- Nodes: the rehearsed day's planned tasks plus, transitively, the planned tasks on other days they wait on. Done and cancelled tasks are not nodes; a done prerequisite satisfies its rule, so nothing blocks.
+- Edges come from `PREREQUISITE_RULES` in `server/checks/rules.ts`, same place (same place id or a shared element), place on record. Per rule: if some candidate finishes before the task starts (done, earlier slot, or the same crew earlier in its own order) the task waits on those; otherwise every candidate is an edge with `violated: true`. full_day overlaps both halves.
+- Rules: inspection before close wall (mandatory), close wall before finish drywall, finish drywall before paint, plumbing rough-in before tile: these also drive order_of_work. Graph only, no finding: an inspection needs the rough-in (plumbing or electrical) of the crew that booked it.
+- order_of_work uses the same candidate and "finishes before" functions, so a `prerequisite_later` finding sits exactly on a violated edge of a finding rule. Live intents use the same functions without building the graph.
+- Critical path: the chain of at least one edge with the most half-day slots (morning or afternoon 1, full_day 2). Ties: the predecessor with the smallest id, then the end task with the smallest id.
+- Slips: for every node, the tasks that can no longer start as planned if it finishes one slot late, pushed along the edges. Slots run morning, afternoon, next calendar day (no working calendar).
+
 ## Tests, e2e, video (lane M)
 
 - `npm test`: unit tests in `contracts`, `server`, `eval` (root `vitest.config.ts`); `mcp` has its own.

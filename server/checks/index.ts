@@ -7,9 +7,9 @@ import {
   PREREQUISITES,
   UNSURE_BELOW,
   slotsOverlap,
-  strictlyBefore,
   taskLabel,
 } from "./rules";
+import { finishesBefore, prerequisiteCandidates, type Step } from "./graph";
 
 // Owner: C. The four deterministic checks, rehearsal and fix proposals.
 // Pure functions of scene + plan (+ intent). No LLM, no randomness, no wall-clock time.
@@ -164,10 +164,6 @@ function sure(severity: Finding["severity"], summary: string, isUnsure: boolean)
   return isUnsure ? { severity: "warn", summary: summary + UNSURE_NOTE } : { severity, summary };
 }
 
-/** Two pieces of work are on the same place: same place id, or a shared element (the 203 wall named either way). */
-const samePlace = (t: PlanTask, work: Work) =>
-  t.placeId === work.placeId || t.elementIds.some((e) => work.elementIds.includes(e));
-
 /** latest_change: the crew's heard geometry of a touched element differs from the current one. */
 function latestChange(ctx: Ctx, work: Work): Finding[] {
   const crew = ctx.scene.crews.find((c) => c.id === work.crewId);
@@ -197,23 +193,21 @@ function latestChange(ctx: Ctx, work: Work): Finding[] {
   return out;
 }
 
-/** order_of_work: prerequisites from rules.ts on the same place. */
+/**
+ * order_of_work: prerequisites from rules.ts on the same place. Same edge rule as the plan graph
+ * (graph.ts): a finding is a violated prerequisite edge, or a mandatory one with nothing on record.
+ */
 function orderOfWork(ctx: Ctx, work: Work): Finding[] {
   const rule = PREREQUISITES[work.taskType];
   if (!rule || !knownPlace(ctx.scene, work.placeId)) return [];
-  const prereqs = ctx.tasks.filter((t) => samePlace(t, work) && t.taskType === rule.before && t.id !== work.taskId);
-  if (prereqs.length === 0 && !rule.mandatory) return [];
   // The crew's own position in the day: the plan task itself, or the lowest order among its matching tasks (live).
   const ownOrders = ctx.tasks
     .filter((t) => work.taskIds.includes(t.id) && t.crewId === work.crewId && t.taskType === work.taskType)
     .map((t) => t.order);
-  const ownOrder = ownOrders.length > 0 ? Math.min(...ownOrders) : undefined;
-  // Same crew, same day and slot, earlier in its own order: the crew does the prerequisite first itself.
-  const sameCrewEarlier = (t: PlanTask) =>
-    ownOrder !== undefined && t.crewId === work.crewId && t.day === work.day && t.slot === work.slot && t.order < ownOrder;
-  const satisfied = prereqs.some(
-    (t) => t.status === "done" || strictlyBefore(t.day, t.slot, work.day, work.slot) || sameCrewEarlier(t),
-  );
+  const step: Step = { ...work, id: work.taskId, order: ownOrders.length > 0 ? Math.min(...ownOrders) : undefined };
+  const prereqs = prerequisiteCandidates(ctx.tasks, step, rule);
+  if (prereqs.length === 0 && !rule.mandatory) return [];
+  const satisfied = prereqs.some((t) => finishesBefore(t, step));
   if (satisfied) return [];
   const place = elementName(ctx.scene, work.placeId);
   const summary =
