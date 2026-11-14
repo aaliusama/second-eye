@@ -107,6 +107,9 @@ export const api = {
   postMessage: (body: PostMessageRequest) => call<PostMessageResponse>("/api/message", post(body)),
   approve: (fixId: string) => call<ApproveFixResponse>(`/api/fixes/${encodeURIComponent(fixId)}/approve`, post({})),
   correction: (c: Correction) => call<{ correction: Correction }>("/api/corrections", post(c)),
+  /** DELETE /api/corrections/:id: undo a lesson; the server reruns without it. */
+  undoCorrection: (id: string) =>
+    call<{ ok: true; removed: Correction; t: string }>(`/api/corrections/${encodeURIComponent(id)}`, { method: "DELETE" }),
   reset: (keepLearning: boolean) => call<{ ok: true; t: string }>("/api/reset", post({ keepLearning })),
   eval: () => optional<EvalResults>("/api/eval"),
   /** Lane A route; undefined until the server has it. */

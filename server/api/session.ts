@@ -384,6 +384,22 @@ export function recordCorrection(c: Correction): Correction {
   return parsed;
 }
 
+/**
+ * Undo: removes the correction with this id and drops the session, so the next request replays
+ * without it and behaves as the run before it was learned. The current run is not mined for new
+ * lessons (no learnFromRun), so an undone crew watch is not stored again by the undo itself.
+ * Unknown id: NotFoundError, nothing changes.
+ */
+export function undoCorrection(id: string): Promise<Correction> {
+  return serial(async () => {
+    const removed = learning.remove(id);
+    if (removed.length === 0) throw new NotFoundError(`not found: correction ${id}`);
+    resetSession({ keepLearning: true });
+    logLine({ kind: "api.correction_undone", id, removed: removed.length });
+    return removed[0]!;
+  });
+}
+
 /** Latest day that has plan tasks, or undefined. */
 export function latestDay(scene: Scene): string | undefined {
   let day: string | undefined;

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { fixtureScene } from "@site/contracts/fixtures";
-import { applyToScene, getContext, record, reset } from "./index";
+import { all, applyToScene, getContext, record, remove, reset, version } from "./index";
 
 afterEach(reset);
 
@@ -15,6 +15,20 @@ describe("learning", () => {
       elementId: "room-204",
     });
     expect(getContext().locationAliases["the blue room"]).toBe("room-204");
+  });
+
+  it("remove undoes one correction by id and leaves the rest", () => {
+    const base = { kind: "location_alias", time: "2026-11-13T18:00:00", sourceMessageId: "m-050" } as const;
+    record({ ...base, id: "c-1", alias: "the blue room", elementId: "room-204" });
+    record({ ...base, id: "c-2", alias: "the corner room", elementId: "room-203" });
+    const v = version();
+    expect(remove("c-1").map((c) => c.id)).toEqual(["c-1"]);
+    expect(version()).toBeGreaterThan(v);
+    expect(all().map((c) => c.id)).toEqual(["c-2"]);
+    expect(getContext().locationAliases).toEqual({ "the corner room": "room-203" });
+    const v2 = version();
+    expect(remove("c-1")).toEqual([]);
+    expect(version()).toBe(v2);
   });
 
   it("starts empty", () => {

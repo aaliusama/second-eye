@@ -199,6 +199,31 @@ describe("api", () => {
     await call("POST", "/api/reset", { keepLearning: false });
   });
 
+  it("DELETE /api/corrections/:id undoes a lesson and reruns without it; unknown id is 404", async () => {
+    const aliasesOf = async (id: string) =>
+      StateResponse.parse((await call("GET", "/api/state")).body).scene.elements.find((e) => e.id === id)!.aliases;
+    await call("POST", "/api/corrections", {
+      kind: "location_alias", id: "c-undo", time: "2026-11-13T18:00:00", sourceMessageId: "live-1", alias: "the blue room", elementId: "room-203",
+    });
+    await call("POST", "/api/reset", {});
+    expect(await aliasesOf("room-203")).toContain("the blue room");
+    const before = learning.version();
+
+    const r = await call("DELETE", "/api/corrections/c-undo");
+    expect(r.status).toBe(200);
+    expect(r.body.ok).toBe(true);
+    expect(r.body.removed).toEqual(expect.objectContaining({ id: "c-undo", alias: "the blue room" }));
+    expect(typeof r.body.t).toBe("string");
+    expect(learning.version()).toBeGreaterThan(before);
+    expect(learning.all().some((c) => c.id === "c-undo")).toBe(false);
+    expect(learning.getContext().locationAliases).toEqual({});
+    // The rerun is already without the nickname: behaves as the run before it was learned.
+    expect(await aliasesOf("room-203")).not.toContain("the blue room");
+
+    const again = await call("DELETE", "/api/corrections/c-undo");
+    expect(again.status).toBe(404);
+  });
+
   it("invalid correction is 400", async () => {
     expect((await call("POST", "/api/corrections", { kind: "location_alias" })).status).toBe(400);
   });
