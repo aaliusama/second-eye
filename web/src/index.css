@@ -1295,3 +1295,6 @@ select:focus-visible, input:not([type="range"]):focus-visible, textarea:focus-vi
 .lesson-side.after .lesson-label { color: var(--clear); }
 .lesson-foot { font-size: 11.5px; color: var(--ink-soft); }
 @media (max-width: 420px) { .lesson-pair { grid-template-columns: 1fr; } }
+.banner.stale { max-width: min(720px, calc(100% - 2 * var(--pad))); box-shadow: var(--depth-float), inset 3px 0 0 var(--pending); padding: 10px 14px; line-height: 1.45; }
+.banner.stale code { font: inherit; font-weight: 650; background: var(--paper); padding: 1px 6px; border-radius: 4px; }
+.banner.stale { top: auto; bottom: calc(var(--pad) + 52px); }

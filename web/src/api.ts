@@ -90,6 +90,8 @@ async function optionalPost<T>(path: string, body: unknown): Promise<T | undefin
 }
 
 export const api = {
+  /** GET /api/health: apiVersion is the API_VERSION the server process started with. */
+  health: () => optional<{ ok: true; liveLlm: boolean; apiVersion?: number }>("/api/health"),
   acknowledgements: () => call<AcknowledgementsResponse>("/api/acknowledgements"),
   acknowledge: (fixId: string, crewId: string) => call<AcknowledgeFixResponse>(`/api/fixes/${encodeURIComponent(fixId)}/acknowledge`, post({ crewId })),
   ask: (crewId: string, text: string) => optionalPost<Answer>("/api/ask", { crewId, text }),

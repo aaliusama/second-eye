@@ -27,6 +27,7 @@ Second Eye reads a construction site's chat messages, keeps a sourced model of o
 7. Before saying a lane is done: `npm run typecheck`, `npm test`, `npm run eval` (must stay 15/15), and look at a screenshot of anything visible. Windows: use `npm.cmd` if PowerShell blocks `npm`.
 8. Commit messages are plain. Work on branches/worktrees; merge to `main` only when all checks pass.
 9. Contracts in `contracts/` may be extended when a lane needs it, but say so in the commit and keep old data valid.
+10. When you add or change an HTTP route or a response shape, bump `API_VERSION` in `contracts/src/index.ts`. The web app then tells anyone running an older server to restart it, instead of showing empty panels.
 
 ## 4. Work lanes (run in parallel; each lane owns its files)
 

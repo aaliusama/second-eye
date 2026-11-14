@@ -302,7 +302,14 @@ export const EvalResults = z.object({
 
 // ---------- HTTP API ----------
 
-export const HealthResponse = z.object({ ok: z.literal(true), liveLlm: z.boolean() });
+/**
+ * Bump when a route or a response shape changes. The server reports the value it started with
+ * (GET /api/health); the web app compares it with its own copy and says so when the server is older,
+ * instead of failing route by route.
+ */
+export const API_VERSION = 2;
+
+export const HealthResponse = z.object({ ok: z.literal(true), liveLlm: z.boolean(), apiVersion: z.number().int().optional() });
 
 /** GET /api/state?t=<ReplayTime> */
 export const StateResponse = z.object({

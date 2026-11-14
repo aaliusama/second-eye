@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import {
+  API_VERSION,
   Correction,
   AcknowledgeFixRequest,
   Day,
@@ -116,7 +117,7 @@ export async function handle(req: IncomingMessage, res: ServerResponse): Promise
       return send(res, 200, await acknowledgeFix(decodeURIComponent(ack[1]!), body.crewId));
     }
     if (route === "GET /api/health") {
-      const body: HealthResponse = { ok: true, liveLlm: process.env.LIVE_LLM === "1" };
+      const body: HealthResponse = { ok: true, liveLlm: process.env.LIVE_LLM === "1", apiVersion: API_VERSION };
       return send(res, 200, body);
     }
 

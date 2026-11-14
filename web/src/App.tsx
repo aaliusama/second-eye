@@ -113,6 +113,7 @@ function Main() {
   const [workspace, setWorkspace] = useState<"today" | "knows" | "auto" | "record" | "learning" | "crew">("today");
   const lens = useSite((s) => s.lens);
   const setLens = useSite((s) => s.setLens);
+  const serverStale = useSite((s) => s.serverStale);
   const phoneOpen = useSite((s) => s.phoneOpen);
   const setPhoneOpen = useSite((s) => s.setPhoneOpen);
   const focus = useSite((s) => s.focus);
@@ -262,6 +263,11 @@ function Main() {
             <span className="record-basis">{asOf ? formatTime(asOf) : "Plans and changes, per the record"}</span>
           )}
         </div>
+        {serverStale && !error && (
+          <div className="banner stale" role="alert">
+            <span><b>The server is older than this page.</b> Some panels will be empty until you restart it: stop it, then run <code>npm run demo</code>.</span>
+          </div>
+        )}
         {(asOf || error) && (
           <div className="banner">
             {asOf && (
