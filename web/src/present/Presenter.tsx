@@ -33,6 +33,16 @@ function alreadySaid(crewId: string, text: string): boolean {
 
 const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ block: "start", behavior: "auto" });
 
+/** Scrolls the desk so the trace's "Read into facts" step sits under the desk tabs: model step, boundary, rule and finding in view. */
+function showTraceRule() {
+  const side = document.querySelector<HTMLElement>("aside.side");
+  const step = document.querySelector<HTMLElement>(".trace-steps > li:nth-child(2)");
+  if (!side || !step || side.scrollHeight <= side.clientHeight) return;
+  const nav = side.querySelector<HTMLElement>(".workspace-nav");
+  const top = nav ? nav.getBoundingClientRect().bottom : side.getBoundingClientRect().top;
+  side.scrollTop += step.getBoundingClientRect().top - top - 12;
+}
+
 /** Restores what the audience sees for a beat. Safe to run any number of times. */
 async function view(id: BeatId): Promise<string | undefined> {
   const s = useSite.getState();
@@ -70,8 +80,23 @@ async function view(id: BeatId): Promise<string | undefined> {
       useSite.getState().select(g ? { kind: "finding", key: findingKey(g) } : undefined);
       return g ? undefined : "No open ghost on record.";
     }
+    case "decided": {
+      // The ghost finding's "How it decided" trace: message, facts read by the model, the rule, the measured result.
+      if (s.asOf) await s.setAsOf(undefined);
+      const g = currentGhost();
+      if (!g) {
+        useSite.getState().select(undefined);
+        return "No open ghost on record.";
+      }
+      useSite.getState().setTrace(findingKey(g));
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      showTraceRule();
+      return;
+    }
     case "rehearse": {
       s.select(undefined);
+      // The desk starts at its first card again (the trace beat left it scrolled).
+      document.querySelector("aside.side")?.scrollTo({ top: 0 });
       const st = useSite.getState();
       const resolved = st.state ? resolvedFindingIds(st.state.fixes, [...st.state.findings, ...(st.rehearsal?.frames.flatMap((f) => f.findings) ?? [])]) : new Set<string>();
       const first = [...troubleSteps(st.rehearsal, resolved)].sort((a, b) => a - b)[0];

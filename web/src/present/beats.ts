@@ -32,6 +32,7 @@ export type BeatId =
   | "build"
   | "ghost"
   | "why"
+  | "decided"
   | "rehearse"
   | "fix"
   | "confirm"
@@ -51,14 +52,15 @@ export interface Beat {
 /** In demo order. Times match docs/demo-script.md. */
 export const BEATS: Beat[] = [
   { id: "clean", title: "Problem", note: "0:00 Site decisions live in group chats. A change in the office thread never reaches the plumber." },
-  { id: "build", title: "Build", note: "0:20 Chat becomes the model: the wall as of the architect's Rev C, every row quotes its message." },
-  { id: "ghost", title: "Ghost wall", note: "0:45 Plumbing says what it does tomorrow. Red: where plumbing thinks the wall is." },
-  { id: "why", title: "Why", note: "1:20 The floor as Novak Plumbing knows it. Each crew hears different threads, so each works from its own version." },
-  { id: "rehearse", title: "Rehearse", note: "1:35 Tomorrow, played forward. Redline on the track marks the clash." },
-  { id: "fix", title: "Send", note: "1:55 Correction sent. The recorded risk stays open until the crew confirms the revision." },
-  { id: "confirm", title: "Confirm", note: "2:05 Simulate the crew confirming the sent revision. Recheck the record; this is not proof of completed work." },
-  { id: "ask", title: "Ask", note: "2:10 Crews text a question and get an answer from the record, with sources." },
-  { id: "learn", title: "Learn", note: "2:20 Run 1 cannot place \"the blue room\". The superintendent maps it once." },
+  { id: "build", title: "Build", note: "0:15 Chat becomes the model: the wall as of the architect's Rev C, every row quotes its message." },
+  { id: "ghost", title: "Ghost wall", note: "0:30 Plumbing says what it does tomorrow. Red: where plumbing thinks the wall is." },
+  { id: "why", title: "Why", note: "0:55 The floor as Novak Plumbing knows it. Each crew hears different threads, so each works from its own version." },
+  { id: "decided", title: "How it decided", note: "1:10 Said, read into facts by the language model, then a fixed rule with the measured gap. Rules decide." },
+  { id: "rehearse", title: "Rehearse", note: "1:25 Tomorrow, played forward. Arrows: what must finish first. Heavy line: the critical path." },
+  { id: "fix", title: "Send", note: "1:45 Correction sent. The recorded risk stays open until the crew confirms the revision." },
+  { id: "confirm", title: "Confirm", note: "2:00 Simulate the crew confirming the sent revision. Recheck the record; this is not proof of completed work." },
+  { id: "ask", title: "Ask", note: "2:15 Crews text a question and get an answer from the record, with sources." },
+  { id: "learn", title: "Learn", note: "2:25 Run 1 cannot place \"the blue room\". The superintendent maps it once." },
   { id: "run2", title: "Run 2", note: "2:35 Same words, next run: resolved on its own." },
   { id: "numbers", title: "Numbers", note: "2:45 Say the numbers exactly as shown. Close with the anchor sentence." },
 ];
