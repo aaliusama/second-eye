@@ -1,0 +1,251 @@
+{
+  "engine": "Chatterbox (Resemble AI, MIT), default voice, exaggeration 0.5, cfg 0.45",
+  "scenes": {
+    "opening": [
+      {
+        "file": "voice/opening-0.wav",
+        "text": "Thursday afternoon, the architect moves a bathroom wall forty centimetres.",
+        "start": 0.6,
+        "dur": 3.986
+      },
+      {
+        "file": "voice/opening-1.wav",
+        "text": "He posts it in the office chat.",
+        "start": 4.936,
+        "dur": 1.743
+      },
+      {
+        "file": "voice/opening-2.wav",
+        "text": "But the plumbers are not in that chat.",
+        "start": 7.029,
+        "dur": 1.739
+      },
+      {
+        "file": "voice/opening-3.wav",
+        "text": "Saturday morning, they run pipe to a wall that isn't there any more.",
+        "start": 9.368,
+        "dur": 2.933
+      }
+    ],
+    "stat": [
+      {
+        "file": "voice/stat-0.wav",
+        "text": "Nobody did anything wrong. And on Monday, someone pays to rip it out.",
+        "start": 0.3,
+        "dur": 4.245
+      },
+      {
+        "file": "voice/stat-1.wav",
+        "text": "In one industry survey, construction leaders blamed almost half of all rework on poor communication and project information.",
+        "start": 4.945,
+        "dur": 6.141
+      }
+    ],
+    "reveal": [
+      {
+        "file": "voice/reveal-0.wav",
+        "text": "This is Second Eye.",
+        "start": 0.9,
+        "dur": 1.759
+      },
+      {
+        "file": "voice/reveal-1.wav",
+        "text": "It shows you tomorrow's mistake, before it gets built.",
+        "start": 2.959,
+        "dur": 2.863
+      }
+    ],
+    "overview": [
+      {
+        "file": "voice/overview-0.wav",
+        "text": "It reads the group chats that your site already uses, and keeps one shared record of the floor.",
+        "start": 0.3,
+        "dur": 4.535
+      },
+      {
+        "file": "voice/overview-1.wav",
+        "text": "What changed, who said it, and which crew has heard.",
+        "start": 5.085,
+        "dur": 2.607
+      }
+    ],
+    "build": [
+      {
+        "file": "voice/build-0.wav",
+        "text": "Every message becomes an update to that record.",
+        "start": 0.3,
+        "dur": 2.324
+      },
+      {
+        "file": "voice/build-1.wav",
+        "text": "And every update keeps the exact message it came from. Here's the architect, in his own words.",
+        "start": 2.874,
+        "dur": 4.628
+      }
+    ],
+    "ghost": [
+      {
+        "file": "voice/ghost-0.wav",
+        "text": "Now the plumber texts his plan for tomorrow.",
+        "start": 0.3,
+        "dur": 2.302
+      },
+      {
+        "file": "voice/ghost-1.wav",
+        "text": "Second Eye checks it against the record, and draws the problem.",
+        "start": 3.802,
+        "dur": 2.915
+      },
+      {
+        "file": "voice/ghost-2.wav",
+        "text": "Red is where the plumbers will measure from. Black is where the wall is now.",
+        "start": 7.017,
+        "dur": 3.954
+      },
+      {
+        "file": "voice/ghost-3.wav",
+        "text": "Forty centimetres apart.",
+        "start": 11.271,
+        "dur": 1.449
+      },
+      {
+        "file": "voice/ghost-4.wav",
+        "text": "And the plumber gets an answer straight away. Hold. Here's why, and here's who said it.",
+        "start": 13.52,
+        "dur": 3.764
+      }
+    ],
+    "why": [
+      {
+        "file": "voice/why-0.wav",
+        "text": "Why did it happen? Each crew only hears its own threads.",
+        "start": 0.3,
+        "dur": 2.793
+      },
+      {
+        "file": "voice/why-1.wav",
+        "text": "So each crew works from its own version of the building. This is the floor exactly as the plumbers know it.",
+        "start": 3.343,
+        "dur": 4.834
+      }
+    ],
+    "rehearse": [
+      {
+        "file": "voice/rehearse-0.wav",
+        "text": "Every evening, Second Eye plays tomorrow forward.",
+        "start": 0.3,
+        "dur": 2.539
+      },
+      {
+        "file": "voice/rehearse-1.wav",
+        "text": "And lists what to settle before work starts. The things you can't undo come first.",
+        "start": 3.089,
+        "dur": 4.489
+      }
+    ],
+    "send": [
+      {
+        "file": "voice/send-0.wav",
+        "text": "The superintendent sends the fix with one tap.",
+        "start": 0.3,
+        "dur": 2.237
+      },
+      {
+        "file": "voice/send-1.wav",
+        "text": "But sending is not the same as hearing. So it stays amber.",
+        "start": 2.837,
+        "dur": 3.031
+      }
+    ],
+    "confirm": [
+      {
+        "file": "voice/confirm-0.wav",
+        "text": "Until the crew confirms this exact revision.",
+        "start": 0.3,
+        "dur": 2.472
+      },
+      {
+        "file": "voice/confirm-1.wav",
+        "text": "Then the record is checked again, and the warning clears. Every step keeps a receipt.",
+        "start": 3.022,
+        "dur": 3.897
+      }
+    ],
+    "ask": [
+      {
+        "file": "voice/ask-0.wav",
+        "text": "Crews can simply ask. Can we start the bathroom tomorrow morning?",
+        "start": 0.3,
+        "dur": 3.031
+      },
+      {
+        "file": "voice/ask-1.wav",
+        "text": "The answer comes straight from the record, with its sources.",
+        "start": 3.581,
+        "dur": 2.532
+      }
+    ],
+    "learn": [
+      {
+        "file": "voice/learn-0.wav",
+        "text": "And it learns how your site talks. The drywall crew calls unit two oh four the blue room.",
+        "start": 0.3,
+        "dur": 4.713
+      },
+      {
+        "file": "voice/learn-1.wav",
+        "text": "The first time, Second Eye asks instead of guessing.",
+        "start": 5.263,
+        "dur": 2.696
+      },
+      {
+        "file": "voice/learn-2.wav",
+        "text": "After one answer, it knows. Next time, same words, no question.",
+        "start": 8.56,
+        "dur": 4.178
+      }
+    ],
+    "numbers": [
+      {
+        "file": "voice/numbers-0.wav",
+        "text": "We measured it. On our simulated test site, it caught all fifteen labelled problems, with no false alarms.",
+        "start": 0.3,
+        "dur": 5.486
+      },
+      {
+        "file": "voice/numbers-1.wav",
+        "text": "That's simulated data, not a field trial. And we show the numbers exactly as the system prints them.",
+        "start": 6.036,
+        "dur": 4.989
+      }
+    ],
+    "loop": [
+      {
+        "file": "voice/loop-0.wav",
+        "text": "One shared record, checked the moment a crew speaks, and again the evening before.",
+        "start": 0.3,
+        "dur": 4.026
+      },
+      {
+        "file": "voice/loop-1.wav",
+        "text": "People and software agents read the same record. The language model only reads the messages. Clear rules make the call.",
+        "start": 4.576,
+        "dur": 6.366
+      }
+    ],
+    "end": [
+      {
+        "file": "voice/end-0.wav",
+        "text": "Context for the physical world, kept up to date.",
+        "start": 0.4,
+        "dur": 2.349
+      },
+      {
+        "file": "voice/end-1.wav",
+        "text": "Second Eye. See tomorrow's mistake, before it gets built.",
+        "start": 3.049,
+        "dur": 3.066
+      }
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "second-eye-film",
+  "private": true,
+  "type": "module",
+  "description": "Cinematic product film for Second Eye. Standalone Remotion project, not an npm workspace.",
+  "scripts": {
+    "capture": "node capture.mjs",
+    "studio": "remotion studio src/index.tsx --browser-executable \"C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe\"",
+    "render": "node render.mjs",
+    "voice": "bash voice/master.sh public/voice-chatterbox && node voice/timing.mjs",
+    "shots": "node export-shots.mjs"
+  },
+  "dependencies": {
+    "@remotion/bundler": "4.0.540",
+    "@remotion/cli": "4.0.540",
+    "@remotion/renderer": "4.0.540",
+    "kokoro-js": "1.2.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.540"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.12",
+    "playwright-core": "1.49.1",
+    "typescript": "5.6.3"
+  }
+}

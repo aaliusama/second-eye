@@ -1,0 +1,71 @@
+{
+  "_about": "Voice-over for the Second Eye film. One entry per scene, spoken lines in order. 'gap' is the silence (seconds) before the line. Facts only from README.md, docs/pitch.md and eval/results.json. Words to avoid: docs/pitch.md.",
+  "scenes": {
+    "opening": [
+      { "gap": 0.6, "text": "Thursday afternoon, the architect moves a bathroom wall forty centimetres." },
+      { "gap": 0.35, "text": "He posts it in the office chat." },
+      { "gap": 0.35, "text": "But the plumbers are not in that chat." },
+      { "gap": 0.6, "text": "Saturday morning, they run pipe to a wall that isn't there any more." }
+    ],
+    "stat": [
+      { "gap": 0.3, "text": "Nobody did anything wrong. And on Monday, someone pays to rip it out." },
+      { "gap": 0.4, "text": "In one industry survey, construction leaders blamed almost half of all rework on poor communication and project information." }
+    ],
+    "reveal": [
+      { "gap": 0.9, "text": "This is Second Eye." },
+      { "gap": 0.3, "text": "It shows you tomorrow's mistake, before it gets built." }
+    ],
+    "overview": [
+      { "gap": 0.3, "text": "It reads the group chats that your site already uses, and keeps one shared record of the floor." },
+      { "gap": 0.25, "text": "What changed, who said it, and which crew has heard." }
+    ],
+    "build": [
+      { "gap": 0.3, "text": "Every message becomes an update to that record." },
+      { "gap": 0.25, "text": "And every update keeps the exact message it came from. Here's the architect, in his own words." }
+    ],
+    "ghost": [
+      { "gap": 0.3, "text": "Now the plumber texts his plan for tomorrow." },
+      { "gap": 1.2, "text": "Second Eye checks it against the record, and draws the problem." },
+      { "gap": 0.3, "text": "Red is where the plumbers will measure from. Black is where the wall is now." },
+      { "gap": 0.3, "text": "Forty centimetres apart." },
+      { "gap": 0.8, "text": "And the plumber gets an answer straight away. Hold. Here's why, and here's who said it." }
+    ],
+    "why": [
+      { "gap": 0.3, "text": "Why did it happen? Each crew only hears its own threads." },
+      { "gap": 0.25, "text": "So each crew works from its own version of the building. This is the floor exactly as the plumbers know it." }
+    ],
+    "rehearse": [
+      { "gap": 0.3, "text": "Every evening, Second Eye plays tomorrow forward." },
+      { "gap": 0.25, "text": "And lists what to settle before work starts. The things you can't undo come first." }
+    ],
+    "send": [
+      { "gap": 0.3, "text": "The superintendent sends the fix with one tap." },
+      { "gap": 0.3, "text": "But sending is not the same as hearing. So it stays amber." }
+    ],
+    "confirm": [
+      { "gap": 0.3, "text": "Until the crew confirms this exact revision." },
+      { "gap": 0.25, "text": "Then the record is checked again, and the warning clears. Every step keeps a receipt." }
+    ],
+    "ask": [
+      { "gap": 0.3, "text": "Crews can simply ask. Can we start the bathroom tomorrow morning?" },
+      { "gap": 0.25, "text": "The answer comes straight from the record, with its sources." }
+    ],
+    "learn": [
+      { "gap": 0.3, "text": "And it learns how your site talks. The drywall crew calls unit two oh four the blue room." },
+      { "gap": 0.25, "text": "The first time, Second Eye asks instead of guessing." },
+      { "gap": 0.6, "text": "After one answer, it knows. Next time, same words, no question." }
+    ],
+    "numbers": [
+      { "gap": 0.3, "text": "We measured it. On our simulated test site, it caught all fifteen labelled problems, with no false alarms." },
+      { "gap": 0.25, "text": "That's simulated data, not a field trial. And we show the numbers exactly as the system prints them." }
+    ],
+    "loop": [
+      { "gap": 0.3, "text": "One shared record, checked the moment a crew speaks, and again the evening before." },
+      { "gap": 0.25, "text": "People and software agents read the same record. The language model only reads the messages. Clear rules make the call." }
+    ],
+    "end": [
+      { "gap": 0.4, "text": "Context for the physical world, kept up to date." },
+      { "gap": 0.3, "text": "Second Eye. See tomorrow's mistake, before it gets built." }
+    ]
+  }
+}

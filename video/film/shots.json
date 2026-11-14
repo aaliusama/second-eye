@@ -1,0 +1,339 @@
+{
+  "fps": 30,
+  "width": 1920,
+  "height": 1080,
+  "master": {
+    "width": 3840,
+    "height": 2160
+  },
+  "voice": "Chatterbox (Resemble AI, MIT), default voice, exaggeration 0.5, cfg 0.45",
+  "overlapFrames": 12,
+  "totalFrames": 4747,
+  "length": "2:38.2",
+  "scenes": [
+    {
+      "id": "opening",
+      "chapter": "The problem",
+      "start": "0:00.0",
+      "end": "0:13.4",
+      "from": 0,
+      "dur": 402,
+      "source": "designed (scenario illustration)",
+      "feature": "The problem: a change in one thread never reaches another crew",
+      "voice": [
+        {
+          "at": "0:00.6",
+          "text": "Thursday afternoon, the architect moves a bathroom wall forty centimetres."
+        },
+        {
+          "at": "0:04.9",
+          "text": "He posts it in the office chat."
+        },
+        {
+          "at": "0:07.0",
+          "text": "But the plumbers are not in that chat."
+        },
+        {
+          "at": "0:09.4",
+          "text": "Saturday morning, they run pipe to a wall that isn't there any more."
+        }
+      ]
+    },
+    {
+      "id": "stat",
+      "chapter": "The problem",
+      "start": "0:13.0",
+      "end": "0:25.2",
+      "from": 390,
+      "dur": 366,
+      "source": "designed (figure quoted in docs/pitch.md)",
+      "feature": "Why it matters: the cost of rework",
+      "voice": [
+        {
+          "at": "0:13.3",
+          "text": "Nobody did anything wrong. And on Monday, someone pays to rip it out."
+        },
+        {
+          "at": "0:17.9",
+          "text": "In one industry survey, construction leaders blamed almost half of all rework on poor communication and project information."
+        }
+      ]
+    },
+    {
+      "id": "reveal",
+      "chapter": "Second Eye",
+      "start": "0:24.8",
+      "end": "0:31.7",
+      "from": 744,
+      "dur": 208,
+      "source": "designed (brand mark from docs/assets/readme/mark.svg)",
+      "feature": "Name and promise",
+      "voice": [
+        {
+          "at": "0:25.7",
+          "text": "This is Second Eye."
+        },
+        {
+          "at": "0:27.8",
+          "text": "It shows you tomorrow's mistake, before it gets built."
+        }
+      ]
+    },
+    {
+      "id": "overview",
+      "chapter": "Second Eye",
+      "start": "0:31.3",
+      "end": "0:40.1",
+      "from": 940,
+      "dur": 264,
+      "source": "capture/problem.png",
+      "feature": "The superintendent's desk beside the floor plan",
+      "voice": [
+        {
+          "at": "0:31.6",
+          "text": "It reads the group chats that your site already uses, and keeps one shared record of the floor."
+        },
+        {
+          "at": "0:36.4",
+          "text": "What changed, who said it, and which crew has heard."
+        }
+      ]
+    },
+    {
+      "id": "build",
+      "chapter": "Catch it",
+      "start": "0:39.7",
+      "end": "0:50.1",
+      "from": 1192,
+      "dur": 312,
+      "source": "capture/build.png",
+      "feature": "Build: messages become sourced operations on one record",
+      "voice": [
+        {
+          "at": "0:40.0",
+          "text": "Every message becomes an update to that record."
+        },
+        {
+          "at": "0:42.6",
+          "text": "And every update keeps the exact message it came from. Here's the architect, in his own words."
+        }
+      ]
+    },
+    {
+      "id": "ghost",
+      "chapter": "Catch it",
+      "start": "0:49.7",
+      "end": "1:08.1",
+      "from": 1492,
+      "dur": 552,
+      "source": "capture/ghost-wall-burst-*.jpg, capture/ghost-wall.png",
+      "feature": "Listen + Compare: crew intent checked, the ghost wall, HOLD reply with source",
+      "voice": [
+        {
+          "at": "0:50.0",
+          "text": "Now the plumber texts his plan for tomorrow."
+        },
+        {
+          "at": "0:53.5",
+          "text": "Second Eye checks it against the record, and draws the problem."
+        },
+        {
+          "at": "0:56.8",
+          "text": "Red is where the plumbers will measure from. Black is where the wall is now."
+        },
+        {
+          "at": "1:01.0",
+          "text": "Forty centimetres apart."
+        },
+        {
+          "at": "1:03.3",
+          "text": "And the plumber gets an answer straight away. Hold. Here's why, and here's who said it."
+        }
+      ]
+    },
+    {
+      "id": "why",
+      "chapter": "Catch it",
+      "start": "1:07.7",
+      "end": "1:18.1",
+      "from": 2032,
+      "dur": 312,
+      "source": "capture/why.png",
+      "feature": "Per-crew belief: the floor as Novak Plumbing knows it, Who knows what",
+      "voice": [
+        {
+          "at": "1:08.0",
+          "text": "Why did it happen? Each crew only hears its own threads."
+        },
+        {
+          "at": "1:11.1",
+          "text": "So each crew works from its own version of the building. This is the floor exactly as the plumbers know it."
+        }
+      ]
+    },
+    {
+      "id": "rehearse",
+      "chapter": "Fix it",
+      "start": "1:17.7",
+      "end": "1:28.1",
+      "from": 2332,
+      "dur": 312,
+      "source": "capture/rehearse.png",
+      "feature": "Rehearse: tomorrow played forward, priorities before work starts",
+      "voice": [
+        {
+          "at": "1:18.0",
+          "text": "Every evening, Second Eye plays tomorrow forward."
+        },
+        {
+          "at": "1:20.8",
+          "text": "And lists what to settle before work starts. The things you can't undo come first."
+        }
+      ]
+    },
+    {
+      "id": "send",
+      "chapter": "Fix it",
+      "start": "1:27.7",
+      "end": "1:36.1",
+      "from": 2632,
+      "dur": 252,
+      "source": "capture/ghost-wall.png -> capture/send.png",
+      "feature": "Fix: one-tap correction, amber until confirmed",
+      "voice": [
+        {
+          "at": "1:28.0",
+          "text": "The superintendent sends the fix with one tap."
+        },
+        {
+          "at": "1:30.6",
+          "text": "But sending is not the same as hearing. So it stays amber."
+        }
+      ]
+    },
+    {
+      "id": "confirm",
+      "chapter": "Fix it",
+      "start": "1:35.7",
+      "end": "1:44.1",
+      "from": 2872,
+      "dur": 252,
+      "source": "capture/send.png -> capture/confirm.png",
+      "feature": "Confirmation of the exact revision, record rechecked",
+      "voice": [
+        {
+          "at": "1:36.0",
+          "text": "Until the crew confirms this exact revision."
+        },
+        {
+          "at": "1:38.8",
+          "text": "Then the record is checked again, and the warning clears. Every step keeps a receipt."
+        }
+      ]
+    },
+    {
+      "id": "ask",
+      "chapter": "Fix it",
+      "start": "1:43.7",
+      "end": "1:52.1",
+      "from": 3112,
+      "dur": 252,
+      "source": "capture/ask.png, capture/phone-ask.png",
+      "feature": "Crew asks, answer from the record with sources",
+      "voice": [
+        {
+          "at": "1:44.0",
+          "text": "Crews can simply ask. Can we start the bathroom tomorrow morning?"
+        },
+        {
+          "at": "1:47.3",
+          "text": "The answer comes straight from the record, with its sources."
+        }
+      ]
+    },
+    {
+      "id": "learn",
+      "chapter": "It learns",
+      "start": "1:51.7",
+      "end": "2:05.6",
+      "from": 3352,
+      "dur": 415,
+      "source": "capture/learn.png -> capture/run-2.png",
+      "feature": "Learn: unplaceable nickname mapped once, next run resolves it",
+      "voice": [
+        {
+          "at": "1:52.0",
+          "text": "And it learns how your site talks. The drywall crew calls unit two oh four the blue room."
+        },
+        {
+          "at": "1:57.0",
+          "text": "The first time, Second Eye asks instead of guessing."
+        },
+        {
+          "at": "2:00.3",
+          "text": "After one answer, it knows. Next time, same words, no question."
+        }
+      ]
+    },
+    {
+      "id": "numbers",
+      "chapter": "Proof",
+      "start": "2:05.2",
+      "end": "2:17.3",
+      "from": 3755,
+      "dur": 364,
+      "source": "capture/numbers.png (GET /api/eval)",
+      "feature": "Measured results from npm run eval",
+      "voice": [
+        {
+          "at": "2:05.5",
+          "text": "We measured it. On our simulated test site, it caught all fifteen labelled problems, with no false alarms."
+        },
+        {
+          "at": "2:11.2",
+          "text": "That's simulated data, not a field trial. And we show the numbers exactly as the system prints them."
+        }
+      ]
+    },
+    {
+      "id": "loop",
+      "chapter": "Proof",
+      "start": "2:16.9",
+      "end": "2:28.9",
+      "from": 4107,
+      "dur": 361,
+      "source": "designed with real capture crops",
+      "feature": "How the steps work together",
+      "voice": [
+        {
+          "at": "2:17.2",
+          "text": "One shared record, checked the moment a crew speaks, and again the evening before."
+        },
+        {
+          "at": "2:21.5",
+          "text": "People and software agents read the same record. The language model only reads the messages. Clear rules make the call."
+        }
+      ]
+    },
+    {
+      "id": "end",
+      "chapter": "Proof",
+      "start": "2:28.5",
+      "end": "2:38.2",
+      "from": 4456,
+      "dur": 291,
+      "source": "designed",
+      "feature": "Brand, promise, where to try it, boundaries",
+      "voice": [
+        {
+          "at": "2:28.9",
+          "text": "Context for the physical world, kept up to date."
+        },
+        {
+          "at": "2:31.6",
+          "text": "Second Eye. See tomorrow's mistake, before it gets built."
+        }
+      ]
+    }
+  ]
+}
