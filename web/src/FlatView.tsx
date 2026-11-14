@@ -37,7 +37,7 @@ import "./risk.css";
  * Risk hierarchy accents (lane W2). Red is the active conflict only, amber a correction sent or a
  * decision still open, emerald a confirmation on record. Neutrals stay on the tokens.
  */
-const RISK = { conflict: "#EF4444", amber: "#F59E0B", confirmed: "#10B981" } as const;
+const RISK = { conflict: color.redline, amber: color.pending, confirmed: color.clear } as const;
 
 /** A soft glow under active conflict geometry, so a 0.40 m gap reads on a projector. Style only. */
 function RiskGlow({ g, width }: { g: Geometry; width: number }) {

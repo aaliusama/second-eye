@@ -2,9 +2,9 @@
    Lane W2: risk hierarchy. Red = active conflict only. Amber = sent, not confirmed, or still open.
    Emerald = a crew confirmation is on record. Neutrals come from the tokens (var(--...)). */
 :root {
-  --risk-conflict: #EF4444;
-  --risk-amber: #F59E0B;
-  --risk-confirmed: #10B981;
+  --risk-conflict: var(--redline);
+  --risk-amber: var(--pending);
+  --risk-confirmed: var(--clear);
   --risk-shift: 250ms;
 }
 

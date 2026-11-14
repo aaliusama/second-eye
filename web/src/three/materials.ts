@@ -1,6 +1,6 @@
 import { BoxGeometry, Color, MeshBasicMaterial, MeshStandardMaterial, ShadowMaterial } from "three";
 import type { ElementState } from "@site/contracts";
-import { color, scene3d } from "../tokens";
+import { color } from "../tokens";
 
 // Owner: H. Every geometry and material the 3D view shares, created once (web/AGENTS.md 3D rules).
 // Colours only from tokens.ts. Surfaces are matte; the drawing lives in the edges.
@@ -20,19 +20,19 @@ const matte = (hex: string, opacity = 1) =>
 
 /** Fill per element state. Built is the only filled ink; planned is barely there. */
 export const fillByState: Record<ElementState, MeshStandardMaterial> = {
-  planned: matte(scene3d.wall, 0.35),
+  planned: matte(color.paper, 0.35),
   proposed: matte(color.pending, 0.18),
-  approved: matte(scene3d.wall),
-  built: matte(scene3d.built),
+  approved: matte(color.paper),
+  built: matte(color.ink),
   unconfirmed: matte(color.pending, 0.32),
-  conflict: matte(scene3d.wall),
+  conflict: matte(color.paper),
 };
 
-/** Floor slabs read as a dark slab on the dark floor; state shows in the outline. */
+/** Floor slabs read as paper on paper; state shows in the outline. */
 export const slabByState: Record<ElementState, MeshStandardMaterial> = {
-  planned: matte(scene3d.slab, 0.5),
+  planned: matte(color.paper, 0.5),
   proposed: matte(color.pending, 0.12),
-  approved: matte(scene3d.slab),
+  approved: matte(color.paper),
   built: matte(color.inkSoft, 0.22),
   unconfirmed: matte(color.pending, 0.22),
   conflict: matte(color.redline, 0.08),
@@ -60,6 +60,6 @@ export const ghostFill = new MeshBasicMaterial({ color: new Color(color.redline)
 export const ghostRevealFill = new MeshBasicMaterial({ color: new Color(color.redline), transparent: true, opacity: 0, depthWrite: false });
 
 /** Receives the key light's shadow on the paper ground. */
-export const groundShadow = new ShadowMaterial({ color: new Color(scene3d.shadow), opacity: 0.45 });
+export const groundShadow = new ShadowMaterial({ color: new Color(color.ink), opacity: 0.16 });
 
 export { color };

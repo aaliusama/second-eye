@@ -2,45 +2,22 @@
 // CSS reads them as variables (applyTokens); TS reads them directly. Never hard-code elsewhere.
 
 export const color = {
-  /** The command-center floor: near-black blue, so the drawing and the ghost carry the light. */
-  paper: "#090D16",
-  /** Quiet rules on dark: hairlines, the drafting grid, panel borders. */
-  paperRule: "rgba(255,255,255,0.08)",
-  /** Drafting grid on the plan canvas only, about 4% white. */
-  gridLine: "rgba(255,255,255,0.04)",
-  /** First surface step above the floor (side panel, header, bars). */
-  surface: "#0F1522",
-  /** Second surface step: raised controls and hovered rows. */
-  surfaceRaised: "#151C2B",
-  ink: "#E6EAF0",
-  inkSoft: "#94A3B8",
+  paper: "#EEF1F2",
+  /** A shade of paper for the drafting grid and quiet panel rules. */
+  paperRule: "#D9DFE2",
+  surface: "#FFFFFF",
+  ink: "#1C2B3A",
+  inkSoft: "#526575",
   /** Ghost and conflict ONLY. Never for buttons, badges or branding. */
-  redline: "#EF4444",
+  redline: "#D4281C",
   /** A check that passed, a clash that was fixed. */
-  clear: "#10B981",
+  clear: "#1F8A4C",
   /** Proposed or unconfirmed. */
-  pending: "#F59E0B",
-  /** Floating HUD panels over the canvas (slider, lens switch). */
-  hudBg: "rgba(15,23,42,0.8)",
-  hudBorder: "rgba(255,255,255,0.1)",
-  /** Strong rule where a hairline must still read (selected rows, header). */
-  ruleStrong: "rgba(255,255,255,0.12)",
+  pending: "#E0A100",
 } as const;
 
-/** 3D scene colours on the dark floor. Matte slate walls so ink edges and the redline ghost pop. */
-export const scene3d = {
-  sky: "#C8D2E0",
-  groundLight: "#1A2333",
-  wall: "#1C2638",
-  slab: "#121A29",
-  built: "#4A5A72",
-  shadow: "#000000",
-  gridCell: "#243044",
-  gridSection: "#3A4A63",
-} as const;
-
-/** One set for crews, lightened to read on the dark floor. The letter badge must be enough without the colour. */
-export const crewHues = ["#7FA6CC", "#C9A86E", "#86BF8F", "#C08CBA", "#D49A6A", "#86A9B8"] as const;
+/** One muted set for crews. The letter badge must be enough without the colour. */
+export const crewHues = ["#4F6D8A", "#7A6A4F", "#5E7D63", "#7D5E78", "#8A6B4F", "#5C6F7A"] as const;
 
 export const font = {
   family: "'Archivo Variable', sans-serif",
@@ -63,7 +40,7 @@ export const size = {
   captionHeight: "112px",
   controlHeight: "36px",
   /** Floating sheets (tools, inspector, phone) sit one step above the drawing. */
-  radiusLarge: "6px",
+  radiusLarge: "10px",
   /** One sub-row of a crew lane on the timeline; a lane grows when that crew's bars overlap. */
   laneRow: "22px",
 } as const;
@@ -73,20 +50,14 @@ export const size = {
  * shadow reads as paper lifted off the table, not a SaaS card.
  */
 export const depth = {
-  ring: "0 0 0 1px rgba(255,255,255,0.08)",
-  lift: "0 0 0 1px rgba(255,255,255,0.08), 0 1px 2px rgb(0 0 0 / 0.35), 0 4px 12px -4px rgb(0 0 0 / 0.5)",
-  float: "0 0 0 1px rgba(255,255,255,0.10), 0 2px 4px rgb(0 0 0 / 0.3), 0 12px 32px -8px rgb(0 0 0 / 0.6)",
-  /** Top highlight on raised controls so they read as pressed, not a flat rectangle. */
+  ring: "0 0 0 1px rgb(28 43 58 / 0.08)",
+  lift: "0 0 0 1px rgb(28 43 58 / 0.08), 0 1px 2px rgb(28 43 58 / 0.06), 0 4px 12px -4px rgb(28 43 58 / 0.10)",
+  float: "0 0 0 1px rgb(28 43 58 / 0.08), 0 2px 4px rgb(28 43 58 / 0.05), 0 12px 32px -8px rgb(28 43 58 / 0.18)",
+  /** Top highlight on dark controls so they read as pressed ink, not a flat rectangle. */
   inkHighlight: "inset 0 1px 0 rgb(255 255 255 / 0.10)",
   /** The drafting dot field behind the plan. */
-  dot: "rgba(255,255,255,0.07)",
+  dot: "rgb(28 43 58 / 0.11)",
   dotStep: "16px",
-  /** Big soft shadow under floating HUD panels. */
-  hud: "0 0 0 1px rgba(255,255,255,0.06), 0 8px 24px -6px rgb(0 0 0 / 0.55), 0 24px 64px -12px rgb(0 0 0 / 0.65)",
-  /** Faint redline glow for conflict emphasis on dark. */
-  glow: "0 0 0 1px rgb(239 68 68 / 0.5), 0 0 18px -2px rgb(239 68 68 / 0.45)",
-  /** Backdrop blur for HUD glass. */
-  blur: "12px",
 } as const;
 
 /** Drawing units are metres. Line weights in metres at plan scale. */

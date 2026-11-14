@@ -5,9 +5,9 @@
 /* ---------- Device frame ---------- */
 
 section.phone.framed {
-  --phone-hold: #ef4444;
-  --phone-amber: #f59e0b;
-  --phone-ok: #10b981;
+  --phone-hold: var(--redline);
+  --phone-amber: var(--pending);
+  --phone-ok: var(--clear);
   --phone-bezel: color-mix(in srgb, var(--paper) 22%, black);
   position: relative;
   background: var(--paper);
@@ -397,20 +397,4 @@ section.phone.compact.framed {
 
 .phone.framed .bubbles li.checking > p {
   color: var(--ink-soft);
-}
-
-/* Dark theme: the crew's own words are a slate-blue bubble, everything the crew receives stays a quiet surface.
-   Prefixed with html so it holds whether or not index.css loads later, framed or full-screen. */
-html .phone .bubbles li.crew > p,
-html .phone.framed .bubbles li.crew > p {
-  background: #1E3A5F;
-  border-color: #2C4F7C;
-  color: #E6EAF0;
-  box-shadow: none;
-}
-html .phone .bubbles li:not(.crew):not(.has-verdict) > p,
-html .phone.framed .bubbles li:not(.crew):not(.has-verdict) > p {
-  background: var(--surface-raised, #151C2B);
-  border-color: var(--paper-rule);
-  color: var(--ink);
 }
