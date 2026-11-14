@@ -991,7 +991,7 @@
         "kind": "point",
         "at": [
           11.5,
-          3.5
+          2.33
         ]
       },
       "state": "planned",
@@ -1007,7 +1007,7 @@
             "kind": "point",
             "at": [
               11.5,
-              3.5
+              2.33
             ]
           },
           "state": "planned",
@@ -1082,15 +1082,455 @@
       ]
     },
     {
-      "id": "vanity-204",
-      "type": "fixture",
-      "name": "Unit 204 vanity",
+      "id": "W-30",
+      "type": "wall",
+      "name": "Level 2 north facade",
+      "aliases": [],
+      "geometry": {
+        "kind": "segment",
+        "from": [
+          0,
+          10
+        ],
+        "to": [
+          30,
+          10
+        ],
+        "thickness": 0.3
+      },
+      "height": 2.7,
+      "state": "approved",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "segment",
+            "from": [
+              0,
+              10
+            ],
+            "to": [
+              30,
+              10
+            ],
+            "thickness": 0.3
+          },
+          "state": "approved",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "W-31",
+      "type": "wall",
+      "name": "Level 2 corridor outer wall",
+      "aliases": [],
+      "geometry": {
+        "kind": "segment",
+        "from": [
+          0,
+          0
+        ],
+        "to": [
+          30,
+          0
+        ],
+        "thickness": 0.3
+      },
+      "height": 2.7,
+      "state": "approved",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "segment",
+            "from": [
+              0,
+              0
+            ],
+            "to": [
+              30,
+              0
+            ],
+            "thickness": 0.3
+          },
+          "state": "approved",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "W-32",
+      "type": "wall",
+      "name": "Level 2 west end wall",
+      "aliases": [],
+      "geometry": {
+        "kind": "segment",
+        "from": [
+          0,
+          0
+        ],
+        "to": [
+          0,
+          10
+        ],
+        "thickness": 0.3
+      },
+      "height": 2.7,
+      "state": "approved",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "segment",
+            "from": [
+              0,
+              0
+            ],
+            "to": [
+              0,
+              10
+            ],
+            "thickness": 0.3
+          },
+          "state": "approved",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "W-33",
+      "type": "wall",
+      "name": "Level 2 east end wall",
+      "aliases": [],
+      "geometry": {
+        "kind": "segment",
+        "from": [
+          30,
+          0
+        ],
+        "to": [
+          30,
+          10
+        ],
+        "thickness": 0.3
+      },
+      "height": 2.7,
+      "state": "approved",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "segment",
+            "from": [
+              30,
+              0
+            ],
+            "to": [
+              30,
+              10
+            ],
+            "thickness": 0.3
+          },
+          "state": "approved",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "W-34",
+      "type": "wall",
+      "name": "Party wall, units 201 and 202",
+      "aliases": [],
+      "geometry": {
+        "kind": "segment",
+        "from": [
+          5,
+          2
+        ],
+        "to": [
+          5,
+          10
+        ],
+        "thickness": 0.2
+      },
+      "height": 2.7,
+      "state": "approved",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "segment",
+            "from": [
+              5,
+              2
+            ],
+            "to": [
+              5,
+              10
+            ],
+            "thickness": 0.2
+          },
+          "state": "approved",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "W-35",
+      "type": "wall",
+      "name": "Party wall, units 202 and 203",
+      "aliases": [],
+      "geometry": {
+        "kind": "segment",
+        "from": [
+          10,
+          2
+        ],
+        "to": [
+          10,
+          10
+        ],
+        "thickness": 0.2
+      },
+      "height": 2.7,
+      "state": "approved",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "segment",
+            "from": [
+              10,
+              2
+            ],
+            "to": [
+              10,
+              10
+            ],
+            "thickness": 0.2
+          },
+          "state": "approved",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "W-36",
+      "type": "wall",
+      "name": "Party wall, units 203 and 204",
+      "aliases": [],
+      "geometry": {
+        "kind": "segment",
+        "from": [
+          15,
+          2
+        ],
+        "to": [
+          15,
+          10
+        ],
+        "thickness": 0.2
+      },
+      "height": 2.7,
+      "state": "approved",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "segment",
+            "from": [
+              15,
+              2
+            ],
+            "to": [
+              15,
+              10
+            ],
+            "thickness": 0.2
+          },
+          "state": "approved",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "W-37",
+      "type": "wall",
+      "name": "Party wall, units 204 and 205",
+      "aliases": [],
+      "geometry": {
+        "kind": "segment",
+        "from": [
+          20,
+          2
+        ],
+        "to": [
+          20,
+          10
+        ],
+        "thickness": 0.2
+      },
+      "height": 2.7,
+      "state": "approved",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "segment",
+            "from": [
+              20,
+              2
+            ],
+            "to": [
+              20,
+              10
+            ],
+            "thickness": 0.2
+          },
+          "state": "approved",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "W-38",
+      "type": "wall",
+      "name": "Party wall, units 205 and 206",
+      "aliases": [],
+      "geometry": {
+        "kind": "segment",
+        "from": [
+          25,
+          2
+        ],
+        "to": [
+          25,
+          10
+        ],
+        "thickness": 0.2
+      },
+      "height": 2.7,
+      "state": "approved",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "segment",
+            "from": [
+              25,
+              2
+            ],
+            "to": [
+              25,
+              10
+            ],
+            "thickness": 0.2
+          },
+          "state": "approved",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "W-13",
+      "type": "wall",
+      "name": "Unit 204 bathroom north wall",
+      "aliases": [],
+      "geometry": {
+        "kind": "segment",
+        "from": [
+          15.85,
+          5
+        ],
+        "to": [
+          18.46,
+          5
+        ],
+        "thickness": 0.1
+      },
+      "height": 2.7,
+      "state": "approved",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "segment",
+            "from": [
+              15.85,
+              5
+            ],
+            "to": [
+              18.46,
+              5
+            ],
+            "thickness": 0.1
+          },
+          "state": "approved",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "door-204-bath",
+      "type": "door",
+      "name": "Unit 204 bathroom door",
       "aliases": [],
       "geometry": {
         "kind": "point",
         "at": [
-          17.5,
-          4.2
+          15.475,
+          5
         ]
       },
       "state": "approved",
@@ -1105,8 +1545,74 @@
           "geometry": {
             "kind": "point",
             "at": [
-              17.5,
-              4.2
+              15.475,
+              5
+            ]
+          },
+          "state": "approved",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "vanity-204",
+      "type": "fixture",
+      "name": "Unit 204 vanity",
+      "aliases": [],
+      "geometry": {
+        "kind": "point",
+        "at": [
+          15.325,
+          3.5
+        ]
+      },
+      "state": "approved",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "point",
+            "at": [
+              15.325,
+              3.5
+            ]
+          },
+          "state": "approved",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "wc-204",
+      "type": "fixture",
+      "name": "Unit 204 WC",
+      "aliases": [],
+      "geometry": {
+        "kind": "point",
+        "at": [
+          17.615,
+          3.65
+        ]
+      },
+      "state": "approved",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "point",
+            "at": [
+              17.615,
+              3.65
             ]
           },
           "state": "approved",
@@ -1122,8 +1628,8 @@
       "geometry": {
         "kind": "point",
         "at": [
-          17.85,
-          3.6
+          17.94,
+          4.45
         ]
       },
       "state": "planned",
@@ -1138,8 +1644,8 @@
           "geometry": {
             "kind": "point",
             "at": [
-              17.85,
-              3.6
+              17.94,
+              4.45
             ]
           },
           "state": "planned",
@@ -1155,8 +1661,8 @@
       "geometry": {
         "kind": "point",
         "at": [
-          16.2,
-          2.8
+          17.49,
+          2.55
         ]
       },
       "state": "planned",
@@ -1171,8 +1677,8 @@
           "geometry": {
             "kind": "point",
             "at": [
-              16.2,
-              2.8
+              17.49,
+              2.55
             ]
           },
           "state": "planned",
@@ -1195,7 +1701,7 @@
           19,
           10
         ],
-        "thickness": 0.2
+        "thickness": 0.3
       },
       "height": 1.5,
       "state": "approved",
@@ -1217,7 +1723,7 @@
               19,
               10
             ],
-            "thickness": 0.2
+            "thickness": 0.3
           },
           "state": "approved",
           "confidence": 1
@@ -1232,11 +1738,11 @@
       "geometry": {
         "kind": "point",
         "at": [
-          19.2,
+          19.35,
           2
         ]
       },
-      "state": "built",
+      "state": "approved",
       "version": 1,
       "history": [
         {
@@ -1248,11 +1754,11 @@
           "geometry": {
             "kind": "point",
             "at": [
-              19.2,
+              19.35,
               2
             ]
           },
-          "state": "built",
+          "state": "approved",
           "confidence": 1
         }
       ]

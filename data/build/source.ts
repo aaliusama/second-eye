@@ -51,16 +51,36 @@ export const ELEMENTS: ElementDef[] = [
   { id: "W-22", type: "wall", name: "Unit 206 living room niche wall", geometry: seg([26, 8], [29, 8]), height: 2.7, state: "approved" },
   { id: "tile-205-bath", type: "fixture", name: "Unit 205 bathroom floor tile", geometry: pt(22, 4), state: "planned" },
   { id: "light-202-kitchen", type: "fixture", name: "Unit 202 kitchen light fixtures", geometry: pt(7, 8), state: "planned" },
-  { id: "vanity-203", type: "fixture", name: "Unit 203 bathroom vanity", geometry: pt(11.5, 3.5), state: "planned" },
+  { id: "vanity-203", type: "fixture", name: "Unit 203 bathroom vanity", geometry: pt(11.5, 2.33), state: "planned" },
   { id: "light-206-bath", type: "fixture", name: "Unit 206 bathroom light", geometry: pt(27, 3.5), state: "planned" },
   { id: "paint-206-living", type: "fixture", name: "Unit 206 living room paint colour", geometry: pt(27.5, 9), state: "planned" },
+  // Building shell, from drawing rev B: facades, end walls and the party walls between units. Ids are numbered,
+  // not lettered, so no id reads as a word in a crew's question ("w-e" would match "we").
+  { id: "W-30", type: "wall", name: "Level 2 north facade", geometry: seg([0, 10], [30, 10], 0.3), height: 2.7, state: "approved" },
+  { id: "W-31", type: "wall", name: "Level 2 corridor outer wall", geometry: seg([0, 0], [30, 0], 0.3), height: 2.7, state: "approved" },
+  { id: "W-32", type: "wall", name: "Level 2 west end wall", geometry: seg([0, 0], [0, 10], 0.3), height: 2.7, state: "approved" },
+  { id: "W-33", type: "wall", name: "Level 2 east end wall", geometry: seg([30, 0], [30, 10], 0.3), height: 2.7, state: "approved" },
+  ...[5, 10, 15, 20, 25].map((x, i): ElementDef => ({
+    id: `W-${34 + i}`,
+    type: "wall",
+    name: `Party wall, units ${units[i]} and ${units[i + 1]}`,
+    geometry: seg([x, 2], [x, 10], 0.2),
+    height: 2.7,
+    state: "approved",
+  })),
   // Unit 204 in depth: what hangs on, or sits against, the bathroom east wall W-12 (drawing rev B positions).
   // Names avoid "bathroom" and "wall" so the query parser keeps resolving "the 204 bath" and "the east wall" to W-12.
-  { id: "vanity-204", type: "fixture", name: "Unit 204 vanity", geometry: pt(17.5, 4.2), state: "approved" },
-  { id: "socket-204-shaver", type: "fixture", name: "Unit 204 shaver socket", geometry: pt(17.85, 3.6), state: "planned" },
-  { id: "tile-204-shower", type: "fixture", name: "Unit 204 shower tile", geometry: pt(16.2, 2.8), state: "planned" },
-  { id: "window-204", type: "window", name: "Unit 204 living room window", geometry: seg([16, 10], [19, 10], 0.2), height: 1.5, state: "approved" },
-  { id: "door-204", type: "door", name: "Unit 204 entrance door", geometry: pt(19.2, 2), state: "built" },
+  // Bathroom: x 15-18 (W-12), y 2-5. The north partition leaves the door opening at the party wall and runs
+  // past W-12, so it still closes the corner once W-12 stands 0.4 m further east.
+  { id: "W-13", type: "wall", name: "Unit 204 bathroom north wall", geometry: seg([15.85, 5], [18.46, 5], 0.1), height: 2.7, state: "approved" },
+  { id: "door-204-bath", type: "door", name: "Unit 204 bathroom door", geometry: pt(15.475, 5), state: "approved" },
+  { id: "vanity-204", type: "fixture", name: "Unit 204 vanity", geometry: pt(15.325, 3.5), state: "approved" },
+  // On the east wall W-12, one item per trade: the WC (plumbing), the shaver socket (electrical), the shower (tiling).
+  { id: "wc-204", type: "fixture", name: "Unit 204 WC", geometry: pt(17.615, 3.65), state: "approved" },
+  { id: "socket-204-shaver", type: "fixture", name: "Unit 204 shaver socket", geometry: pt(17.94, 4.45), state: "planned" },
+  { id: "tile-204-shower", type: "fixture", name: "Unit 204 shower tile", geometry: pt(17.49, 2.55), state: "planned" },
+  { id: "window-204", type: "window", name: "Unit 204 living room window", geometry: seg([16, 10], [19, 10], 0.3), height: 1.5, state: "approved" },
+  { id: "door-204", type: "door", name: "Unit 204 entrance door", geometry: pt(19.35, 2), state: "approved" },
 ];
 
 export const CREWS = [
