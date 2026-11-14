@@ -94,7 +94,9 @@ export function Phone({
     lines.push(l);
     lines.push(...(local[l.id] ?? []));
   }
-  for (const [after, extra] of Object.entries(local)) if (!thread.some((l) => l.id === after)) lines.push(...extra);
+  // Questions and errors have no message to sit after: show only this crew's own.
+  for (const [after, extra] of Object.entries(local))
+    if (!thread.some((l) => l.id === after) && after.startsWith(`${crewId}|`)) lines.push(...extra);
 
   /** One send path for typed and presenter-scripted messages: the same API calls either way. */
   async function submit(body: string, as: { id: string; name: string } | undefined): Promise<void> {
@@ -104,7 +106,7 @@ export function Phone({
       if (isQuestion(body)) {
         const answer = await api.ask(as.id, body);
         if (answer) {
-          const key = `q-${Date.now()}`;
+          const key = `${as.id}|q-${Date.now()}`;
           setLocal((s) => ({
             ...s,
             [key]: [
@@ -131,7 +133,7 @@ export function Phone({
       announceChange();
       onPosted?.();
     } catch (err) {
-      setLocal((s) => ({ ...s, [`err-${Date.now()}`]: [{ id: `err-${Date.now()}`, from: "system", text: `Not sent: ${String(err)}` }] }));
+      setLocal((s) => ({ ...s, [`${as.id}|err-${Date.now()}`]: [{ id: `err-${Date.now()}`, from: "system", text: `Not sent: ${String(err)}` }] }));
     } finally {
       setSending(false);
     }

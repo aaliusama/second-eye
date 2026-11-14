@@ -140,7 +140,10 @@ export function digest(s: QueryState, day: string): Digest {
     open_decision: 2,
     space_clash: 3,
   };
-  const onePerIncident = [...new Map(findings.map((f) => [f.id, f])).values()];
+  // One incident = same check, same crews, same elements: a live statement and the recorded plan
+  // about the same wall, or a clash seen from each crew's side, are one thing to raise at 06:30.
+  const incidentKey = (f: (typeof findings)[number]) => [f.check, [...f.crewIds].sort().join("+"), [...f.elementIds].sort().join("+")].join("|");
+  const onePerIncident = [...new Map([...findings].sort((a, b) => a.id.localeCompare(b.id)).map((f) => [incidentKey(f), f])).values()];
   const huddle = [...onePerIncident]
     .sort((a, b) => Number(a.severity !== "hold") - Number(b.severity !== "hold") ||
       consequenceOrder[a.check] - consequenceOrder[b.check] || a.time.localeCompare(b.time) || a.id.localeCompare(b.id))
