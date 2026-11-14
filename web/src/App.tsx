@@ -251,7 +251,7 @@ function Main() {
             <div className="lens-control">
               <span className="lens-label" id="lens-label">See the floor as</span>
               <div className="lens-switch" role="group" aria-labelledby="lens-label">
-                <button type="button" aria-pressed={!lens} onClick={() => setLens(undefined)}>Record</button>
+                <button type="button" aria-pressed={!lens} onClick={() => setLens(undefined)}>As recorded</button>
                 {state.scene.crews.map((c) => (
                   <button key={c.id} type="button" className="lens-crew" aria-pressed={lens === c.id} title={`${c.name} knows it`} onClick={() => setLens(lens === c.id ? undefined : c.id)}>
                     {c.letter}<span className="visually-hidden"> {c.name}</span>
@@ -333,7 +333,7 @@ function Main() {
           <dl><dt>Solid line</dt><dd>The wall in the latest site record.</dd><dt>Dashed red line</dt><dd>The earlier position available to the crew.</dd></dl>
           <p className="meta">Select the wall or ghost to inspect the messages behind this mismatch.</p>
         </section>}
-        {!asOf && <details className="desk-disclosure" open={focus === "fix" || focus === "confirm"}><summary>Crew confirmations<span>Sent is not confirmed</span></summary><Acknowledgements /></details>}
+        {!asOf && <details className="desk-disclosure" open={focus === "fix" || focus === "confirm"}><summary>Crew replies<span>A sent correction is not a confirmation</span></summary><Acknowledgements /></details>}
         {asOf && <section className="panel"><h2>A moment in the record</h2><p className="meta">Select a wall to see what changed and who said it. Return to now to review today's actions.</p></section>}
         <details className="desk-disclosure" open={focus === "fix"} hidden={focus === "ghost" || focus === "why" || focus === "confirm"}><summary>All proposed actions<span>Review before sending</span></summary><section className="panel">
           <h2>Needs approval</h2>

@@ -1298,3 +1298,5 @@ select:focus-visible, input:not([type="range"]):focus-visible, textarea:focus-vi
 .banner.stale { max-width: min(720px, calc(100% - 2 * var(--pad))); box-shadow: var(--depth-float), inset 3px 0 0 var(--pending); padding: 10px 14px; line-height: 1.45; }
 .banner.stale code { font: inherit; font-weight: 650; background: var(--paper); padding: 1px 6px; border-radius: 4px; }
 .banner.stale { top: auto; bottom: calc(var(--pad) + 52px); }
+.record-toggle { align-self: flex-start; padding: 0; min-height: 32px; }
+.incident-more { margin-top: var(--gap); padding: 0; min-height: 36px; font-size: var(--text); }

@@ -91,7 +91,7 @@ async function main() {
 
   // 0:20-0:45 Build: chat becomes the model.
   await step("record: model after the architect's message", async () => {
-    await page.getByRole("button", { name: /Model after this message/ }).first().click();
+    await page.getByRole("button", { name: /See the floor at this moment/ }).first().click();
   });
   await until(28);
   await step("back to now", async () => page.getByRole("button", { name: /Back to now/ }).click());

@@ -265,13 +265,22 @@ export function AgentLog({ scene, messages, asOf }: { scene: Scene; messages: Ch
 export function Record({ scene, messages }: { scene: Scene; messages: ChatMessage[] }) {
   const setAsOf = useSite((s) => s.setAsOf);
   const asOf = useSite((s) => s.asOf);
+  const [all, setAll] = useState(false);
   const said = messages.filter((m) => m.senderRole !== "system");
+  // Messages that changed the floor or the plan: the ones the model actually rests on.
+  const changed = new Set([...scene.elements.flatMap((e) => e.history.map((h) => h.sourceMessageId)), ...scene.tasks.map((t) => t.sourceMessageId)]);
+  const shown = all ? said : said.filter((m) => changed.has(m.id));
   return (
     <section className="panel">
       <h2>The record</h2>
-      <p className="meta">Every change in the model comes from one of these messages.</p>
+      <p className="meta">
+        {all ? `All ${said.length} messages, newest first.` : `The ${shown.length} messages that changed the floor or the plan, newest first. The other ${said.length - shown.length} changed nothing.`}
+      </p>
+      <button type="button" className="quiet record-toggle" onClick={() => setAll(!all)}>
+        {all ? "Show only messages that changed something" : `Show all ${said.length} messages`}
+      </button>
       <ol className="plain record">
-        {[...said].reverse().map((m) => (
+        {[...shown].reverse().map((m) => (
           <li key={m.id} className={asOf === m.time ? "current" : ""}>
             <p className="meta">
               {formatTime(m.time)} · {sourceLine({ ...describeSource(m.id, [m], (c) => crewName(scene, c)), when: "" })}
@@ -280,7 +289,7 @@ export function Record({ scene, messages }: { scene: Scene; messages: ChatMessag
             {/* The time view replays the golden record only; live messages are not in it. */}
             {!m.id.startsWith("live-") && (
               <button type="button" className="quiet" onClick={() => void setAsOf(m.time)}>
-                Model after this message
+                See the floor at this moment
               </button>
             )}
           </li>
