@@ -35,7 +35,9 @@ const lastStatus = new Map<string, ExtractStatus>();
 export const extractStatus = (messageId: string): ExtractStatus | undefined => lastStatus.get(messageId);
 
 async function readCached(messageId: string): Promise<ExtractResult | undefined> {
-  for (const dir of cacheConfig.read) {
+  // Offline, the demo reads only committed caches: what a judge typed in an earlier live session does not leak in.
+  const dirs = isLive() ? cacheConfig.read : cacheConfig.read.filter((d) => d.join("/") !== "llm-cache-live");
+  for (const dir of dirs) {
     try {
       const raw = await readFile(dataPath(...dir, `${messageId}.json`), "utf8");
       return ExtractResult.parse(JSON.parse(raw));
