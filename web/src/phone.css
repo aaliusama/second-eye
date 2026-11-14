@@ -34,7 +34,7 @@ section.phone.compact.framed {
 }
 
 .crew-dock .phone.compact.framed {
-  height: min(600px, calc(100dvh - 380px));
+  height: min(600px, max(420px, calc(100dvh - 470px)));
   border-style: solid;
   border-color: var(--phone-bezel);
 }
@@ -110,14 +110,14 @@ section.phone.compact.framed {
 
 .phone.framed form input {
   min-height: 40px;
-  padding: 0 14px;
-  border-radius: 20px;
+  padding: 0 12px;
+  border-radius: var(--radius);
 }
 
 .phone.framed form button {
   min-height: 40px;
   padding: 0 16px;
-  border-radius: 20px;
+  border-radius: var(--radius);
   font-weight: 700;
 }
 
@@ -161,7 +161,7 @@ section.phone.compact.framed {
 .phone.framed .bubbles li > p {
   padding: 8px 12px;
   border: var(--rule) solid var(--paper-rule);
-  border-radius: 18px 18px 18px 6px;
+  border-radius: 8px 8px 8px 2px;
   background: var(--surface);
   color: var(--ink);
   line-height: 1.4;
@@ -170,14 +170,16 @@ section.phone.compact.framed {
 
 .phone.framed .bubbles li.crew > p {
   border-color: var(--ink);
-  border-radius: 18px 18px 6px 18px;
+  border-radius: 8px 8px 2px 8px;
   background: var(--ink);
   color: var(--paper);
 }
 
 .phone.framed .bubbles li .meta {
   font-size: 11px;
-  padding: 0 6px;
+  font-stretch: var(--condensed);
+  font-variant-numeric: tabular-nums;
+  padding: 0 4px;
 }
 
 
@@ -228,13 +230,14 @@ section.phone.compact.framed {
 .verdict .verdict-badge {
   flex: none;
   padding: 3px 8px;
-  border-radius: var(--radius);
+  border-radius: 4px;
+  font-stretch: var(--condensed);
   color: var(--surface);
   background: var(--ink-soft);
-  font-size: var(--heading);
+  font-size: var(--title);
   font-weight: 800;
   line-height: 1.2;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.06em;
 }
 
 .verdict.hold .verdict-badge {
@@ -307,9 +310,9 @@ section.phone.compact.framed {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 12px 4px 6px;
+  padding: 5px 10px 5px 8px;
   border: var(--rule) solid color-mix(in srgb, var(--phone-ok) 55%, transparent);
-  border-radius: 999px;
+  border-radius: 4px;
   background: color-mix(in srgb, var(--phone-ok) 14%, transparent);
   color: color-mix(in srgb, var(--phone-ok) 55%, var(--ink));
   font-size: var(--text);

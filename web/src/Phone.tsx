@@ -268,7 +268,7 @@ export function Phone({
     if (!script || script.nonce === handled.current) return;
     handled.current = script.nonce;
     const as = scene.crews.find((c) => c.id === script.crewId);
-    if (as) setCrewId(as.id);
+    if (as) switchCrew(as.id);
     void submit(script.text, as).finally(script.done);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [script]);
@@ -276,7 +276,16 @@ export function Phone({
   // Keep the newest message in view, so an answer is never below the fold of the thread.
   const listRef = useRef<HTMLOListElement | null>(null);
   // Subtle enter/leave for bubbles; auto-animate already skips motion under prefers-reduced-motion.
-  const [animateRef] = useAutoAnimate<HTMLOListElement>({ duration: 180, easing: "ease-out" });
+  const [animateRef, setAnimate] = useAutoAnimate<HTMLOListElement>({ duration: 180, easing: "ease-out" });
+  // Switching crew swaps the whole thread: show it at once, animate only sends and replies.
+  function switchCrew(id: string) {
+    if (id !== crewId) setAnimate(false);
+    setCrewId(id);
+  }
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setAnimate(true));
+    return () => cancelAnimationFrame(frame);
+  }, [crewId, setAnimate]);
   const bindList = useCallback(
     (el: HTMLOListElement | null) => {
       listRef.current = el;
@@ -291,7 +300,17 @@ export function Phone({
   useEffect(() => {
     const el = listRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [lineCount, sending, slow, receipts]);
+  }, [lineCount, sending, slow, receipts, crewId]);
+  // The desk tab mounts the phone hidden; when the thread first gets a size, start at the newest.
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => {
+      el.scrollTop = el.scrollHeight;
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   function card(l: Line, v: Verdict) {
     const receipt = v.kind === "hold" ? receiptFor(l) : undefined;
@@ -318,7 +337,7 @@ export function Phone({
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
               >
-                <CircleCheck className="receipt-icon" size={18} strokeWidth={2.4} aria-hidden="true" />
+                <CircleCheck className="receipt-icon" size={16} strokeWidth={1.5} aria-hidden="true" />
                 <span>
                   Confirmed <time dateTime={mine.acknowledgedAt}>{formatTime(mine.acknowledgedAt)}</time>
                 </span>
@@ -349,15 +368,15 @@ export function Phone({
         <span className="phone-clock">{replayTime ? clock(replayTime) : "--:--"}</span>
         <span className="phone-notch" />
         <span className="phone-icons">
-          <Signal size={14} strokeWidth={2.4} />
-          <Wifi size={14} strokeWidth={2.4} />
-          <BatteryFull size={18} strokeWidth={2} />
+          <Signal size={14} strokeWidth={1.75} />
+          <Wifi size={14} strokeWidth={1.75} />
+          <BatteryFull size={18} strokeWidth={1.5} />
         </span>
       </div>
       <header>
         <label>
           <span className="meta">Texting as</span>
-          <select value={crewId} onChange={(e) => setCrewId(e.target.value)}>
+          <select value={crewId} onChange={(e) => switchCrew(e.target.value)}>
             {scene.crews.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.letter} · {c.name}
