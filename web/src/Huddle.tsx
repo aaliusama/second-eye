@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { ChatMessage } from "@site/contracts";
 import { onChange } from "./api";
+import "./tabs.css";
 
 type Digest = { text: string };
 
@@ -53,14 +54,14 @@ export function Huddle({ day, messages, revision }: { day?: string; messages: Ch
   const lines = digest ? huddleLines(digest.text) : [];
   return (
     <section className="panel huddle-panel" aria-label="06:30 superintendent huddle">
-      <h2>06:30 huddle</h2>
-      <p className="meta">First three recorded risks to review · per the record</p>
+      <h2 className="tab-title">06:30 huddle</h2>
+      <p className="meta tab-lede">First three recorded risks to review · per the record</p>
       {!day && <p className="meta">Tomorrow's plan not found.</p>}
       {error && <p className="error">{error}</p>}
       {day && !digest && !error && <p className="meta">Loading recorded risks</p>}
       {digest && lines.length === 0 && !error && <p className="meta">No recorded risks for tomorrow.</p>}
       {!error && lines.length > 0 && (
-        <ol className="plain">
+        <ol className="plain huddle-list">
           {lines.map((raw, index) => {
             const line = raw.replace(/^\s*-\s*/, "");
             const match = / Sources: ([^.]*)\.$/.exec(line);

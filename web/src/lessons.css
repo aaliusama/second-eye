@@ -1,10 +1,121 @@
-/* What it has learned: before and after side by side, with Undo. Base rules for .lesson live in index.css. */
-.lesson-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--gap); }
-.lesson-undo { flex: none; font-size: var(--small); }
-.lesson-summary { margin: 0; font-size: 13px; line-height: 1.45; color: var(--ink); }
-.lesson-side.before .lesson-label { color: var(--pending); }
-.lesson-side p { margin: 0; }
-.lesson-missing { color: var(--ink-soft); font-style: italic; }
-.lesson-src { font-size: 11.5px; color: var(--ink-soft); }
-.lesson-uses { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.lesson-uses li { display: flex; flex-direction: column; gap: 4px; }
+/* What it has learned: before and after as a two-column comparison split by a drafting divider.
+   Undo is a quiet secondary action. Scoped under .lessons to win over the base rules in index.css. */
+
+.lessons .lesson-list { gap: var(--gap); }
+.lessons .lesson {
+  background: var(--surface);
+  border: var(--rule) solid var(--paper-rule);
+  border-radius: var(--radius);
+  box-shadow: none;
+  padding: 12px 14px;
+  gap: 10px;
+}
+.lessons .lesson-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--gap); }
+.lessons .lesson-kind {
+  margin: 0 0 3px;
+  font-size: 10.5px;
+  font-weight: 650;
+  font-stretch: var(--condensed);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+}
+.lessons .lesson-title { margin: 0; font-size: 16px; font-weight: 620; letter-spacing: -0.015em; line-height: 1.3; color: var(--ink); }
+.lessons .lesson-title span[aria-hidden] { color: var(--ink-soft); font-weight: 400; margin: 0 4px; }
+
+/* Undo: secondary, quiet, never competing with the lesson. */
+.lessons button.lesson-undo {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 28px;
+  padding: 0 8px;
+  font-size: var(--small);
+  font-weight: 550;
+  color: var(--ink-soft);
+  background: transparent;
+  border: var(--rule) solid var(--paper-rule);
+  border-radius: var(--radius);
+  text-decoration: none;
+  box-shadow: none;
+  transition: color var(--answer) var(--ease-out), border-color var(--answer) var(--ease-out);
+}
+.lessons button.lesson-undo:hover:not(:disabled) { color: var(--ink); border-color: var(--ink-soft); background: transparent; text-decoration: none; }
+
+.lessons .lesson-summary { margin: 0; font-size: 13px; line-height: 1.5; color: var(--ink); }
+
+/* The comparison: before | divider | after. No slab backgrounds; the divider does the separating. */
+.lessons .lesson-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20px minmax(0, 1fr);
+  gap: 0;
+  background: transparent;
+  border-radius: 0;
+  overflow: visible;
+  border-top: var(--rule) solid var(--paper-rule);
+  border-bottom: var(--rule) solid var(--paper-rule);
+  padding: 10px 0;
+}
+.lessons .lesson-side { background: transparent; padding: 0; gap: 6px; font-size: 12.5px; line-height: 1.45; min-width: 0; color: var(--ink); }
+.lessons .lesson-side.before { background: transparent; }
+.lessons .lesson-side p { margin: 0; }
+.lessons .lesson-side blockquote { margin: 0; padding-left: 8px; box-shadow: inset 1.5px 0 0 var(--ink-soft); color: var(--ink); }
+.lessons .lesson-label {
+  font-size: 10.5px;
+  font-weight: 650;
+  font-stretch: var(--condensed);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+}
+/* Before: the moment it had to ask (amber, an open question then). After is green only once the record shows it used. */
+.lessons .lesson-side.before .lesson-label { color: var(--pending); }
+.lessons .lesson-side.after .lesson-label { color: var(--ink-soft); }
+.lessons .lesson-side.after.used .lesson-label { color: var(--clear); }
+
+.lessons .lesson-divider { position: relative; display: flex; justify-content: center; align-items: center; }
+/* Hairline with an end tick at top and bottom, like an extension line on a drawing. */
+.lessons .lesson-divider::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 50%;
+  width: var(--rule);
+  background: var(--paper-rule);
+}
+.lessons .lesson-divider::after {
+  content: "";
+  position: absolute;
+  left: calc(50% - 4px);
+  width: 8px;
+  top: 2px;
+  bottom: 2px;
+  border-top: var(--rule) solid var(--ink-soft);
+  border-bottom: var(--rule) solid var(--ink-soft);
+}
+.lessons .lesson-divider-mark {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  background: var(--surface);
+  color: var(--ink-soft);
+}
+
+.lessons .lesson-missing { color: var(--ink-soft); font-style: normal; }
+.lessons .lesson-src { font-size: 11.5px; color: var(--ink-soft); }
+.lessons .lesson-uses { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.lessons .lesson-uses li { display: flex; flex-direction: column; gap: 4px; }
+.lessons .lesson-foot { margin: 0; font-size: 11.5px; color: var(--ink-soft); }
+
+@media (max-width: 420px) {
+  .lessons .lesson-pair { grid-template-columns: 1fr; row-gap: 10px; }
+  .lessons .lesson-divider { height: 12px; }
+  .lessons .lesson-divider::before { top: 50%; bottom: auto; left: 0; right: 0; width: auto; height: var(--rule); }
+  .lessons .lesson-divider::after { display: none; }
+  .lessons .lesson-divider-mark { transform: rotate(90deg); }
+}
