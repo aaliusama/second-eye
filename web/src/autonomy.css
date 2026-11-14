@@ -1,0 +1,63 @@
+/* On its own: one card per risk, its steps as a drafted chain. Colours and sizes from tokens.ts only.
+   Redline marks the risk itself (conflict), never a button or badge. */
+
+.chain-count { font-variant-numeric: tabular-nums; opacity: 0.7; }
+
+.chain-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--gap); }
+
+.chain-card {
+  background: var(--surface);
+  border-radius: var(--radius-large);
+  box-shadow: var(--depth-ring);
+  padding: var(--gap) var(--pad) 6px;
+}
+.chain-card.lead { box-shadow: var(--depth-lift); border-left: 3px solid var(--redline); }
+
+.chain-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--gap); padding-bottom: 8px; border-bottom: var(--rule) solid var(--paper-rule); }
+.chain-lead { margin: 0 0 2px; font-size: var(--small); font-weight: 650; color: var(--redline); }
+.chain-title { margin: 0; font-size: var(--heading); font-weight: 650; letter-spacing: -0.02em; line-height: 1.25; }
+.chain-crews { margin: 2px 0 0; font-size: var(--small); color: var(--ink-soft); }
+.chain-ghost { color: var(--redline); font-weight: 650; font-variant-numeric: tabular-nums; }
+
+.chain-status {
+  flex: none;
+  font-size: var(--small);
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 var(--rule) var(--paper-rule);
+  white-space: nowrap;
+}
+.chain-status.needs_you { background: var(--ink); color: var(--surface); box-shadow: var(--depth-ink-highlight); }
+.chain-status.waiting_crew { box-shadow: inset 0 0 0 var(--rule) var(--pending); }
+.chain-status.confirmed,
+.chain-status.settled { color: var(--clear); box-shadow: inset 0 0 0 var(--rule) var(--clear); }
+
+.chain-steps { list-style: none; margin: 0; padding: 8px 0 0; position: relative; }
+.chain-steps::before { content: ""; position: absolute; left: 5px; top: 18px; bottom: 18px; width: var(--rule); background: var(--paper-rule); }
+.chain-step { position: relative; display: grid; grid-template-columns: 11px minmax(0, 1fr); gap: var(--gap); padding: 6px 0; }
+.chain-mark { width: 11px; height: 11px; margin-top: 4px; border-radius: 50%; background: var(--surface); box-shadow: inset 0 0 0 2px var(--ink-soft); position: relative; z-index: 1; }
+
+.chain-step.noticed .chain-mark { box-shadow: inset 0 0 0 2px var(--redline); }
+.chain-step.told .chain-mark,
+.chain-step.sent .chain-mark,
+.chain-step.asked .chain-mark { box-shadow: inset 0 0 0 2px var(--ink); }
+.chain-step.no_reply .chain-mark { box-shadow: inset 0 0 0 2px var(--pending); }
+.chain-step.brought .chain-mark { background: var(--ink); box-shadow: 0 0 0 3px var(--surface); }
+.chain-step.approved .chain-mark { background: var(--ink); border-radius: 2px; box-shadow: 0 0 0 3px var(--surface); }
+.chain-step.declined .chain-mark { background: var(--ink-soft); border-radius: 2px; }
+.chain-step.confirmed .chain-mark,
+.chain-step.settled .chain-mark { background: var(--clear); box-shadow: 0 0 0 3px var(--surface); }
+.chain-step.open .chain-mark { background: var(--surface); box-shadow: none; border: 2px dashed var(--pending); box-sizing: border-box; }
+.chain-step.held .chain-mark { background: repeating-linear-gradient(45deg, var(--pending) 0 2px, var(--surface) 2px 4px); }
+
+.chain-body { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.chain-step-head { margin: 0; display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.chain-step-head strong { font-weight: 650; font-size: var(--text); }
+.chain-step.open .chain-step-head strong { color: var(--ink-soft); font-weight: 600; }
+.chain-time { flex: none; font-size: var(--small); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.chain-text { margin: 0; font-size: var(--small); line-height: 1.5; color: var(--ink); }
+.chain-why { margin: 0; font-size: var(--small); color: var(--ink); background: var(--paper); border-radius: var(--radius); padding: 3px 8px; align-self: flex-start; }
+.chain-held { margin: 0; font-size: var(--small); color: var(--ink); font-weight: 550; }
+.chain-source { margin: 0; font-size: var(--small); color: var(--ink-soft); line-height: 1.45; }

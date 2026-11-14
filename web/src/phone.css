@@ -1,0 +1,192 @@
+/* Owner: D. Crew phone verdict cards and the pending check. Colours and sizes come from tokens.ts. */
+
+.bubbles li.has-verdict {
+  max-width: 94%;
+  width: 94%;
+}
+
+.verdict {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px 8px;
+  background: var(--surface);
+  border: var(--rule) solid var(--paper-rule);
+  border-left: 4px solid var(--ink-soft);
+  border-radius: var(--radius);
+  box-shadow: var(--depth-ring);
+}
+
+.verdict.hold {
+  border-left-color: var(--redline);
+}
+
+.verdict.clear {
+  border-left-color: var(--clear);
+}
+
+.verdict.unchecked {
+  border-left-color: var(--pending);
+}
+
+/* Reset the generic bubble look for paragraphs inside a card. */
+.bubbles li .verdict p {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  border-radius: 0;
+}
+
+.bubbles li .verdict .verdict-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.verdict .verdict-badge {
+  flex: none;
+  padding: 3px 8px;
+  border-radius: var(--radius);
+  color: var(--surface);
+  background: var(--ink-soft);
+  font-size: var(--heading);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+}
+
+.verdict.hold .verdict-badge {
+  background: var(--redline);
+}
+
+.verdict.clear .verdict-badge {
+  background: var(--clear);
+}
+
+.verdict.unchecked .verdict-badge {
+  background: transparent;
+  color: var(--ink);
+  border: 2px solid var(--pending);
+  font-size: var(--text);
+  padding: 2px 6px;
+}
+
+.verdict .reason {
+  font-size: var(--text);
+  font-weight: 600;
+  line-height: 1.4;
+  padding-top: 2px;
+  overflow-wrap: anywhere;
+}
+
+.verdict .next {
+  font-size: var(--text);
+  color: var(--ink);
+}
+
+.verdict .source {
+  font-size: var(--small);
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.verdict .source .label {
+  font-weight: 600;
+  color: var(--ink);
+  margin-right: 4px;
+}
+
+.verdict .confirm {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding-top: 6px;
+  border-top: var(--rule) solid var(--paper-rule);
+}
+
+.verdict .confirm button {
+  min-height: 44px;
+  min-width: 120px;
+  font-weight: 700;
+}
+
+.bubbles li .verdict .done {
+  color: var(--clear);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.verdict details {
+  font-size: var(--small);
+  color: var(--ink-soft);
+}
+
+.verdict summary {
+  cursor: pointer;
+  width: fit-content;
+  padding: 2px 0;
+}
+
+.bubbles li .verdict details p {
+  padding-top: 4px;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.verdict button:focus-visible,
+.verdict summary:focus-visible,
+.bubbles .retry:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.bubbles .retry {
+  align-self: flex-start;
+  min-height: 40px;
+}
+
+/* The pending check: calm, one slow pulse on a small dot, nothing else moves. */
+.bubbles li.sending p {
+  opacity: 0.6;
+}
+
+.bubbles li.checking p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  color: var(--ink-soft);
+  background: var(--surface);
+}
+
+.checking .pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--pending);
+  animation: phone-pulse 1.6s ease-in-out infinite;
+}
+
+.checking .slow {
+  flex-basis: 100%;
+  font-size: var(--small);
+}
+
+@keyframes phone-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .checking .pulse {
+    animation: none;
+  }
+}

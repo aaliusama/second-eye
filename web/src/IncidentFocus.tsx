@@ -99,12 +99,14 @@ export function incidentLead(scene: Scene, finding: Finding): string {
 }
 
 /** A short decision list over the existing record, not another checking engine. */
-export function IncidentFocus({ scene, findings, fixes, messages, onInspect }: {
+export function IncidentFocus({ scene, findings, fixes, messages, onInspect, onTrace }: {
   scene: Scene;
   findings: Finding[];
   fixes: Fix[];
   messages: ChatMessage[];
   onInspect: (finding: Finding) => void;
+  /** Open "How it decided" for this finding. */
+  onTrace?: (finding: Finding) => void;
 }) {
   const approve = useSite((s) => s.approve);
   const busy = useSite((s) => s.busy);
@@ -155,6 +157,7 @@ export function IncidentFocus({ scene, findings, fixes, messages, onInspect }: {
           {state === "awaiting" && <p className="incident-waiting">Sent to {crews}. Still on hold until they reply: sent is not confirmed.</p>}
           <div className="incident-links">
             <button className="quiet" type="button" onClick={() => onInspect(finding)}>Show on plan</button>
+            {onTrace && <button className="quiet" type="button" onClick={() => onTrace(finding)}>How it decided</button>}
             <details className="incident-detail">
               <summary>{pending ? "Why, and what will be sent" : "Why"}</summary>
               <p>{finding.summary}</p>

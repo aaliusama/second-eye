@@ -42,6 +42,7 @@ import {
   recordCorrection,
   resetSession,
   sessionNow,
+  undoCorrection,
 } from "./session";
 import { clearStateAt, stateAt } from "./state-at";
 
@@ -100,6 +101,7 @@ function parseBody<T>(schema: Schema<T>, raw: unknown): T {
 }
 
 const approveRoute = /^\/api\/fixes\/([^/]+)\/approve$/;
+const correctionRoute = /^\/api\/corrections\/([^/]+)$/;
 
 export async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> {
   const url = new URL(req.url ?? "/", "http://localhost");
@@ -198,6 +200,15 @@ export async function handle(req: IncomingMessage, res: ServerResponse): Promise
       const correction = recordCorrection(body);
       clearStateAt();
       return send(res, 200, { correction });
+    }
+
+    // Undo a lesson: the correction is removed and the run replays without it (session.ts undoCorrection).
+    const undo = req.method === "DELETE" ? correctionRoute.exec(url.pathname) : null;
+    if (undo) {
+      const removed = await undoCorrection(decodeURIComponent(undo[1]!));
+      clearStateAt();
+      const s = await getSession();
+      return send(res, 200, { ok: true, removed, t: sessionNow(s) });
     }
 
     if (route === "POST /api/reset") {

@@ -64,6 +64,21 @@ export function record(correction: Correction): void {
   save();
 }
 
+/**
+ * Removes every stored correction with this id (undo). Returns the removed ones, oldest first;
+ * empty when the id is not stored (nothing changes, the version stays).
+ */
+export function remove(id: string): Correction[] {
+  const removed = corrections.filter((c) => c.id === id);
+  if (removed.length === 0) return [];
+  const kept = corrections.filter((c) => c.id !== id);
+  corrections.length = 0;
+  corrections.push(...kept);
+  storeVersion++;
+  save();
+  return removed;
+}
+
 /** Clears the store, and deletes the file when persistence is on. */
 export function reset(): void {
   storeVersion++;

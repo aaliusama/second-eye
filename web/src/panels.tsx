@@ -101,12 +101,16 @@ const checkName: Record<Finding["check"], string> = {
 };
 
 function FindingBlock({ f, scene, messages }: { f: Finding; scene: Scene; messages: Map<string, ChatMessage> }) {
+  const setTrace = useSite((s) => s.setTrace);
   return (
     <section className="finding">
       <p className="severity">
         {f.severity === "hold" ? "Hold" : "Check"} · {checkName[f.check]} · {f.trigger === "live" ? "found when it was said" : "found in the evening run-through"}
       </p>
       <p>{f.summary}</p>
+      <button type="button" className="quiet trace-open" onClick={() => setTrace(findingKey(f))}>
+        How it decided
+      </button>
       {f.ghost && <p className="meta">Red dashed line: where they last heard the wall was, {f.ghost.label} from the record</p>}
       <h3>What was said</h3>
       <Source id={f.sourceMessageId} messages={messages} scene={scene} />
