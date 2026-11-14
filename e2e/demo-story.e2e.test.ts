@@ -87,7 +87,7 @@ describe("demo story (golden replay, cached extraction)", () => {
   it("health: demo mode, no live LLM", async () => {
     const { status, body } = await get("/api/health");
     expect(status).toBe(200);
-    expect(body).toEqual({ ok: true, liveLlm: false });
+    expect(body).toEqual({ ok: true, liveLlm: false, apiVersion: expect.any(Number) });
   });
 
   it("beat 3: the ghost wall is in the record — W-12, 0.4 m east, sourced", async () => {

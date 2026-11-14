@@ -24,6 +24,7 @@ import {
   STORY_ELEMENT,
   type Box,
 } from "./derive";
+import { clearanceTone, clearanceWords, faceGeometry, overlapLabel } from "./depth";
 import { phase, REVEAL } from "./reveal";
 import type { Selection } from "./store";
 import { color, drawing, font } from "./tokens";
@@ -56,6 +57,8 @@ export interface FlatViewProps {
   lens?: Crew;
   /** Elements this crew's planned work touches: an unheard change there is drawn in redline. */
   exposedIds?: Set<string>;
+  /** Open findings with measured geometry (lane B): work-zone strip and faces, or the overlap of a clash. */
+  measured?: Finding[];
 }
 
 const LENS_MS = 520;
@@ -307,8 +310,80 @@ function RoomLabel({ el, tasks, scene }: { el: Element; tasks: PlanTask[]; scene
   );
 }
 
+const TONE = { redline: color.redline, pending: color.pending, soft: color.inkSoft } as const;
+
+/**
+ * Lane B's measured geometry, in drafting conventions. Clearance: the work-zone strip (soft hatch),
+ * the recorded face (ink) and the face the crew believes in (redline, the conflict itself), with the
+ * measured offset. Overlap: each crew's work zone dashed in its hue, the shared area hatched in redline.
+ */
+function MeasureLayer({ f, scene, opacity, sent }: { f: Finding; scene: Scene; opacity: number; sent: boolean }) {
+  const c = f.measure?.clearance;
+  const o = f.measure?.overlap;
+  if (opacity <= 0 || (!c && !o)) return null;
+  const s = drawing.smallLabel * 0.8;
+  return (
+    <g opacity={opacity} pointerEvents="none" className="measure">
+      {c && (() => {
+        const tone = TONE[clearanceTone(c, sent)];
+        const zone = c.workZone.kind === "polygon" ? c.workZone.points : undefined;
+        const zb = zone ? boxOf(zone) : undefined;
+        const [l1, l2] = clearanceWords(c);
+        const towardFace = midpoint(faceGeometry(c.recordedFace))[0] >= (zb ? (zb.minX + zb.maxX) / 2 : 0);
+        // Two lines, both above the strip, so the note never covers the hatch or the faces.
+        const [tx, ty] = zb ? P([towardFace ? zb.maxX : zb.minX, zb.maxY + 0.35 + s * 1.2]) : [0, 0];
+        const line = (face: [Point, Point], stroke: string, width: number, dash?: string) => {
+          const [x1, y1] = P(face[0]);
+          const [x2, y2] = P(face[1]);
+          return <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={stroke} strokeWidth={width} strokeDasharray={dash} />;
+        };
+        return (
+          <g>
+            {zone && <polygon points={poly(zone)} fill="url(#hatch-zone)" stroke={color.inkSoft} strokeWidth={drawing.hairline} strokeDasharray="0.12 0.08" />}
+            {line(c.recordedFace, color.ink, drawing.outline)}
+            {line(c.believedFace, tone, drawing.outline, "0.16 0.1")}
+            {!f.ghost && <Dimension ghost={faceGeometry(c.believedFace)} truth={faceGeometry(c.recordedFace)} label={`${c.offsetM.toFixed(2)} m ${c.direction}`} opacity={1} tone={tone} />}
+            {zb && (
+              <text x={tx} y={ty} className="ghost-note" fontSize={s} style={{ textAnchor: towardFace ? "end" : "start", fill: color.inkSoft, paintOrder: "stroke", stroke: color.paper, strokeWidth: 0.1 }}>
+                <tspan x={tx}>{l1}</tspan>
+                <tspan x={tx} dy="1.2em" style={{ fill: tone }}>{l2}</tspan>
+              </text>
+            )}
+          </g>
+        );
+      })()}
+      {o && (() => {
+        const shared = o.zone.kind === "polygon" ? o.zone.points : undefined;
+        const [cx, cy] = shared ? P(midpoint(o.zone)) : [0, 0];
+        return (
+          <g>
+            {o.zones.map((z) => z.zone.kind === "polygon" && (() => {
+              const b = boxOf(z.zone.points);
+              const [lx, ly] = P([b.minX + 0.3, b.minY + 0.35]);
+              return (
+                <g key={`${z.crewId}-${z.taskId}`}>
+                  <polygon points={poly(z.zone.points)} fill="none" stroke={crewHue(scene, z.crewId)} strokeWidth={drawing.outline} strokeDasharray="0.2 0.12" />
+                  <text x={lx} y={ly} className="badge-letter" fontSize={s} style={{ fill: crewHue(scene, z.crewId) }}>
+                    {crewById(scene, z.crewId)?.letter ?? "?"}
+                  </text>
+                </g>
+              );
+            })())}
+            {shared && <polygon points={poly(shared)} fill="url(#hatch-clash)" stroke={color.redline} strokeWidth={drawing.outline} />}
+            {shared && (
+              <text x={cx} y={cy} className="dim-label" fontSize={drawing.smallLabel} style={{ fill: color.redline, paintOrder: "stroke", stroke: color.paper, strokeWidth: 0.12 }}>
+                {overlapLabel(o.areaM2)}
+              </text>
+            )}
+          </g>
+        );
+      })()}
+    </g>
+  );
+}
+
 export function FlatView(props: FlatViewProps) {
-  const { scene, ghosts, conflictIds, clearIds, activeTasks, selection, onSelect, reveal, sentIds, tight = false, lens, exposedIds } = props;
+  const { scene, ghosts, conflictIds, clearIds, activeTasks, selection, onSelect, reveal, sentIds, tight = false, lens, exposedIds, measured = [] } = props;
   const glide = useLensGlide(lens);
   const [whole, setWhole] = useState<string | undefined>(undefined);
   const [comparison, setComparison] = useState<"compare" | "earlier" | "latest">("compare");
@@ -399,10 +474,23 @@ export function FlatView(props: FlatViewProps) {
           <pattern id="hatch-pending" width={0.3} height={0.3} patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
             <line x1={0} y1={0} x2={0} y2={0.3} stroke={color.pending} strokeWidth={0.06} />
           </pattern>
+          <pattern id="hatch-zone" width={drawing.hatchStep} height={drawing.hatchStep} patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <line x1={0} y1={0} x2={0} y2={drawing.hatchStep} stroke={color.inkSoft} strokeWidth={drawing.hatchWidth} />
+          </pattern>
+          <pattern id="hatch-clash" width={drawing.hatchStep} height={drawing.hatchStep} patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
+            <line x1={0} y1={0} x2={0} y2={drawing.hatchStep} stroke={color.redline} strokeWidth={drawing.hatchWidth * 1.5} />
+          </pattern>
         </defs>
         <Grid box={base} />
         {areas.map(drawEl)}
         {solids.filter((el) => !(comparison === "earlier" && ghosts.some((f) => f.ghost?.elementId === el.id))).map(drawEl)}
+        {!lens && comparison === "compare" && measured.map((f) => {
+          // The revealed ghost's numbers arrive with its dimension line, not before.
+          const key = findingKey(f);
+          const ghostKey = f.ghost ? ghosts.find((g) => g.id === f.id || g.ghost?.elementId === f.ghost?.elementId) : undefined;
+          const playing = ghostKey ? findingKey(ghostKey) === reveal.key : key === reveal.key;
+          return <MeasureLayer key={`m-${key}`} f={f} scene={scene} opacity={playing ? phase(reveal.elapsed, REVEAL.growEnd, REVEAL.total) : 1} sent={sentIds?.has(f.id) ?? false} />;
+        })}
         {areas.map((el) => (
           <RoomLabel key={`l-${el.id}`} el={el} tasks={activeTasks} scene={scene} />
         ))}

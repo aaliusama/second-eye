@@ -37,6 +37,9 @@ interface SiteStore {
   /** Draw the floor as this crew knows it (crew id). Undefined = the record. Display only. */
   lens?: string;
   setLens: (crewId: string | undefined) => void;
+  /** "How it decided" open on this finding (findingKey). Display only. */
+  trace?: string;
+  setTrace: (key: string | undefined) => void;
   /**
    * A message the presenter sends from the phone. The Phone component picks it up and submits it
    * through its own send path (same API calls as typing), then calls `done`.
@@ -103,12 +106,13 @@ export const useSite = create<SiteStore>((set, get) => ({
   },
 
   setAsOf: async (t) => {
-    set({ asOf: t, selection: undefined });
+    set({ asOf: t, selection: undefined, trace: undefined });
     await get().refresh();
   },
 
   setSlider: (step) => set({ slider: step }),
-  select: (selection) => set({ selection }),
+  // Selecting anything else on the plan closes the trace; selecting its own finding keeps it.
+  select: (selection) => set((st) => ({ selection, trace: selection?.kind === "finding" && selection.key === st.trace ? st.trace : undefined })),
 
   approve: async (fixId) => {
     set({ busy: fixId });
@@ -127,7 +131,7 @@ export const useSite = create<SiteStore>((set, get) => ({
     set({ busy: "reset" });
     try {
       await api.reset(keepLearning);
-      set({ asOf: undefined, selection: undefined, run: get().run + 1 });
+      set({ asOf: undefined, selection: undefined, trace: undefined, run: get().run + 1 });
       announceChange();
       await get().refresh();
     } catch (err) {
@@ -162,6 +166,7 @@ export const useSite = create<SiteStore>((set, get) => ({
   setPhoneOpen: (phoneOpen) => set({ phoneOpen }),
   setFocus: (focus) => set({ focus }),
   setLens: (lens) => set({ lens }),
+  setTrace: (trace) => set(trace ? { trace, selection: { kind: "finding", key: trace } } : { trace: undefined }),
 
   phoneSend: (crewId, text) =>
     new Promise<void>((resolve) => {
