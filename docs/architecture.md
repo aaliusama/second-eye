@@ -39,6 +39,13 @@ chat message -> server/extract -> operations + intents -> server/model -> scene 
 - `rehearse.ts` steps one day's plan in order for the slider. `fixes.ts` proposes one fix per finding with the crew message.
 - Listen step (`fixes.ts`): each silent crew gets a question instead of a HOLD; system DMs are not crew replies. If every crew is silent in the evening, the fix becomes `ask_crew`. Without chat history, low-confidence tasks retain the confirmation fallback. A warning never becomes a work instruction.
 
+## Geometry (lane B)
+
+- All numbers live in `server/checks/geometry-rules.ts`: per task type the clear depth the crew needs in front of a face (`clearanceM`, also the work-zone depth) and the face tolerance, each with a one-line reason; `HOLD_FROM_M` (0.05 m) and `MIN_OVERLAP_M2` (0.25 m²).
+- Plane geometry is pure and tested in `geometry.ts`: shoelace area, convex hull, half-plane clip, Sutherland-Hodgman intersection (the clip polygon must be convex; non-convex shapes are hulled first, which can only enlarge a zone), wall faces and strips.
+- latest_change (`measure.ts` `measureClearance`): walls are thick segments. The work side is the side of the wall's centre line holding more of the task's place; with no place or an even split both faces are measured and the nearer is used (on a tie, the face where work would run into the wall). The offset is perpendicular to the believed wall, between the believed face and the recorded face. Moved into the work side beyond tolerance: `inside_new_wall`; away: `gap`; else `within_tolerance`. Hold at or above `HOLD_FROM_M` beyond tolerance, otherwise warn; the unsure rule still downgrades. Filled into `finding.measure.clearance` and the summary; `ghost` is unchanged. Non-wall elements keep the plain hold.
+- space_clash (`workZone`, `measureOverlap`): each task's zone is the strip along each named element inside its place (the crew's believed geometry), or the whole place when it names none; several strips join by convex hull. Two crews at overlapping times clash when the zones share at least `MIN_OVERLAP_M2`, whatever their place ids. A zone that cannot be drawn falls back to the same-place-id rule, unmeasured. Filled into `finding.measure.overlap`, the summary and rule `space_clash.overlapping_work_zones`.
+
 ## Session and learning
 
 - `server/api/session.ts` holds one session. The first request plays the golden replay and keeps the result. Live messages are added on top.
