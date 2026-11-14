@@ -20,7 +20,6 @@ import { FlatView } from "./FlatView";
 import { Huddle } from "./Huddle";
 import { IncidentFocus, rankIncidents, worstLine } from "./IncidentFocus";
 import "./desk.css";
-import "./hud.css";
 import { Knowledge } from "./Knowledge";
 import { Autonomy } from "./Autonomy";
 import { Lessons } from "./Lessons";
