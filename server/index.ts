@@ -6,6 +6,7 @@ import { usePersistence } from "./learning/index";
 import { configureDismissals } from "./learning/dismissals";
 import { logLine } from "./log";
 import { REPO_ROOT } from "./paths";
+import { serveWeb } from "./static";
 
 // Owner: A. Server entry.
 try {
@@ -20,7 +21,13 @@ configureDismissals(process.env.LEARNING_FILE);
 
 const port = Number(process.env.PORT ?? 8787);
 
-createServer((req, res) => void handle(req, res)).listen(port, () => {
+createServer((req, res) => {
+  void (async () => {
+    // Hosted: everything that is not the API is the built web app. Locally there is no build and Vite serves it.
+    if (!req.url?.startsWith("/api") && (await serveWeb(req, res))) return;
+    await handle(req, res);
+  })();
+}).listen(port, () => {
   logLine({ kind: "server.listening", port, liveLlm: process.env.LIVE_LLM === "1", learningFile: process.env.LEARNING_FILE || null });
   // Play the golden replay now; requests that arrive meanwhile await the same session.
   void warmUp();

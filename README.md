@@ -142,6 +142,8 @@ Methodology: [evaluation guide](eval/README.md) · [golden case details](eval/re
 | `npm run eval:paraphrase` | Run three development cases with uncached model calls |
 | `npm run build -w @site/web` | Build the web interface |
 
+**Hosted demo.** [`render.yaml`](render.yaml) deploys one Render web service that runs the API and serves the built web app (`server/static.ts`). Every push to `main` redeploys. It runs the offline replay only: no API key, live extraction off. All visitors share one in-memory record, so press **R** in the presenter to start clean.
+
 On Windows, use `npm.cmd` if PowerShell blocks `npm.ps1`. Evaluating outputs that aren't cached needs a Groq key; a call that can't run doesn't count as a successful negative. Recording instructions are in [`video/README.md`](video/README.md).
 
 <details>
