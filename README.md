@@ -47,18 +47,34 @@ Text-only sheet comparisons also flag a difference between an issued revision an
 
 ## How it works
 
-**The LLM extracts facts. Rules decide.** No model call sits inside the checks. The same input always gives the same output.
+### One floor, many versions of it
+
+Most tools keep one model of the building. A site doesn't have one. Each crew works from **its own version**: the changes said in the threads it reads, and none of the ones it doesn't.
+
+Site Rehearsal models that directly. Every change to every element keeps the thread it was said in. From that history the engine derives, **per crew**, where that crew believes each wall is (`knownGeometry(element, crew)`). A ghost wall is the measured difference between one crew's belief and the record, at the place where its planned work meets it.
+
+<div align="center">
+<img src="docs/assets/readme/who-knows.png" alt="The floor as Novak Plumbing knows it: their wall drawn where they believe it is, the record dashed red 0.4 m east. Beside it, the Who knows what matrix: every change since the drawing against every crew, with the Unit 204 wall row marked red for Novak Plumbing. Simulated site data." width="100%">
+<br><sub>"See the floor as" any crew. The matrix shows every change against every crew: heard, not heard, or not heard where the checks find that crew's work meets it.</sub>
+</div>
 
 ```mermaid
 flowchart LR
-    A[Site messages] --> B[Validated facts<br/>and crew intent]
-    B --> C[Sourced scene<br/>and plan]
-    C --> D{Four deterministic<br/>checks}
-    D --> E[Ghost and<br/>proposed correction]
-    E --> F[Approval and<br/>crew confirmation]
-    F --> C
-    C --> G[Web · HTTP · MCP]
+    M[Site messages<br/>in many threads] -->|LLM extracts,<br/>zod validates| O[Sourced operations<br/>source · thread · confidence]
+    O --> R[(The record<br/>versioned element history)]
+    R --> K{{Per-crew belief<br/>what each crew has heard}}
+    T[Crew intent<br/>and tomorrow's plan] --> C
+    K --> C{Four deterministic checks<br/>latest change · space · order · open decision}
+    R --> C
+    C --> G[Ghost wall<br/>belief vs record, measured]
+    G --> F[Correction, approval,<br/>revision-bound confirmation]
+    F -->|crew hears it| K
+    R --> A[Web · HTTP · MCP]
 ```
+
+**The LLM extracts facts. Rules decide.** No model call sits inside the checks, and replays run on recorded time, so the same input always gives the same output. Sending a correction doesn't clear the risk; only a reply that confirms the current revision does.
+
+### Stack
 
 It is TypeScript throughout:
 
