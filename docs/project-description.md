@@ -4,7 +4,13 @@ Prepared for review. This file does not update GitHub settings or submit an entr
 
 ## Repository description
 
-See tomorrow's mistake before it gets built. Turn crew messages into a sourced floor plan, reveal conflicting work, and track corrections through confirmation.
+Construction coordination intelligence: turn crew messages into a versioned spatial record, detect conflicting plans with deterministic checks, and track corrections through revision-specific confirmation.
+
+## Professional project description
+
+Second Eye is a construction coordination prototype that transforms site communications into a traceable model of one floor. It combines language-model extraction with deterministic spatial and scheduling checks to identify discrepancies between crew intent and the latest project record. Source-linked findings, measured geometry and dependency analysis help superintendents inspect risks and coordinate corrections before work begins.
+
+The system maintains a versioned scene, exposes the evidence behind each finding, and tracks corrections through explicit confirmation of the relevant revision. A React workspace, crew phone interface and read-only MCP server share the same underlying record. The prepared demonstration runs offline using cached extraction and simulated site data; optional live extraction supports new wording. It does not verify physical construction or certify site safety.
 
 ## One sentence
 

@@ -6,9 +6,12 @@
 
 **See tomorrow's mistake before it gets built.**
 
-A wall moves in the office chat. The plumber still plans from the old line.<br>
-**Second Eye makes that mismatch visible before the crew starts.**<br>
-Crew messages become a shared floor plan, an early warning, and a correction someone can act on.
+**Spatial coordination intelligence for construction teams.**<br>
+Turn crew messages into a traceable project record, detect conflicting plans,<br>
+and coordinate corrections before work begins.
+
+[![Launch Second Eye](https://img.shields.io/badge/LAUNCH_LIVE_DEMO-Second_Eye-24775B?style=for-the-badge&logo=render&logoColor=white)](https://site-rehearsal.onrender.com)
+[![Explore architecture](https://img.shields.io/badge/EXPLORE-Architecture-172C39?style=for-the-badge)](#system-architecture)
 
 [![Talona track](https://img.shields.io/badge/Talona-Context%20for%20the%20Physical%20World-1C2B3A?style=flat-square)](docs/TALONA_ALIGNMENT.md)
 [![Offline demo](https://img.shields.io/badge/demo-offline%2C%20no%20API%20key-1F8A4C?style=flat-square)](#quick-start)
@@ -18,7 +21,7 @@ Crew messages become a shared floor plan, an early warning, and a correction som
 
 [Read the pitch deck (PDF)](docs/deck/deck.pdf) · [Run it locally](#quick-start)
 
-[Quick start](#quick-start) · [How it works](#how-it-works) · [Measured results](#measured-not-assumed) · [Architecture](docs/architecture.md) · [Demo script](docs/demo-script.md)
+[Live demo](#try-second-eye) · [How it works](#how-it-works) · [Architecture](#system-architecture) · [Technical stack](#technical-stack) · [Results](#measured-not-assumed) · [Quick start](#quick-start)
 
 <br>
 
@@ -32,6 +35,27 @@ Crew messages become a shared floor plan, an early warning, and a correction som
 
 > [!IMPORTANT]
 > **Hackathon prototype on simulated data.** Built for the Talona · Context for the Physical World track at proximata Hackathon '26. The model reflects what was *said in the record*, not what was built. A crew acknowledgement records receipt in the simulation; it does not establish inspection, completed work or physical safety.
+
+## Overview
+
+Second Eye is a construction coordination prototype that connects site communication with spatial and scheduling context. It transforms crew messages into a versioned model of one floor, compares intended work with the latest recorded changes, and identifies conflicts in geometry, shared work areas, task dependencies and unresolved decisions.
+
+Each finding links back to its source messages, extracted facts and the rule that produced it. A superintendent can review a proposed correction, track confirmation of the relevant revision, and inspect the resulting recheck. The same record supports a web workspace, a crew phone interface and read-only access for AI agents through the Model Context Protocol (MCP).
+
+## Try Second Eye
+
+**[Launch the live application →](https://site-rehearsal.onrender.com)**
+
+No installation or API key is required for the prepared demonstration.
+
+| Experience | Direct link | What to explore |
+|---|---|---|
+| **Superintendent workspace** | [Open the application](https://site-rehearsal.onrender.com) | Floor plan, incident evidence, corrections and tomorrow's work |
+| **Guided demonstration** | [Start the presenter](https://site-rehearsal.onrender.com/?present=1) | Press **R** to reset, then **→** to follow the twelve-beat story |
+| **Crew phone** | [Open the phone interface](https://site-rehearsal.onrender.com/phone) | Prepared crew messages and sourced responses |
+| **Pitch deck** | [Read the PDF](docs/deck/deck.pdf) | The problem, product and demonstration story |
+
+The hosted demo uses cached extraction and simulated data. Visitors share one session; resetting it also resets the shared demonstration. For an isolated session or unfamiliar message wording, use the [local setup](#quick-start).
 
 ## One wall. Two versions. One chance to intervene.
 
@@ -93,9 +117,6 @@ Every change keeps its source message and thread. The engine uses thread access 
 <br><sub>Compare the latest record with the version available in each crew's threads. The matrix highlights information gaps that intersect planned work.</sub>
 </div>
 
-<details>
-<summary><strong>For technical judges: measured geometry, decision traces and the plan graph</strong></summary>
-
 ### Measured, not just flagged
 
 The checks work in metres. Walls are thick segments and rooms are polygons. For a latest change, the engine measures the perpendicular offset between recorded wall faces and compares it with configured trade clearances and tolerances. For a space clash, it intersects the crews' work zones and reports the shared floor area. Thresholds and their stated rationale are inspectable in [`geometry-rules.ts`](server/checks/geometry-rules.ts). These prototype rules are not a certification of code compliance or physical safety.
@@ -116,11 +137,16 @@ The evening rehearsal builds tomorrow's plan as a dependency graph from one prer
 <br><sub>"Show crew plan": arrows for what must finish first, the critical path in heavy ink, out-of-order work dashed red, and who is blocked if the selected task slips.</sub>
 </div>
 
+## System architecture
+
+**The language model extracts facts. Deterministic rules decide which plans conflict.** A shared TypeScript contract connects extraction, the versioned record, the checking engine and every client. Both immediate intent checks and evening rehearsal use the same rules.
+
 ```mermaid
 flowchart LR
-    M["Site messages<br/>in many threads"] -->|"LLM extracts,<br/>rules ground and validate"| O["Sourced operations and intents<br/>source · thread · confidence"]
+    M["Site messages<br/>in many threads"] --> X["Extraction<br/>cached replay or opt-in Groq"]
+    X -->|"schema validation<br/>and grounding"| O["Operations and intents<br/>source · thread · confidence"]
     O --> R[("The record<br/>versioned element history")]
-    R --> K{{"Per-crew belief<br/>what each crew has heard"}}
+    R --> K{{"Crew-accessible record<br/>derived from thread access"}}
     K --> C{"Four deterministic checks<br/>latest change · space · order · open decision"}
     R --> C
     C --> G["Measured geometry<br/>face offset, clearance, overlap"]
@@ -130,22 +156,48 @@ flowchart LR
     P --> H
     H --> F["Correction, approval,<br/>revision-bound confirmation"]
     F -->|"crew confirms"| K
+    F --> L["Explicit learning<br/>nicknames and review memory"]
+    L --> O
     H --> A["Web · HTTP · MCP"]
+    classDef record fill:#edf4f1,stroke:#24775b,color:#172c39;
+    classDef decision fill:#f5f3ed,stroke:#526878,color:#172c39;
+    classDef risk fill:#fff0ed,stroke:#c74438,color:#172c39;
+    class R,K,L record;
+    class C,G,P decision;
+    class H,F risk;
 ```
 
-**The LLM extracts facts. Rules decide.** No model call sits inside the checks, the geometry or the plan graph, and replays run on recorded time, so the same input always gives the same output. In live mode, rules also audit the model's reading: a wall named for a unit the message never mentions is dropped, and a message with a distance and a direction but no extracted move is read a second time. Sending a correction doesn't clear the risk; only a reply that confirms the current revision does.
+| Layer | Responsibility | Implementation |
+|---|---|---|
+| **Contracts and extraction** | Validate messages as typed operations and intent; preserve sources and confidence | [`contracts/`](contracts/src/), [`server/extract/`](server/extract/) |
+| **Versioned scene** | Apply changes, retain element history and derive recorded plans | [`server/model/`](server/model/) |
+| **Checking engine** | Evaluate four conflict categories, wall-face offsets and overlapping work zones | [`server/checks/`](server/checks/) |
+| **Plan graph** | Derive prerequisites, the critical path and effects of a one-slot delay | [`graph.ts`](server/checks/graph.ts), [`rehearse.ts`](server/checks/rehearse.ts) |
+| **Correction and learning** | Track revision-specific receipts, reject stale confirmations and retain explicit corrections | [`server/api/`](server/api/), [`server/learning/`](server/learning/) |
+| **Clients** | Present the same record through flat/3D views, the crew phone, HTTP and MCP | [`web/`](web/), [`mcp/`](mcp/) |
 
-### Stack
+### Engineering principles
 
-It is TypeScript throughout:
+- **Traceable decisions.** Every operation and finding carries `sourceMessageId`; findings expose evidence, rule identifiers and applicable measurements.
+- **Reproducible checks.** Checks, geometry and the plan graph contain no language-model calls. Cached replay and recorded time make the prepared demonstration repeatable; fresh model extraction can vary.
+- **Explicit uncertainty.** Missing extraction is “not checked.” Uncertain locations are not silently guessed. Grounding checks reject references to units absent from the message.
+- **Revision-aware confirmation.** Dispatch remains separate from receipt. An acknowledgement for a superseded revision is rejected; duplicate confirmations are idempotent.
+- **Shared spatial state.** The SVG and three.js renderers consume the same scene. The 3D view is a second presentation of the record, not another model of truth.
+- **Inspectable learning.** Nickname corrections and review memory alter subsequent behavior without model retraining.
 
-- Node HTTP server, zod contracts and a React/Vite interface.
-- An SVG floor plan that always works, plus an optional three.js renderer of the same scene.
-- Groq handles extraction and question parsing.
-- Replays run on recorded time, so results repeat exactly.
-- Agents and the [demo robot planner](mcp/README.md) query the same record through MCP.
+Full implementation detail: [architecture and data flow](docs/architecture.md) · [MCP tools and example consumer](mcp/README.md) · [evaluation methodology](eval/README.md).
 
-</details>
+## Technical stack
+
+| Area | Technology | Purpose |
+|---|---|---|
+| Language and contracts | TypeScript, Zod, npm workspaces | Shared types and runtime validation across modules |
+| Web interface | React, Vite, SVG, three.js | Interactive floor plan, crew interface and optional 3D view |
+| API and runtime | Node.js 22.12+, `node:http` | Scene state, message processing, rehearsal and correction endpoints |
+| Language-model extraction | Groq; cached outputs for the offline demo | Extract structured changes and intent; parse crew questions |
+| Agent access | Model Context Protocol | Read-only queries against the same sourced project record |
+| Verification | Vitest, HTTP story tests, labelled evaluation | Protect rule behavior and measure catches, misses and false alarms |
+| Hosting | Render | One Node service serves the API and built web application |
 
 ## Quick start
 

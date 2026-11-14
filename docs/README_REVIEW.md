@@ -1,5 +1,7 @@
 # README refresh and readiness review
 
+Follow-up: the user requested equal emphasis on engineering and marketing. The README now exposes the architecture diagram, module responsibilities, engineering principles and technology stack directly, adds a prominent live-demo button and direct-access table, and includes a professional project overview. Local links, section anchors and typecheck passed. The web tool could not access the hosted URL; uptime was not verified. This follow-up supersedes the disclosure-layout description below.
+
 14 November 2026. Reviewed local branch `win/integration` after pulling `origin/main` at `946b998`. Nothing pushed or submitted in this pass.
 
 ## Delivered
