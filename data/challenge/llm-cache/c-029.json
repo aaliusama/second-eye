@@ -1,0 +1,65 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "c-029",
+  "operations": [
+    {
+      "id": "op-c-029-1",
+      "time": "2026-11-16T15:00:00",
+      "sourceMessageId": "c-029",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-c-029-1",
+        "crewId": "crew-electrical",
+        "day": "2026-11-17",
+        "slot": "afternoon",
+        "order": 0,
+        "taskType": "rough_in_electrical",
+        "description": "rough in on the 206 kitchen partition",
+        "placeId": "room-206",
+        "elementIds": [
+          "W-21"
+        ],
+        "status": "planned",
+        "sourceMessageId": "c-029",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-c-029-1",
+      "crewId": "crew-electrical",
+      "time": "2026-11-16T15:00:00",
+      "sourceMessageId": "c-029",
+      "confidence": 1,
+      "day": "2026-11-17",
+      "slot": "afternoon",
+      "taskType": "rough_in_electrical",
+      "description": "rough in on the 206 kitchen partition",
+      "placeId": "room-206",
+      "elementIds": [
+        "W-21"
+      ]
+    }
+  ],
+  "facts": {
+    "id": "c-029",
+    "plans": [
+      {
+        "day": "2026-11-17",
+        "slot": "afternoon",
+        "taskType": "rough_in_electrical",
+        "placeId": "room-206",
+        "placeSaid": null,
+        "elementIds": [
+          "W-21"
+        ],
+        "description": "rough in on the 206 kitchen partition",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

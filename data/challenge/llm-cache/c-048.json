@@ -1,0 +1,29 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "c-048",
+  "operations": [
+    {
+      "id": "op-c-048-1",
+      "time": "2026-11-17T09:30:00",
+      "sourceMessageId": "c-048",
+      "thread": "office",
+      "confidence": 0.9,
+      "type": "set_status",
+      "elementId": "W-05",
+      "state": "proposed"
+    }
+  ],
+  "intents": [],
+  "facts": {
+    "id": "c-048",
+    "plans": [],
+    "changes": [
+      {
+        "kind": "status",
+        "elementId": "W-05",
+        "state": "proposed",
+        "confidence": 0.9
+      }
+    ]
+  }
+}

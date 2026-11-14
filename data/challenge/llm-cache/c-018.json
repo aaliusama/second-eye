@@ -1,0 +1,29 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "c-018",
+  "operations": [
+    {
+      "id": "op-c-018-1",
+      "time": "2026-11-16T11:20:00",
+      "sourceMessageId": "c-018",
+      "thread": "office",
+      "confidence": 1,
+      "type": "set_status",
+      "elementId": "light-206-bath",
+      "state": "proposed"
+    }
+  ],
+  "intents": [],
+  "facts": {
+    "id": "c-018",
+    "plans": [],
+    "changes": [
+      {
+        "kind": "status",
+        "elementId": "light-206-bath",
+        "state": "proposed",
+        "confidence": 1
+      }
+    ]
+  }
+}
