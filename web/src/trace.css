@@ -1,64 +1,79 @@
-/* Owner: D. "How it decided" as a stepped pipeline: numbered nodes on one connector line.
+/* Owner: D. "How it decided" as a stepped pipeline: numbered nodes on one hairline connector.
    Loaded before index.css, so every rule is scoped under .trace to win over the base trace rules.
-   Colours come only from the token variables (neutrals) and the three state accents. */
+   Neutrals from token variables; colour only for meaning (conflict, unconfirmed/waiting, confirmed). */
 
 .trace .trace-steps { position: relative; gap: 0; }
 
-/* Node and connector. The line runs from under each node to the next node. */
-.trace .trace-step { padding: 0 0 22px 44px; gap: 10px; }
+/* Node and connector: a 1px line from under each node to the next. Dashed while the model reads. */
+.trace .trace-step { padding: 0 0 24px 46px; gap: 10px; }
 .trace .trace-step::before,
 .trace .trace-step.model-side::before {
   content: ""; position: absolute; left: 14px; top: 30px; bottom: 0; width: 0;
-  border-left: 1.5px solid var(--ink-soft); opacity: 0.55;
+  border-left: 1px solid var(--ink-soft); opacity: 0.45;
 }
 .trace .trace-step.model-side::before { border-left-style: dashed; }
 .trace .trace-step:last-child::before { display: none; }
 .trace .trace-n {
-  width: 30px; height: 30px; font-size: var(--small); font-variant-numeric: tabular-nums;
-  background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); z-index: 1;
+  width: 29px; height: 29px; border-radius: 4px; z-index: 1;
+  font-size: var(--small); font-weight: 650; font-stretch: var(--condensed); letter-spacing: 0.06em; font-variant-numeric: tabular-nums;
+  background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink);
 }
-.trace .model-side .trace-n { box-shadow: inset 0 0 0 1.5px var(--ink-soft); color: var(--ink-soft); }
-.trace .rule-side .trace-n { background: var(--ink); color: var(--surface); box-shadow: none; }
+.trace .model-side .trace-n { box-shadow: inset 0 0 0 1px var(--ink-soft); color: var(--ink-soft); }
 
-.trace .trace-step h3 { line-height: 30px; gap: 4px 10px; }
-.trace .trace-icon { display: inline-flex; color: var(--ink-soft); margin-right: -2px; }
+/* Step label: condensed caps, small. The content under it carries the weight. */
+.trace .trace-step h3 {
+  font-size: var(--small); font-weight: 650; font-stretch: var(--condensed); text-transform: uppercase; letter-spacing: 0.08em;
+  line-height: 29px; gap: 4px 10px; color: var(--ink);
+}
+.trace .trace-actor { text-transform: none; letter-spacing: 0.02em; font-stretch: var(--normal, 100%); border-radius: 4px; }
+.trace .trace-actor.rules { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
 
 /* The boundary keeps the connector running through it. */
-.trace .trace-boundary { margin: 0; padding: 4px 0 22px 44px; }
-.trace .trace-boundary::after { content: ""; position: absolute; left: 14px; top: 0; bottom: 0; border-left: 1.5px dashed var(--ink-soft); opacity: 0.55; }
-.trace .trace-boundary::before { left: 44px; top: calc(50% - 9px); }
-.trace .trace-boundary span { background: var(--surface); padding: 0 8px 0 0; font-variant-numeric: tabular-nums; }
+.trace .trace-boundary { margin: 0; padding: 2px 0 24px 46px; font-stretch: var(--condensed); text-transform: uppercase; letter-spacing: 0.08em; }
+.trace .trace-boundary::after { content: ""; position: absolute; left: 14px; top: 0; bottom: 0; border-left: 1px dashed var(--ink-soft); opacity: 0.45; }
+.trace .trace-boundary::before { left: 46px; top: calc(50% - 10px); }
+.trace .trace-boundary span { background: var(--surface); padding: 0 8px 0 0; }
 
-/* Step 1: who, thread, replay time, quote. */
+/* Step 1: who, thread, replay time, then the words. */
 .trace .trace-quote { display: flex; flex-direction: column; gap: 6px; }
-.trace .trace-quote + .trace-quote { margin-top: 6px; }
-.trace .trace-fields { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0; }
+.trace .trace-quote + .trace-quote { margin-top: 8px; }
+.trace .trace-quote figcaption { display: flex; align-items: center; gap: 6px; }
+.trace .trace-icon { flex: none; color: var(--ink-soft); }
+.trace .trace-fields { display: flex; flex-wrap: wrap; gap: 4px 18px; margin: 0; }
 .trace .trace-field { display: flex; gap: 6px; align-items: baseline; font-size: var(--small); }
-.trace .trace-field dt { color: var(--ink-soft); }
+.trace .trace-field dt { color: var(--ink-soft); font-stretch: var(--condensed); text-transform: uppercase; letter-spacing: 0.06em; }
 .trace .trace-field dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
-.trace .trace-quote blockquote { margin: 0; border-left: 2px solid var(--ink-soft); padding: 2px 0 2px var(--gap); }
+.trace .trace-quote blockquote { margin: 0; border-left: 1px solid var(--ink-soft); padding: 2px 0 2px var(--gap); }
 .trace .missing { color: var(--ink-soft); font-style: italic; }
 
-/* Step 2: facts with a confidence badge. */
+/* Step 2: each fact with its stored confidence. Green outline when sure, amber fill when unconfirmed. */
 .trace .trace-facts li { flex-direction: row; justify-content: space-between; align-items: baseline; gap: 12px; }
 .trace .trace-conf {
-  flex: none; display: inline-flex; align-items: center; gap: 6px; font-size: var(--small); font-weight: 600;
-  color: var(--clear); padding: 1px 8px; border-radius: var(--radius); box-shadow: inset 0 0 0 1px var(--clear); white-space: nowrap;
+  flex: none; display: inline-flex; align-items: center; gap: 6px; font-size: var(--small); font-weight: 600; font-variant-numeric: tabular-nums;
+  color: var(--clear); padding: 1px 7px; border-radius: 4px; box-shadow: inset 0 0 0 1px currentColor; white-space: nowrap;
 }
-.trace .trace-conf.unsure { color: var(--pending); box-shadow: inset 0 0 0 1px var(--pending); background: color-mix(in srgb, var(--pending) 12%, transparent); }
-.trace .trace-unconfirmed { font-weight: 700; }
+.trace .trace-conf.unsure { color: var(--pending); background: color-mix(in srgb, var(--pending) 12%, transparent); }
+.trace .trace-unconfirmed { font-weight: 700; font-stretch: var(--condensed); text-transform: uppercase; letter-spacing: 0.06em; }
 
 /* Step 3: the rule. */
 .trace .trace-rule { line-height: 1.55; }
 .trace .trace-rule-id { font-size: var(--small); color: var(--ink-soft); }
-.trace .trace-rule-id span { color: var(--ink); font-weight: 600; font-stretch: var(--condensed); letter-spacing: 0.01em; }
+.trace .trace-rule-id span { color: var(--ink); font-weight: 600; font-stretch: var(--condensed); letter-spacing: 0.02em; }
 
-/* Step 4: measured result, fix and receipt. */
-.trace .trace-verdict { line-height: 1.5; }
+/* Step 4: severity, the measured offset drawn as a dimension, then the fix and the crew receipt. */
+.trace .trace-verdict { line-height: 1.5; font-size: var(--text); color: var(--ink); }
+.trace .trace-sev { font-size: var(--small); font-stretch: var(--condensed); text-transform: uppercase; letter-spacing: 0.08em; margin-right: 6px; }
 .trace .trace-sev.hold { color: var(--redline); }
 .trace .trace-sev.warn { color: var(--pending); }
-.trace .trace-number { font-variant-numeric: tabular-nums; }
-.trace .trace-sub { font-size: var(--small); font-weight: 650; color: var(--ink-soft); margin-top: 4px; }
+.trace .trace-dim { display: flex; align-items: center; gap: 10px; max-width: 320px; margin: 4px 0; font-variant-numeric: tabular-nums; }
+.trace .trace-dim-line { flex: 1; position: relative; height: 14px; }
+.trace .trace-dim-line::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; border-top: 1px solid currentColor; }
+.trace .trace-dim-line:first-child::after,
+.trace .trace-dim-line:last-child::after { content: ""; position: absolute; top: 0; bottom: 0; border-left: 1px solid currentColor; }
+.trace .trace-dim-line:first-child::after { left: 0; }
+.trace .trace-dim-line:last-child::after { right: 0; }
+.trace .trace-dim-value { flex: none; }
+.trace .trace-sub { font-size: var(--small); font-weight: 650; font-stretch: var(--condensed); text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-soft); margin-top: 6px; }
 .trace .trace-status { display: flex; flex-direction: column; gap: 4px; }
 .trace .trace-receipt { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; }
 .trace .trace-receipt.waiting { color: var(--pending); }

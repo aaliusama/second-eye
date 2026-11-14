@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { motion, useReducedMotion, type Variants } from "motion/react";
-import { CircleCheck, Clock, MessageSquareQuote, Ruler, ScanText, Scale } from "lucide-react";
+import { CircleCheck, Clock, MessageSquareQuote } from "lucide-react";
 import type { ChatMessage, Finding, Fix, IncidentReceipt, Scene } from "@site/contracts";
 import { api, onChange } from "./api";
 import { elementById, formatTime } from "./derive";
@@ -44,16 +44,13 @@ const NOT_FOUND = "not found";
 const list: Variants = { hidden: {}, shown: { transition: { staggerChildren: 0.09, delayChildren: 0.05 } } };
 const item: Variants = { hidden: { opacity: 0, x: -6 }, shown: { opacity: 1, x: 0, transition: { duration: 0.22, ease: "easeOut" } } };
 
-function Step({ n, side, icon, title, actor, children }: { n: number; side: "model" | "rule"; icon: ReactNode; title: string; actor?: ReactNode; children: ReactNode }) {
+function Step({ n, side, title, actor, children }: { n: number; side: "model" | "rule"; title: string; actor?: ReactNode; children: ReactNode }) {
   return (
     <motion.li variants={item} className={`trace-step ${side}-side`}>
       <span className="trace-n" aria-hidden="true">
-        {n}
+        {String(n).padStart(2, "0")}
       </span>
       <h3>
-        <span className="trace-icon" aria-hidden="true">
-          {icon}
-        </span>
         {title} {actor}
       </h3>
       {children}
@@ -87,7 +84,7 @@ export function Trace({
   const trace = useMemo(() => (finding ? traceOf(finding, scene, messages, fixes, receipts, formatTime) : undefined), [finding, scene, messages, fixes, receipts]);
   const place = finding ? elementById(scene, finding.ghost?.elementId ?? finding.elementIds[0])?.name : undefined;
   const reduced = useReducedMotion();
-  const icon = { size: 15, strokeWidth: 1.75 };
+  const icon = { size: 16, strokeWidth: 1.5, "aria-hidden": true } as const;
 
   return (
     <section className="trace" aria-labelledby="trace-title">
@@ -106,10 +103,13 @@ export function Trace({
         <>
           <p className="trace-lede">The language model only reads messages into facts. Fixed rules make the decision, the same way every time.</p>
           <motion.ol className="trace-steps" variants={list} initial={reduced ? false : "hidden"} animate="shown" key={finding?.id}>
-            <Step n={1} side="model" icon={<MessageSquareQuote {...icon} />} title="Said">
+            <Step n={1} side="model" title="Said">
               {trace.messages.map((m) => (
                 <figure key={m.source.id} className="trace-quote">
-                  <figcaption>{m.role === "trigger" ? "The crew's statement the check ran on" : "Evidence in the record"}</figcaption>
+                  <figcaption>
+                    <MessageSquareQuote {...icon} className="trace-icon" />
+                    {m.role === "trigger" ? "The crew's statement the check ran on" : "Evidence in the record"}
+                  </figcaption>
                   <dl className="trace-fields">
                     <Field label="Who" value={m.source.kind === "unknown" ? undefined : m.source.who} />
                     <Field label="Thread" value={m.source.where} />
@@ -123,7 +123,7 @@ export function Trace({
                 </figure>
               ))}
             </Step>
-            <Step n={2} side="model" icon={<ScanText {...icon} />} title="Read into facts" actor={<span className="trace-actor">Language model</span>}>
+            <Step n={2} side="model" title="Read into facts" actor={<span className="trace-actor">Language model</span>}>
               {trace.messages.map((m) => (
                 <div key={m.source.id} className="trace-facts">
                   <p className="trace-from">From {m.role === "trigger" ? "the statement" : `${m.source.who}${m.source.when ? `, ${m.source.when}` : ""}`}</p>
@@ -155,7 +155,7 @@ export function Trace({
             <motion.li variants={item} className="trace-boundary" aria-hidden="true">
               <span>Language model above · rules below</span>
             </motion.li>
-            <Step n={3} side="rule" icon={<Scale {...icon} />} title="Rule applied" actor={<span className="trace-actor rules">Rules, no language model</span>}>
+            <Step n={3} side="rule" title="Rule applied" actor={<span className="trace-actor rules">Rules, no language model</span>}>
               <p className="trace-verdict">
                 <strong>{trace.finding.check}</strong> check · {trace.finding.when}
               </p>
@@ -163,18 +163,24 @@ export function Trace({
                 <>
                   <p className="trace-rule">{trace.rule.statement}</p>
                   <p className="trace-rule-id">
-                    Rule <span>{trace.rule.id}</span> · same record, same result
+                    Rule <span>{trace.rule.id}</span>. Same record, same result.
                   </p>
                 </>
               ) : (
                 <p className="meta missing">Rule {NOT_FOUND}: it was not recorded with this finding.</p>
               )}
             </Step>
-            <Step n={4} side="rule" icon={<Ruler {...icon} />} title="Measured result">
+            <Step n={4} side="rule" title="Measured result">
               <p className="trace-verdict">
-                <strong className={`trace-sev ${finding?.severity ?? ""}`}>{trace.finding.severity}</strong> · {trace.finding.summary}
+                <strong className={`trace-sev ${finding?.severity ?? ""}`}>{trace.finding.severity}</strong> {trace.finding.summary}
               </p>
-              {trace.finding.offset && <p className="trace-number">{trace.finding.offset}</p>}
+              {trace.finding.offset && (
+                <p className="trace-number trace-dim" aria-label={`Measured offset ${trace.finding.offset}`}>
+                  <span className="trace-dim-line" aria-hidden="true" />
+                  <span className="trace-dim-value">{trace.finding.offset}</span>
+                  <span className="trace-dim-line" aria-hidden="true" />
+                </p>
+              )}
               {trace.finding.numbers.map((n) => (
                 <p key={n} className="trace-measure">
                   {n}
@@ -193,7 +199,7 @@ export function Trace({
                       <p>{f.description}</p>
                       <p className={`trace-status ${FIX_MARK[f.status]}`} data-receipt={tone}>
                         <span className={`trace-receipt ${tone}`}>
-                          {tone === "confirmed" ? <CircleCheck size={13} strokeWidth={2} aria-hidden="true" /> : tone === "waiting" ? <Clock size={13} strokeWidth={2} aria-hidden="true" /> : null}
+                          {tone === "confirmed" ? <CircleCheck {...icon} /> : tone === "waiting" ? <Clock {...icon} /> : null}
                           {RECEIPT_WORD[f.status]}
                         </span>
                         <span>{f.words}</span>
