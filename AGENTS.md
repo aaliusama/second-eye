@@ -6,7 +6,11 @@ Who owns what and when we sync: `TEAM.md`. If you work for one teammate, read `A
 
 ## Start here: winning strategy and current handoff
 
+Read `docs/PARALLEL_STATUS.md` first for current exclusive file assignments and verified implementation status. Do not duplicate another active agent's edits. This status supersedes older assignment tables.
+
 Before choosing work, read `docs/WINNING_BRIEF.md`. It contains the user's winning objective, ordered tasks, acceptance criteria, and the proposed judge-facing story. Read `docs/winning-assessment.md` for the research, sources, verified baseline and limitations behind it.
+
+Current parallel assignments are listed in `docs/WINNING_BRIEF.md`. Check agent status, branch/worktree diffs, and the existing `n/rail`, `o/feed`, and `p/phone-slider` branches before taking overlapping work. The user's latest direction authorizes reconsidering prior KILL decisions in pursuit of winning; keep the frozen-contract review, source/uncertainty requirements, and offline demo integrity explicit.
 
 - Protect the ghost-wall demonstration. Strengthen evidence and the correction loop before adding features. The memorable promise is **"See tomorrow's mistake before it gets built."** Treat this as a demonstration of risks in the record, not a guarantee about physical outcomes.
 - The Talona rubric is technical implementation 35, autonomous operation and impact 30, learning loop and vision 15, demo and presentation 20. Do not invent subweights, guaranteed scores, savings, or claims that no competitor has similar capabilities.
@@ -60,6 +64,7 @@ Read `docs/demo-script.md` before any task that touches what a judge sees.
 Read `docs/architecture.md` before adding a module or a dependency.
 
 ## Frozen contracts
+- The user approved the coordinated acknowledgement, text-only sheet revision and dismissal-memory extensions in this session. Their schemas are exported from `contracts/src/acknowledgement.ts`, `sheets.ts`, and `dismissals.ts`. This is a scoped exception, not permission for unrelated contract changes. Text-only sheet comparison is now in scope despite the older KILL entry below; attachment/BIM extraction was not added.
 - Never change anything in `contracts/` without the owner's explicit approval in the prompt. Propose the change and stop.
 - Import types from `contracts/`. Never redefine a shape locally.
 - Operation types: `move`, `add`, `remove`, `set_status`, `plan_task`. Do not add a type.

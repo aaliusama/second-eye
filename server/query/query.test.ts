@@ -256,6 +256,17 @@ describe("briefing and digest", () => {
     expect(d.pendingFixes).toEqual([{ fixId: "fix-001", kind: "notify_crew", description: fixtureFix.description }]);
     expect(d.silentCrews).toEqual([]); // plumbing posted m-002 after the change m-001
     expect(d.text.split("\n")[0]).toBe("Evening digest for Sat 14 Nov, per the record: 1 hold, 0 warnings.");
+    expect(d.text).toContain("06:30 huddle — first three risks to review:");
+    expect(d.text).toContain("Unit 204 bathroom east wall moved 0.4 m east");
+  });
+
+  it("huddle prioritizes prerequisite work and caps the list at three", () => {
+    const d = digest(state(), SAT);
+    const huddle = d.text.split("06:30 huddle — first three risks to review:\n")[1]?.split("\nOpen decisions:")[0] ?? "";
+    const items = huddle.split("\n").filter((line) => line.startsWith("  - "));
+    expect(items.length).toBeLessThanOrEqual(3);
+    expect(items[0]).toContain("Unit 204 bathroom east wall moved 0.4 m east");
+    expect(items[0]).toContain("Sources: m-");
   });
 
   it("evening digest: a crew that said nothing since the change is silent", () => {

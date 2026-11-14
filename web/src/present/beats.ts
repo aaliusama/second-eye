@@ -34,6 +34,7 @@ export type BeatId =
   | "why"
   | "rehearse"
   | "fix"
+  | "confirm"
   | "ask"
   | "learn"
   | "run2"
@@ -54,7 +55,8 @@ export const BEATS: Beat[] = [
   { id: "ghost", title: "Ghost wall", note: "0:45 Plumbing says what it does tomorrow. Red: where plumbing thinks the wall is." },
   { id: "why", title: "Why", note: "1:20 What was said, and what Novak Plumbing did not hear." },
   { id: "rehearse", title: "Rehearse", note: "1:35 Tomorrow, played forward. Redline on the track marks the clash." },
-  { id: "fix", title: "Fix", note: "2:00 One tap: the fix goes to the crew, the wall turns green." },
+  { id: "fix", title: "Send", note: "1:55 Correction sent. The recorded risk stays open until the crew confirms the revision." },
+  { id: "confirm", title: "Confirm", note: "2:05 Simulate the crew confirming the sent revision. Recheck the record; this is not proof of completed work." },
   { id: "ask", title: "Ask", note: "2:10 Crews text a question and get an answer from the record, with sources." },
   { id: "learn", title: "Learn", note: "2:20 Run 1 cannot place \"the blue room\". The superintendent maps it once." },
   { id: "run2", title: "Run 2", note: "2:35 Same words, next run: resolved on its own." },

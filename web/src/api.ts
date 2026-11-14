@@ -1,5 +1,7 @@
 import type {
   ApproveFixResponse,
+  AcknowledgementsResponse,
+  AcknowledgeFixResponse,
   ChatMessage,
   Correction,
   EvalResults,
@@ -88,6 +90,8 @@ async function optionalPost<T>(path: string, body: unknown): Promise<T | undefin
 }
 
 export const api = {
+  acknowledgements: () => call<AcknowledgementsResponse>("/api/acknowledgements"),
+  acknowledge: (fixId: string, crewId: string) => call<AcknowledgeFixResponse>(`/api/fixes/${encodeURIComponent(fixId)}/acknowledge`, post({ crewId })),
   ask: (crewId: string, text: string) => optionalPost<Answer>("/api/ask", { crewId, text }),
   agentLog: () =>
     optional<AgentLogEntry[] | { entries?: AgentLogEntry[]; timeline?: AgentLogEntry[] }>("/api/agent/log").then((r) =>

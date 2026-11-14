@@ -1,5 +1,15 @@
 # Demo script
 
+## Current confirmation flow (supersedes older beat wording below)
+
+Presenter now has eleven beats: Problem, Build, Ghost wall, Why, Rehearse, Send, Confirm, Ask, Learn, Run 2, Numbers. Press R before recording. Send approves and dispatches the geometry correction; the risk stays open and the receipt is amber. Confirm is a separately labelled simulated crew action that confirms the exact sent revision and rechecks the record. Only then ask whether the recorded plan has a conflict. A newer revision rejects the old confirmation. Acknowledgement proves receipt in this simulation, not completed work or physical safety.
+
+Say at Send: "The superintendent sends the correction. We are still waiting for the crew." Say at Confirm: "Now the crew confirms this revision. The recorded mismatch is rechecked, and every message stays in the receipt." Use the receipt's "Who said what, when" disclosure for evidence. Do not say dispatch alone fixes the wall or proves that the crew read it.
+
+Two supporting demonstrations are available in the live side panel, outside the three-minute core unless rehearsed to fit: "Which sheet is the crew using?" records an architect issuance and a crew revision statement without reading attachments; "What this site has learned" remembers an exact reviewed alert with a reason and Undo. Changed evidence brings the alert back into review. This preference does not remove safety findings or alter evaluation results.
+
+The legacy video recorder has not been updated/visually verified for this eleven-beat sequence. Use the presenter and review the entire take. Browser automation was unavailable during this implementation pass; HTTP tests are not visual QA.
+
 Owner: D (presenter mode: L). Read before any task that touches what a judge sees.
 
 Length: 3 minutes. A judge understands it in 20 s; the ghost wall is on screen within 90 s.

@@ -28,7 +28,7 @@ function replyFor(r: PostMessageResponse, cite: Cite): string {
   if (r.intents.length > 0) {
     return `CLEAR: nothing on record conflicts with “${r.intents[0].description}”. Source: ${cite([r.message.id])}.`;
   }
-  return `Not found: no plan for tomorrow recognised in this message. Source: ${cite([r.message.id])}.`;
+  return `No plan was extracted, so this message has not been cleared. The offline demo only understands prepared messages; other wording needs live extraction and a working connection. Source: ${cite([r.message.id])}.`;
 }
 
 function answerText(a: Answer, cite: Cite): string {

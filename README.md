@@ -15,6 +15,10 @@ npm run demo
 
 Open http://localhost:5173. The demo plays `data/replay.golden.json` with cached LLM output from `data/llm-cache/`, so it needs no API key and no network.
 
+For unscripted crew messages, set `GROQ_API_KEY` in `.env`, then run `npm run demo:live`. This enables the existing live extractor for uncached wording and requires network access. It can still fail or leave a message unresolved; no extraction is not a clearance. Stop your existing demo process before starting another on the same ports.
+
+`npm run eval:paraphrase` evaluates the separate small paraphrase challenge set through uncached model calls and writes `eval/paraphrase-results.json`. It does not update the golden labels or extraction cache. An unavailable model is reported as unavailable, not as a successful negative case. These development challenge cases are not field validation.
+
 - Presenter mode: http://localhost:5173/?present=1 (or press P). One key per demo beat: → next beat, ← back, R reset, H hide the bar.
 - Crew phone: http://localhost:5173/phone, sized for a real phone. Send a message as a crew and it is checked live.
 
@@ -77,6 +81,12 @@ The LLM (Groq, JSON mode, temperature 0) does exactly two jobs:
 The four checks (`server/checks/`), rehearsal, fixes and the site agent contain no LLM call. They are pure functions of scene, plan and messages on the replay clock: same input, same output. A finding that rests on something unsure (low confidence, or a place still `unconfirmed`) is a warning to confirm, never a hold.
 
 ## API
+
+The latest geometry-correction flow separates dispatch from acknowledgement. Sending a fix leaves the risk open; the **Crew confirmation** panel offers an explicitly labelled simulated crew reply and a sourced incident receipt. A reply for an older revision is rejected. This records information received, not physical completion.
+
+The side panel also compares explicitly stated sheet revisions and offers reversible review memory for an exact alert. Sheet comparisons do not read attachments. Review memory does not suppress safety checks or grant clearance. With `LEARNING_FILE` configured, review preferences persist in a companion `.dismissals.json` file; receipts remain session-local.
+
+Additional routes: `GET /api/acknowledgements`, `POST /api/fixes/:id/acknowledge {crewId}`, `GET /api/sheets`, `GET/POST /api/dismissals` (POST body `{findingId, reason}`), and `POST /api/dismissals/:id/undo`.
 
 The server listens on port 8787. The web app reaches it through the Vite proxy at `/api`.
 

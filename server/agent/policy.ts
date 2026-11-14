@@ -108,6 +108,10 @@ export function decide(input: AgentInput): Action[] {
             .sort()[0]
         : undefined;
     if (fix && fix.status === "approved" && (approvedAt === undefined || approvedAt <= now)) {
+      // Dispatch is not acknowledgement: do not send a morning CLEAR while this risk still reproduces.
+      if (lead.check === "latest_change" && reproduces(lead, tasks, scene) && dayOf(now) === workDay) {
+        for (const crewId of lead.crewIds) openCrews.add(crewId);
+      }
       const morning = atClock(workDay, BRIEFING_AT);
       if (approvedAt !== undefined && approvedAt < morning && now >= morning && dayOf(now) === workDay && !isQuiet(now)) {
         for (const m of fix.messages) {

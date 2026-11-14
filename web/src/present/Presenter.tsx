@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Finding } from "@site/contracts";
+import { api, announceChange } from "../api";
 import { findingKey, resolvedFindingIds, troubleSteps } from "../derive";
 import { useSite } from "../store";
 import { BEATS, BLUE_ROOM, isPlaceholder, PHONE, type BeatId } from "./beats";
@@ -37,7 +38,13 @@ async function view(id: BeatId): Promise<string | undefined> {
   const s = useSite.getState();
   switch (id) {
     case "clean":
-      if (s.asOf) await s.setAsOf(undefined);
+      // Start before the architect's W-12 revision so no ghost is visible before the
+      // plumber states the conflicting intent. The next beat builds the changed record.
+      {
+        const change = s.messages.find((m) => m.id === "m-001");
+        if (!change) return "No wall-change message on record yet.";
+        await s.setAsOf(new Date(Date.parse(change.time) - 1000).toISOString().slice(0, 19));
+      }
       s.select(undefined);
       s.setSlider(0);
       s.setPhoneOpen(false);
@@ -70,6 +77,7 @@ async function view(id: BeatId): Promise<string | undefined> {
       return first === undefined ? "No clash on tomorrow's track." : undefined;
     }
     case "fix":
+    case "confirm":
     case "ask":
       s.select(undefined);
       return;
@@ -104,6 +112,17 @@ async function act(id: BeatId): Promise<string | undefined> {
       const fix = s.state?.fixes.find((f) => f.status === "pending" && f.findingId === ghost?.id);
       if (!fix) return "No pending W-12 ghost-wall fix found.";
       await s.approve(fix.id);
+      return;
+    }
+    case "confirm": {
+      const { receipts } = await api.acknowledgements();
+      const receipt = [...receipts].reverse().find((r) => r.status === "awaiting_confirmation" &&
+        r.revisions.some((revision) => revision.elementId === "W-12") &&
+        r.crews.some((crew) => crew.crewId === PHONE.plumbingIntent.crewId && !crew.acknowledgedMessageId));
+      if (!receipt) return "No current W-12 correction awaiting this crew's confirmation.";
+      await api.acknowledge(receipt.fixId, PHONE.plumbingIntent.crewId);
+      announceChange();
+      await useSite.getState().refresh();
       return;
     }
     case "ask": {

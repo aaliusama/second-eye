@@ -1,5 +1,7 @@
 # Pitch
 
+Current flow correction: the presenter now has eleven beats, including separate Send and Confirm. Replace any wording below that says one-tap dispatch clears the ghost with: "The correction is sent, and we wait for confirmation. Now we simulate the crew confirming this exact revision; the record is rechecked and the source trail stays visible." Confirmation proves information receipt in the simulation, not physical work. Follow the current sequence in `docs/demo-script.md` and time the full run before recording.
+
 Spoken scripts. Click-by-click steps live in `docs/demo-script.md`; the timings here match it.
 Numbers: say only what `eval/results.json` says on the day. `[[...]]` = fill from the final run.
 

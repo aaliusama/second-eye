@@ -1,5 +1,9 @@
 # Winning brief for the next agent
 
+Current implementation ownership and completion evidence: `docs/PARALLEL_STATUS.md`. Its assignments supersede the historical parallel table below.
+
+Completed Codex implementation and exact continuation tasks: `docs/CLAUDE_RESUME.md`. Read that before restarting any of the historical tasks below.
+
 ## Objective
 
 The user wants Site Rehearsal to win the Talona track through a memorable working demonstration, defensible differentiation, and strong evidence across the actual rubric. They welcome improvements to the product and documentation. They do not want a generic chatbot, a collection of unfinished features, or unsupported claims of a perfect score.
@@ -55,6 +59,20 @@ Treat this as a defensible product position, not proof of market exclusivity. Ot
 The useful model has three parts: latest site record, crew-accessible record, and intended work. The difference between them explains the risk. Thread access is a proxy for information availability, not proof of what a person believes or has read.
 
 ## Work queue
+
+### Current parallel assignments (14 Nov 2026)
+
+These assignments were launched in separate agent tasks after inspecting the checked-out `win/integration` worktree. They are active investigations/implementation tasks, not completed features. Check branch/worktree status and agent reports before changing their files or assigning a duplicate task. Claude Code's other branches (`n/rail`, `o/feed`, `p/phone-slider`) exist locally; inspect their diffs before integrating or redoing their work.
+
+| Lane | Assigned outcome | Ownership / boundary |
+|---|---|---|
+| Ghost reveal | Clean reveal, large readable 40 cm mismatch, resolve apparent fix/UI timing contradiction | `web/`; coordinate with existing N/O/P branch changes; do not rewrite another branch blindly |
+| Live input + evaluation | Diagnose paraphrase cache miss, honest offline UX or opt-in live demo, separately scored unseen paraphrases | `server/extract/`, `eval/`, narrowly scoped `data/`; preserve golden labels/cache and offline demo; no contract edits |
+| Huddle + messages | Rank top three urgent next-day issues, deduplicate queue, improve sourced crew text | Inspect `server/checks/` and `web/`; coordinate with ghost lane if UI paths overlap; no contract edits |
+
+**Not assigned yet:** acknowledgement/receipt, learning from dismissed alerts, and text-only sheet revisions. The first two can change message/finding/learning semantics; sheet revisions explicitly extend the frozen data model and prior scope decision. Inspect required contracts and propose the smallest changes before assigning. The user says winning takes priority and authorizes reconsidering earlier kill decisions; still preserve auditability, source IDs, uncertainty and a working demo.
+
+**Submission / eligibility:** still open. No agent has been asked to contact organizers, team size eligibility is unclear, and there is no verified form destination or final video. Prepare a concrete status/checklist in docs; never claim those external steps are complete without evidence.
 
 Work on the first applicable unfinished task inside the assigned scope. Before freeze, prioritize the existing demonstration and correctness. After freeze, preserve the submitted revision and identify any further work as post-submission. Do not begin optional features merely because this file lists them.
 
