@@ -57,6 +57,17 @@ Today geometry is midpoints and point-in-polygon. Make the latest-change and spa
 - Re-record the demo with `video/record-present.mjs`; refresh `docs/assets/readme/*.png`.
 - Write a 90-second pitch and a 3-minute talk track that only uses measured numbers.
 
+## 4b. Who does what (two people, two Claude sessions)
+
+| Person | Lanes | Needs |
+|---|---|---|
+| Friend with the Groq key | **Lane A only** (extraction, challenge run 4, new unseen `data/challenge2/`) | `GROQ_API_KEY` in `.env` |
+| Teammate | **Lanes B, C, D, then E** | no key; never runs live extraction |
+
+- Each person works on their own branch (`lane-a/...`, `lanes-bcde/...`) and merges to `main` only after all checks pass. Pull `main` before each merge.
+- Lane A must not edit `server/checks/`, `server/model/` or `web/`. Lanes B to E must not edit `server/extract/`, `eval/challenge*.ts` or `data/challenge*/`.
+- Shared files: `README.md` (the numbers table belongs to Lane A, everything else to Lane E) and `docs/architecture.md` (each adds its own section). If a change is needed in the other person's files, write it in `docs/PARALLEL_STATUS.md` instead of making it.
+
 ## 5. Order and coordination
 
 - Lanes A, B, C, D can start at once. E starts once a lane merges.
