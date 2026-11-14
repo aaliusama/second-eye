@@ -19,6 +19,8 @@ and shows the conflicting position as a red **ghost wall** before work starts.
 
 **[Open the live demo](https://site-rehearsal.onrender.com)** · [Guided presenter](https://site-rehearsal.onrender.com/?present=1) · [Crew phone](https://site-rehearsal.onrender.com/phone)
 
+[Pitch deck](docs/deck/index.html) ([PDF](docs/deck/deck.pdf))
+
 [Quick start](#quick-start) · [How it works](#how-it-works) · [Measured results](#measured-not-assumed) · [Architecture](docs/architecture.md) · [Demo script](docs/demo-script.md)
 
 <br>
