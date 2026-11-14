@@ -1,5 +1,6 @@
 /* Owner: D. Every colour, size and timing comes from tokens.ts as a CSS variable.
-   A construction drawing, not a dashboard: ink rules on paper, no shadows, no gradients. */
+   A construction drawing, not a dashboard: ink rules on paper, no gradient washes.
+   Depth comes only from the two lift steps in tokens.ts (see the finish pass at the end). */
 * {
   box-sizing: border-box;
 }
@@ -985,4 +986,194 @@ button.incident-action.quiet { padding: 0; text-underline-offset: 5px; font-size
   .crew-dock .phone.compact { height: 540px; }
   .track-row { grid-template-columns: 110px minmax(0, 1fr); }
   .slider-head { flex-wrap: wrap; }
+}
+
+/* ==========================================================================
+   Finish pass: a drawing set laid on a table. Depth from two lift steps,
+   a drafting dot field, tight type and controls that answer the hand.
+   Nothing here moves on its own; the ghost reveal keeps the motion budget.
+   ========================================================================== */
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "tnum" 1, "ss01" 1;
+}
+
+::selection { background: color-mix(in srgb, var(--ink) 16%, transparent); }
+
+/* Header: the title block of a drawing sheet. */
+.top { min-height: 60px; padding: 0 var(--pad); }
+.title { gap: 12px; }
+.title h1 { font-size: 17px; font-weight: 720; font-stretch: 112%; letter-spacing: -0.02em; }
+.site-mark { width: 28px; height: 28px; color: var(--ink); }
+.title-rule { width: 1px; height: 18px; background: var(--paper-rule); }
+.title-scene { font-size: var(--text); color: var(--ink-soft); font-weight: 450; }
+.top .sim {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 5px 10px; border-radius: 999px;
+  background: var(--paper); box-shadow: var(--depth-ring);
+  font-stretch: 85%; letter-spacing: 0.01em; color: var(--ink-soft);
+}
+.top .sim::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--pending); }
+
+/* Buttons: ink that darkens and presses, instead of flipping to paper. */
+button { font-weight: 550; transition: background-color var(--answer) var(--ease-out), color var(--answer) var(--ease-out), box-shadow var(--answer) var(--ease-out), transform 120ms var(--ease-out); }
+button:not(.quiet):not([aria-pressed]) { box-shadow: var(--depth-ink-highlight); }
+button:hover:not(:disabled) { background: color-mix(in srgb, var(--ink) 88%, white); color: var(--surface); }
+button:active:not(:disabled) { transform: scale(0.98); }
+button.quiet:hover:not(:disabled) { background: transparent; color: var(--ink); border-color: transparent; text-decoration-thickness: 2px; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 3px; }
+
+/* Segmented controls: a recessed paper trough, the chosen option lifts out as a sheet. */
+.toggle, .comparison-tools {
+  background: var(--paper); border: none; border-radius: var(--radius-large);
+  padding: 3px; gap: 2px; box-shadow: inset 0 0 0 1px rgb(28 43 58 / 0.06);
+}
+.toggle button, .comparison-tools button {
+  background: transparent; color: var(--ink-soft); border: none;
+  border-radius: 7px; min-height: 32px; padding: 0 14px; font-size: var(--small); font-weight: 550;
+}
+.toggle button:hover:not(:disabled), .comparison-tools button:hover:not(:disabled) { background: rgb(255 255 255 / 0.6); color: var(--ink); }
+.toggle button[aria-pressed="true"], .comparison-tools button[aria-pressed="true"] {
+  background: var(--surface); color: var(--ink); box-shadow: var(--depth-lift);
+}
+.comparison-tools { top: 12px; box-shadow: var(--depth-lift); background: color-mix(in srgb, var(--paper) 92%, white); }
+/* The compare toolbar gets its own band, so it never covers the gridline bubbles of a zoomed plan. */
+.flat:has(.comparison-tools) svg { height: calc(100% - 56px); margin-top: 56px; }
+
+/* The drawing table: a fine dot field, so the plan reads as laid on drafting paper. */
+.model {
+  background-color: var(--paper);
+  background-image: radial-gradient(var(--depth-dot) 1px, transparent 1.2px);
+  background-size: var(--depth-dot-step) var(--depth-dot-step);
+  background-position: -1px -1px;
+}
+.model-caption { background: linear-gradient(var(--paper) 70%, transparent); }
+.model-caption .meta { font-size: var(--small); font-weight: 550; color: var(--ink-soft); margin-bottom: 4px; }
+.model-caption h2 { font-weight: 600; letter-spacing: -0.035em; }
+.record-basis { line-height: 1.45; }
+
+.drawing-legend {
+  padding: 7px 12px; gap: 16px; border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 88%, transparent); box-shadow: var(--depth-ring);
+}
+
+/* Floating sheets above the plan. */
+.banner { border: none; border-radius: var(--radius-large); box-shadow: var(--depth-float); background: var(--surface); padding: 6px 6px 6px 14px; }
+.presenter { border: none; border-radius: var(--radius-large); box-shadow: var(--depth-lift); padding: 8px 12px; }
+.phone-inset > .row { border: none; box-shadow: var(--depth-lift); border-radius: var(--radius-large); }
+.measured-large { border: none; border-radius: 14px; box-shadow: var(--depth-float); background: var(--surface); }
+
+/* Site desk. */
+.side { box-shadow: -1px 0 0 var(--paper-rule); border-left: none; }
+.workspace-heading { padding-top: 22px; }
+.workspace-heading h2 { font-size: 21px; font-weight: 650; letter-spacing: -0.03em; }
+.workspace-heading p { line-height: 1.5; max-width: 34ch; }
+.workspace-nav { box-shadow: 0 1px 0 var(--paper-rule); border-bottom: none; }
+.workspace-nav button { position: relative; font-weight: 500; transition: color var(--answer) var(--ease-out); }
+.workspace-nav button:hover:not(:disabled) { background: transparent; color: var(--ink); }
+.workspace-nav button[aria-pressed="true"] { border-bottom-color: transparent; font-weight: 650; }
+.workspace-nav button[aria-pressed="true"]::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; border-radius: 2px; background: var(--ink);
+}
+
+/* Incidents: one decision per sheet, the measured offset set like a dimension. */
+.incident-count { font-size: 18px; letter-spacing: -0.025em; }
+.incident-count + .meta, .incident-focus > header .meta { line-height: 1.5; margin-top: 4px; }
+.incident-item { padding: 22px 0; }
+.incident-place { font-size: 22px; letter-spacing: -0.035em; }
+.incident-place .severity {
+  border: none; padding: 3px 9px 3px 8px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px;
+  font-weight: 650; font-size: 11.5px; color: var(--ink);
+  background: color-mix(in srgb, var(--pending) 14%, var(--surface));
+}
+.incident-place .severity::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--pending); }
+/* Red stays a mark of the conflict (the dot), never a coloured badge. */
+.incident-item.hold .severity { background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 1px var(--paper-rule); }
+.incident-item.hold .severity::before { background: var(--redline); }
+.incident-title { font-weight: 550; letter-spacing: -0.01em; }
+.incident-offset { font-size: 40px; font-weight: 600; font-stretch: 88%; letter-spacing: -0.045em; line-height: 1; margin: 14px 0 6px; }
+.incident-offset span { font-size: var(--small); font-stretch: 100%; color: var(--ink-soft); margin-top: 8px; line-height: 1.5; }
+.incident-action.primary {
+  border-radius: var(--radius-large); min-height: 50px; padding: 0 16px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  box-shadow: var(--depth-ink-highlight), 0 1px 2px rgb(28 43 58 / 0.2), 0 6px 16px -6px rgb(28 43 58 / 0.45);
+}
+.incident-action.primary::after {
+  content: ""; flex: none; width: 7px; height: 7px; margin-right: 3px;
+  border-top: 1.5px solid currentColor; border-right: 1.5px solid currentColor; transform: rotate(45deg); opacity: 0.7;
+}
+.incident-waiting { border-left: none; border-radius: var(--radius-large); padding: 12px 14px; box-shadow: inset 3px 0 0 var(--pending); }
+.incident-detail blockquote, .source { border-left-color: var(--paper-rule); }
+
+/* Fix queue and huddle: hairline edge, not a slab. */
+.fix, .huddle-panel .fix { border-left-width: 2px; }
+.desk-disclosure > summary { list-style: none; display: flex; flex-direction: column; gap: 2px; position: relative; padding-right: 44px; transition: background-color var(--answer) var(--ease-out); }
+.desk-disclosure > summary::-webkit-details-marker { display: none; }
+.desk-disclosure > summary span { margin-left: 0; }
+.desk-disclosure > summary::after {
+  content: ""; position: absolute; right: var(--pad); top: 50%; width: 7px; height: 7px; margin-top: -6px;
+  border-right: 1.5px solid var(--ink-soft); border-bottom: 1.5px solid var(--ink-soft); transform: rotate(45deg);
+  transition: transform var(--answer) var(--ease-out);
+}
+.desk-disclosure[open] > summary::after { transform: rotate(225deg); margin-top: -2px; }
+.desk-disclosure > summary:hover { background: var(--paper); }
+
+/* Inputs. */
+select, input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), .side .panel textarea {
+  background: var(--surface); border: none; border-radius: 8px; min-height: 36px; padding: 6px 10px;
+  box-shadow: inset 0 0 0 1px var(--paper-rule), 0 1px 0 rgb(28 43 58 / 0.03);
+  transition: box-shadow var(--answer) var(--ease-out);
+}
+select:hover, input:not([type="range"]):hover { box-shadow: inset 0 0 0 1px var(--ink-soft); }
+select:focus-visible, input:not([type="range"]):focus-visible, textarea:focus-visible { outline: none; box-shadow: inset 0 0 0 1.5px var(--ink), 0 0 0 4px rgb(28 43 58 / 0.08); }
+
+/* Rehearsal bar. */
+.bottom { box-shadow: 0 -1px 0 var(--paper-rule); border-top: none; }
+.slider { padding: 12px var(--pad) 14px; }
+.clock { font-size: 16px; letter-spacing: -0.02em; }
+.track input[type="range"] { -webkit-appearance: none; appearance: none; height: 14px; cursor: pointer; bottom: -2px; }
+.track input[type="range"]::-webkit-slider-runnable-track { height: 3px; border-radius: 3px; background: var(--paper-rule); }
+.track input[type="range"]::-moz-range-track { height: 3px; border-radius: 3px; background: var(--paper-rule); }
+.track input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 16px; height: 16px; margin-top: -6.5px; border-radius: 50%;
+  background: var(--ink); border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--ink), 0 2px 6px rgb(28 43 58 / 0.3);
+  transition: transform 120ms var(--ease-out);
+}
+.track input[type="range"]::-moz-range-thumb {
+  width: 10px; height: 10px; border-radius: 50%; background: var(--ink); border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--ink), 0 2px 6px rgb(28 43 58 / 0.3);
+}
+.track input[type="range"]:active::-webkit-slider-thumb { transform: scale(1.15); }
+.track input[type="range"]:focus-visible { outline: none; }
+.track input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 1px var(--ink), 0 0 0 5px rgb(28 43 58 / 0.14); }
+.track .trouble { border-radius: 2px; }
+.bar { border-width: 1px; border-radius: 4px; background: var(--surface); }
+.bar.active { box-shadow: 0 1px 2px rgb(28 43 58 / 0.08); }
+.bar.held { border-width: 1.5px; background: color-mix(in srgb, var(--redline) 5%, var(--surface)); }
+.badge { border-width: 1.5px; border-radius: 4px; }
+
+/* Crew phone: a thread, softly bound. */
+.phone { border-radius: 22px; }
+.phone-page { background-color: var(--paper); background-image: radial-gradient(var(--depth-dot) 1px, transparent 1.2px); background-size: var(--depth-dot-step) var(--depth-dot-step); }
+.phone-page .phone { border: none; box-shadow: var(--depth-float); }
+.bubbles li p { border-radius: 14px 14px 14px 4px; border-color: var(--paper-rule); background: var(--surface); line-height: 1.45; }
+.bubbles li.crew p { border-radius: 14px 14px 4px 14px; box-shadow: var(--depth-ink-highlight); }
+.bubbles li .meta { font-size: 11px; padding: 0 4px; }
+
+/* Measured numbers: tabular, right-aligned, readable on a projector. */
+.numbers th, .numbers td { border-bottom-color: var(--paper-rule); }
+.numbers thead th { color: var(--ink-soft); font-weight: 550; font-size: 0.85em; }
+
+.measured-large .numbers th[scope="row"], .measured-large .numbers thead th:first-child { padding-left: 0; }
+.measured-large .numbers .total th, .measured-large .numbers .total td { border-top: 1.5px solid var(--ink); }
+.measured-large .sim { border-radius: 999px; padding: 4px 10px; }
+
+@media (max-width: 760px) {
+  .top { padding: 10px var(--pad); }
+  .comparison-tools { flex-wrap: nowrap; max-width: calc(100% - 2 * var(--pad)); }
+  .comparison-tools button { padding: 0 9px; white-space: nowrap; font-size: 11.5px; }
+  .title-rule, .title-scene { display: none; }
+  .incident-offset { font-size: 34px; }
 }

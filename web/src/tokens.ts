@@ -39,6 +39,23 @@ export const size = {
   display: "28px",
   captionHeight: "88px",
   controlHeight: "36px",
+  /** Floating sheets (tools, inspector, phone) sit one step above the drawing. */
+  radiusLarge: "10px",
+} as const;
+
+/**
+ * Surface depth. Two steps only, ink-tinted, never grey fog: a hairline ring plus a short contact
+ * shadow reads as paper lifted off the table, not a SaaS card.
+ */
+export const depth = {
+  ring: "0 0 0 1px rgb(28 43 58 / 0.08)",
+  lift: "0 0 0 1px rgb(28 43 58 / 0.08), 0 1px 2px rgb(28 43 58 / 0.06), 0 4px 12px -4px rgb(28 43 58 / 0.10)",
+  float: "0 0 0 1px rgb(28 43 58 / 0.08), 0 2px 4px rgb(28 43 58 / 0.05), 0 12px 32px -8px rgb(28 43 58 / 0.18)",
+  /** Top highlight on dark controls so they read as pressed ink, not a flat rectangle. */
+  inkHighlight: "inset 0 1px 0 rgb(255 255 255 / 0.10)",
+  /** The drafting dot field behind the plan. */
+  dot: "rgb(28 43 58 / 0.11)",
+  dotStep: "16px",
 } as const;
 
 /** Drawing units are metres. Line weights in metres at plan scale. */
@@ -67,6 +84,8 @@ export function applyTokens(root: HTMLElement): void {
   const kebab = (s: string) => s.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
   for (const [name, value] of Object.entries(color)) root.style.setProperty(`--${kebab(name)}`, value);
   for (const [name, value] of Object.entries(size)) root.style.setProperty(`--${kebab(name)}`, value);
+  for (const [name, value] of Object.entries(depth)) root.style.setProperty(`--depth-${kebab(name)}`, value);
+  root.style.setProperty("--ease-out", "cubic-bezier(0.2, 0.8, 0.2, 1)");
   root.style.setProperty("--font", font.family);
   root.style.setProperty("--condensed", font.condensed);
   root.style.setProperty("--answer", `${motion.answer}ms`);
