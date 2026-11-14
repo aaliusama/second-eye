@@ -45,7 +45,7 @@ describe("sample lane data", () => {
 
 describe("measured drawings", () => {
   it("words the clearance with its numbers and keeps redline for real conflicts", () => {
-    expect(clearanceWords(sampleClearance)[1]).toBe("0.40 m gap, tolerance 0.10 m");
+    expect(clearanceWords(sampleClearance)[1]).toBe("0.40 m gap · needs 0.10 m clear");
     expect(clearanceWords({ ...sampleClearance, outcome: "inside_new_wall" })[1]).toContain("inside the recorded wall");
     expect(clearanceTone(sampleClearance, false)).toBe("redline");
     expect(clearanceTone(sampleClearance, true)).toBe("pending");

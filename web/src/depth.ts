@@ -16,8 +16,8 @@ export function clearanceWords(c: Clearance): [string, string] {
     c.outcome === "inside_new_wall"
       ? `lands inside the recorded wall (${m(c.offsetM)} ${c.direction})`
       : c.outcome === "gap"
-        ? `${m(c.offsetM)} gap, tolerance ${m(c.requiredM)}`
-        : `within tolerance (${m(c.offsetM)}, allowed ${m(c.requiredM)})`;
+        ? `${m(c.offsetM)} gap · needs ${m(c.requiredM)} clear`
+        : `within tolerance (${m(c.offsetM)})`;
   return ["Their work zone", second];
 }
 

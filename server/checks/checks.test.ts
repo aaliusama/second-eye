@@ -59,7 +59,7 @@ describe("checks", () => {
   it("moveLabel: dominant axis and diagonal", () => {
     const seg = (x: number, y: number) => ({ kind: "segment" as const, from: [x, y] as [number, number], to: [x, y + 3] as [number, number], thickness: 0.12 });
     expect(moveLabel(seg(18, 2), seg(18.4, 2))).toBe("0.4 m east");
-    expect(moveLabel(seg(18, 2), seg(17.75, 2))).toBe("0.3 m west");
+    expect(moveLabel(seg(18, 2), seg(17.75, 2))).toBe("0.25 m west");
     expect(moveLabel(seg(18, 2), seg(18.4, 2.3))).toBe("0.3 m north, 0.4 m east");
     expect(moveLabel(seg(18, 2), seg(18.02, 2))).toBe("same position, changed shape");
   });

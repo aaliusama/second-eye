@@ -96,7 +96,8 @@ export function measureLines(scene: Scene, m: Measure | undefined): string[] {
   const out: string[] = [];
   if (m?.clearance) {
     const c = m.clearance;
-    out.push(`Face offset ${c.offsetM.toFixed(2)} m ${c.direction}, tolerance ${c.requiredM.toFixed(2)} m: ${OUTCOME[c.outcome]}`);
+    // requiredM is the clear working depth the trade needs in front of the face (contracts), not the tolerance.
+    out.push(`Face offset ${c.offsetM.toFixed(2)} m ${c.direction}; the trade needs ${c.requiredM.toFixed(2)} m clear: ${OUTCOME[c.outcome]}`);
   }
   if (m?.overlap) {
     const o = m.overlap;

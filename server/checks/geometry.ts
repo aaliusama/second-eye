@@ -70,11 +70,17 @@ export function inside(p: Point, area: Geometry): boolean {
   return hit;
 }
 
-const fmt = (v: number) => (Math.round(Math.abs(v) * 10) / 10).toFixed(1);
+const fmt = (v: number) => {
+  // Under 5 cm is noise and reads "0.0" (the old 0.1 m rounding floor). Above it, centimetre precision with one
+  // trailing zero dropped: 0.4 m stays "0.4", a 25 cm move reads "0.25", not a rounded "0.3".
+  if (Math.abs(v) < 0.05) return "0.0";
+  const s = (Math.round(Math.abs(v) * 100) / 100).toFixed(2);
+  return s.endsWith("0") ? s.slice(0, -1) : s;
+};
 
 /**
  * Dimension label from where the crew thinks the element is (ghost) to where it is per the record.
- * x is east, y is north, rounded to 0.1 m. Both axes are named when both round to at least 0.1 m,
+ * x is east, y is north, to the centimetre. Both axes are named when both round to at least 0.1 m,
  * north/south first ("0.3 m north, 0.4 m east"). "same position, changed shape" when the midpoint did not move.
  */
 export function moveLabel(ghost: Geometry, current: Geometry): string {

@@ -36,7 +36,7 @@ describe("how it decided", () => {
 
   it("shows measured numbers when lane B sends them", () => {
     const t = traceOf({ ...finding, measure: { clearance: sampleClearance } }, fixtureScene, fixtureMessages, [], []);
-    expect(t.finding.numbers).toEqual(["Face offset 0.40 m east, tolerance 0.10 m: work on the face they believe in leaves a gap beyond tolerance"]);
+    expect(t.finding.numbers).toEqual(["Face offset 0.40 m east; the trade needs 0.10 m clear: work on the face they believe in leaves a gap beyond tolerance"]);
     expect(t.finding.note).toBe(sampleClearance.text);
   });
 

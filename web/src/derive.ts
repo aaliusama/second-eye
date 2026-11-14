@@ -81,7 +81,13 @@ export function sameGeometry(a: Geometry, b: Geometry): boolean {
 export function offsetLabel(from: Geometry, to: Geometry): string {
   const [gx, gy] = midpoint(from);
   const [cx, cy] = midpoint(to);
-  const f = (v: number) => (Math.round(Math.abs(v) * 10) / 10).toFixed(1);
+  const f = (v: number) => {
+    // Under 5 cm is noise and reads "0.0" (the old 0.1 m rounding floor). Above it, centimetre precision with one
+    // trailing zero dropped: 0.4 m stays "0.4", a 25 cm move reads "0.25", not a rounded "0.3".
+    if (Math.abs(v) < 0.05) return "0.0";
+    const s = (Math.round(Math.abs(v) * 100) / 100).toFixed(2);
+    return s.endsWith("0") ? s.slice(0, -1) : s;
+  };
   const parts: string[] = [];
   if (f(cy - gy) !== "0.0") parts.push(`${f(cy - gy)} m ${cy > gy ? "north" : "south"}`);
   if (f(cx - gx) !== "0.0") parts.push(`${f(cx - gx)} m ${cx > gx ? "east" : "west"}`);
