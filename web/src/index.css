@@ -1021,7 +1021,7 @@ body {
 /* Buttons: ink that darkens and presses, instead of flipping to paper. */
 button { font-weight: 550; transition: background-color var(--answer) var(--ease-out), color var(--answer) var(--ease-out), box-shadow var(--answer) var(--ease-out), transform 120ms var(--ease-out); }
 button:not(.quiet):not([aria-pressed]) { box-shadow: var(--depth-ink-highlight); }
-button:hover:not(:disabled) { background: color-mix(in srgb, var(--ink) 88%, white); color: var(--surface); }
+button:hover:not(:disabled) { background: color-mix(in srgb, var(--ink) 82%, var(--paper)); color: var(--surface); }
 button:active:not(:disabled) { transform: scale(0.98); }
 button.quiet:hover:not(:disabled) { background: transparent; color: var(--ink); border-color: transparent; text-decoration-thickness: 2px; }
 :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 3px; }
@@ -1029,17 +1029,17 @@ button.quiet:hover:not(:disabled) { background: transparent; color: var(--ink); 
 /* Segmented controls: a recessed paper trough, the chosen option lifts out as a sheet. */
 .toggle, .comparison-tools {
   background: var(--paper); border: none; border-radius: var(--radius-large);
-  padding: 3px; gap: 2px; box-shadow: inset 0 0 0 1px rgb(28 43 58 / 0.06);
+  padding: 3px; gap: 2px; box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.06);
 }
 .toggle button, .comparison-tools button {
   background: transparent; color: var(--ink-soft); border: none;
   border-radius: 7px; min-height: 32px; padding: 0 14px; font-size: var(--small); font-weight: 550;
 }
-.toggle button:hover:not(:disabled), .comparison-tools button:hover:not(:disabled) { background: rgb(255 255 255 / 0.6); color: var(--ink); }
+.toggle button:hover:not(:disabled), .comparison-tools button:hover:not(:disabled) { background: var(--surface-raised); color: var(--ink); }
 .toggle button[aria-pressed="true"], .comparison-tools button[aria-pressed="true"] {
   background: var(--surface); color: var(--ink); box-shadow: var(--depth-lift);
 }
-.comparison-tools { top: 12px; box-shadow: var(--depth-lift); background: color-mix(in srgb, var(--paper) 92%, white); }
+.comparison-tools { top: 12px; box-shadow: var(--depth-lift); background: var(--surface-raised); }
 /* The compare toolbar gets its own band, so it never covers the gridline bubbles of a zoomed plan. */
 .flat:has(.comparison-tools) svg { height: calc(100% - 56px); margin-top: 56px; }
 
@@ -1099,7 +1099,7 @@ button.quiet:hover:not(:disabled) { background: transparent; color: var(--ink); 
 .incident-action.primary {
   border-radius: var(--radius-large); min-height: 50px; padding: 0 16px;
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  box-shadow: var(--depth-ink-highlight), 0 1px 2px rgb(28 43 58 / 0.2), 0 6px 16px -6px rgb(28 43 58 / 0.45);
+  box-shadow: var(--depth-ink-highlight), 0 1px 2px rgb(0 0 0 / 0.2), 0 6px 16px -6px rgb(0 0 0 / 0.45);
 }
 .incident-action.primary::after {
   content: ""; flex: none; width: 7px; height: 7px; margin-right: 3px;
@@ -1124,11 +1124,11 @@ button.quiet:hover:not(:disabled) { background: transparent; color: var(--ink); 
 /* Inputs. */
 select, input:not([type="range"]):not([type="checkbox"]):not([type="radio"]), .side .panel textarea {
   background: var(--surface); border: none; border-radius: 8px; min-height: 36px; padding: 6px 10px;
-  box-shadow: inset 0 0 0 1px var(--paper-rule), 0 1px 0 rgb(28 43 58 / 0.03);
+  box-shadow: inset 0 0 0 1px var(--paper-rule), 0 1px 0 rgb(0 0 0 / 0.03);
   transition: box-shadow var(--answer) var(--ease-out);
 }
 select:hover, input:not([type="range"]):hover { box-shadow: inset 0 0 0 1px var(--ink-soft); }
-select:focus-visible, input:not([type="range"]):focus-visible, textarea:focus-visible { outline: none; box-shadow: inset 0 0 0 1.5px var(--ink), 0 0 0 4px rgb(28 43 58 / 0.08); }
+select:focus-visible, input:not([type="range"]):focus-visible, textarea:focus-visible { outline: none; box-shadow: inset 0 0 0 1.5px var(--ink), 0 0 0 4px rgb(230 234 240 / 0.14); }
 
 /* Rehearsal bar. */
 .bottom { box-shadow: 0 -1px 0 var(--paper-rule); border-top: none; }
@@ -1139,18 +1139,18 @@ select:focus-visible, input:not([type="range"]):focus-visible, textarea:focus-vi
 .track input[type="range"]::-moz-range-track { height: 3px; border-radius: 3px; background: var(--paper-rule); }
 .track input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none; width: 16px; height: 16px; margin-top: -6.5px; border-radius: 50%;
-  background: var(--ink); border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--ink), 0 2px 6px rgb(28 43 58 / 0.3);
+  background: var(--ink); border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--ink), 0 2px 6px rgb(0 0 0 / 0.3);
   transition: transform 120ms var(--ease-out);
 }
 .track input[type="range"]::-moz-range-thumb {
-  width: 10px; height: 10px; border-radius: 50%; background: var(--ink); border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--ink), 0 2px 6px rgb(28 43 58 / 0.3);
+  width: 10px; height: 10px; border-radius: 50%; background: var(--ink); border: 3px solid var(--surface); box-shadow: 0 0 0 1px var(--ink), 0 2px 6px rgb(0 0 0 / 0.3);
 }
 .track input[type="range"]:active::-webkit-slider-thumb { transform: scale(1.15); }
 .track input[type="range"]:focus-visible { outline: none; }
-.track input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 1px var(--ink), 0 0 0 5px rgb(28 43 58 / 0.14); }
+.track input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 1px var(--ink), 0 0 0 5px rgb(230 234 240 / 0.2); }
 .track .trouble { border-radius: 2px; }
 .bar { border-width: 1px; border-radius: 4px; background: var(--surface); }
-.bar.active { box-shadow: 0 1px 2px rgb(28 43 58 / 0.08); }
+.bar.active { box-shadow: 0 1px 2px rgb(0 0 0 / 0.08); }
 .bar.held { border-width: 1.5px; background: color-mix(in srgb, var(--redline) 5%, var(--surface)); }
 .badge { border-width: 1.5px; border-radius: 4px; }
 
@@ -1171,12 +1171,12 @@ select:focus-visible, input:not([type="range"]):focus-visible, textarea:focus-vi
 /* ---------- Who knows what: the floor through one crew's eyes ---------- */
 .lens-control { pointer-events: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
 .lens-label { font-size: var(--small); color: var(--ink-soft); font-weight: 550; }
-.lens-switch { display: flex; gap: 2px; padding: 3px; border-radius: var(--radius-large); background: color-mix(in srgb, var(--paper) 92%, white); box-shadow: var(--depth-lift); }
+.lens-switch { display: flex; gap: 2px; padding: 3px; border-radius: var(--radius-large); background: var(--surface-raised); box-shadow: var(--depth-lift); }
 .lens-switch button { background: transparent; color: var(--ink-soft); border: none; border-radius: 7px; min-height: 32px; min-width: 32px; padding: 0 10px; font-size: var(--small); font-weight: 650; box-shadow: none; }
 .lens-switch button.lens-crew { padding: 0; font-stretch: var(--condensed); font-size: 13px; }
-.lens-switch button:hover:not(:disabled) { background: rgb(255 255 255 / 0.7); color: var(--ink); }
+.lens-switch button:hover:not(:disabled) { background: var(--surface-raised); color: var(--ink); }
 .lens-switch button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--depth-lift); }
-.lens-switch button.lens-crew[aria-pressed="true"] { background: var(--ink); color: var(--surface); box-shadow: var(--depth-ink-highlight), 0 2px 6px -2px rgb(28 43 58 / 0.5); }
+.lens-switch button.lens-crew[aria-pressed="true"] { background: var(--ink); color: var(--surface); box-shadow: var(--depth-ink-highlight), 0 2px 6px -2px rgb(0 0 0 / 0.5); }
 .lens-name { font-style: normal; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
 .soft-line { border-color: var(--ink-soft); border-top-style: dashed; }
 .lens-legend strong { font-weight: 650; color: var(--ink); padding-left: 16px; box-shadow: -1px 0 0 var(--paper-rule); }
