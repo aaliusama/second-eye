@@ -17,7 +17,7 @@ import {
 } from "./derive";
 import { FlatView } from "./FlatView";
 import { Huddle } from "./Huddle";
-import { IncidentFocus } from "./IncidentFocus";
+import { IncidentFocus, incidentLead, rankIncidents } from "./IncidentFocus";
 import { Knowledge } from "./Knowledge";
 import { Autonomy } from "./Autonomy";
 import { Acknowledgements } from "./Acknowledgements";
@@ -193,6 +193,11 @@ function Main() {
     />
   );
   const lensCrew = knowledge?.crew;
+  // The first thing anyone sees: how much to settle before work starts, and the worst one in one line.
+  const opening = !asOf && !story && !lensCrew && !selection ? (() => {
+    const { all, when } = rankIncidents(state.scene, d.visible, state.fixes);
+    return { count: all.length, when, first: all[0]?.[0] };
+  })() : undefined;
   const backToFlat = () => {
     setNo3D(true);
     setView("flat");
@@ -225,8 +230,21 @@ function Main() {
 
       <main className="model" id="site-workspace" tabIndex={-1}>
         <div className="model-caption">
-          <div><p className="meta">{asOf ? "Site history" : "Work preparation"}</p>
-          <h2>{lensCrew ? <>The floor as <em className="lens-name">{lensCrew.name}</em> knows it</> : story ? "The 204 bathroom wall" : state.scene.name}</h2></div>
+          {opening ? (
+            <div className="opening">
+              <p className="meta">{state.scene.name} · per the record</p>
+              <h2>{opening.count === 0 ? "Nothing to settle before work starts" : <><span className="opening-count">{opening.count}</span> to settle before {opening.when ?? "work starts"}</>}</h2>
+              {opening.first && (
+                <p className="opening-lead">
+                  <span>First: {incidentLead(state.scene, opening.first)}{d.sent.has(opening.first.id) ? " Correction sent, waiting for a reply." : ""}</span>
+                  <button type="button" className="opening-show" onClick={() => { select({ kind: "finding", key: findingKey(opening.first!) }); setWorkspace("today"); }}>Show me</button>
+                </p>
+              )}
+            </div>
+          ) : (
+            <div><p className="meta">{asOf ? "Site history" : "Work preparation"}</p>
+            <h2>{lensCrew ? <>The floor as <em className="lens-name">{lensCrew.name}</em> knows it</> : story ? "The 204 bathroom wall" : state.scene.name}</h2></div>
+          )}
           {view === "flat" || no3D ? (
             <div className="lens-control">
               <span className="lens-label" id="lens-label">See the floor as</span>

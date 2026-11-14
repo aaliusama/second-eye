@@ -37,7 +37,7 @@ export const size = {
   pad: "20px",
   queueWidth: "380px",
   display: "28px",
-  captionHeight: "88px",
+  captionHeight: "112px",
   controlHeight: "36px",
   /** Floating sheets (tools, inspector, phone) sit one step above the drawing. */
   radiusLarge: "10px",

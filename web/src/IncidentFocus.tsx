@@ -27,18 +27,11 @@ const dayLabel = (day: string) => {
   return Number.isNaN(d.getTime()) ? day : d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
 };
 
-/** A short decision list over the existing record, not another checking engine. */
-export function IncidentFocus({ scene, findings, fixes, messages, onInspect }: {
-  scene: Scene;
-  findings: Finding[];
-  fixes: Fix[];
-  messages: ChatMessage[];
-  onInspect: (finding: Finding) => void;
-}) {
-  const approve = useSite((s) => s.approve);
-  const busy = useSite((s) => s.busy);
-  const error = useSite((s) => s.error);
-  const crewName = (id: string) => scene.crews.find((crew) => crew.id === id)?.name ?? "Crew not found";
+/**
+ * Open incidents in the order the superintendent settles them, and the first planned work they touch.
+ * Shared by the desk list and the page heading so both always agree on what comes first.
+ */
+export function rankIncidents(scene: Scene, findings: Finding[], fixes: Fix[]) {
   const resolved = resolvedFindingIds(fixes, findings);
   const active = findings.filter((finding) => !resolved.has(finding.id)).sort((a, b) =>
     Number(a.severity !== "hold") - Number(b.severity !== "hold") ||
@@ -51,10 +44,38 @@ export function IncidentFocus({ scene, findings, fixes, messages, onInspect }: {
     groups.set(key, [...(groups.get(key) ?? []), finding]);
   }
   const all = [...groups.values()];
-  const incidents = all.slice(0, 3);
   const firstWork = scene.tasks
     .filter((t) => t.status === "planned" && all.some((g) => g.some((f) => f.taskIds.includes(t.id))))
     .sort((a, b) => a.day.localeCompare(b.day) || (a.slot === "afternoon" ? 1 : 0) - (b.slot === "afternoon" ? 1 : 0))[0];
+  return { all, firstWork, when: firstWork ? `${dayLabel(firstWork.day)} ${slotWord[firstWork.slot]}` : undefined };
+}
+
+/** The top incident in one sentence, from the finding itself. */
+export function incidentLead(scene: Scene, finding: Finding): string {
+  const name = (id: string) => scene.elements.find((e) => e.id === id)?.name;
+  const crews = finding.crewIds.map((id) => scene.crews.find((c) => c.id === id)?.name ?? id).join(" and ");
+  if (finding.check === "latest_change" && finding.ghost) {
+    const el = name(finding.ghost.elementId) ?? "a wall";
+    return `${el} moved ${finding.ghost.label}, and ${crews} may not have heard.`;
+  }
+  const place = finding.elementIds.map(name).find(Boolean);
+  return `${title[finding.check]}${place ? `: ${place}` : ""}, ${crews}.`;
+}
+
+/** A short decision list over the existing record, not another checking engine. */
+export function IncidentFocus({ scene, findings, fixes, messages, onInspect }: {
+  scene: Scene;
+  findings: Finding[];
+  fixes: Fix[];
+  messages: ChatMessage[];
+  onInspect: (finding: Finding) => void;
+}) {
+  const approve = useSite((s) => s.approve);
+  const busy = useSite((s) => s.busy);
+  const error = useSite((s) => s.error);
+  const crewName = (id: string) => scene.crews.find((crew) => crew.id === id)?.name ?? "Crew not found";
+  const { all, firstWork } = rankIncidents(scene, findings, fixes);
+  const incidents = all.slice(0, 3);
 
   return <section className="incident-focus" aria-label="Priority site decisions">
     <header>
