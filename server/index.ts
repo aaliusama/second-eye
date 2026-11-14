@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { handle } from "./api/index";
 import { warmUp } from "./api/session";
 import { usePersistence } from "./learning/index";
+import { configureDismissals } from "./learning/dismissals";
 import { logLine } from "./log";
 import { REPO_ROOT } from "./paths";
 
@@ -15,6 +16,7 @@ try {
 
 // Opt-in: LEARNING_FILE set = stored corrections survive a restart. Unset = in memory, clean every start.
 usePersistence(process.env.LEARNING_FILE);
+configureDismissals(process.env.LEARNING_FILE);
 
 const port = Number(process.env.PORT ?? 8787);
 

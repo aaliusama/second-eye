@@ -1,0 +1,8 @@
+{
+  "note": "Simulated site data. No accuracy score: the live extraction request failed before this case could be evaluated.",
+  "status": "unavailable",
+  "model": "openai/gpt-oss-120b",
+  "case": "P1",
+  "casesScored": 0,
+  "error": "TypeError: fetch failed"
+}

@@ -67,8 +67,9 @@ describe("proposeFixes", () => {
     expect(fix!.sourceMessageId).toBe(fixtureFix.sourceMessageId);
     expect(fix!.messages.map((m) => m.crewId)).toEqual(fixtureFix.messages.map((m) => m.crewId));
     expect(fix!.messages[0]!.text).toBe(
-      "HOLD: Unit 204 bathroom east wall moved 0.4 m east per the record (m-001). Work to the new line.",
+      "HOLD: Unit 204 bathroom east wall moved 0.4 m east per the record. See the incident source record. Work to the new line.",
     );
+    expect(fix!.messages[0]!.text).not.toContain("m-001");
     expect(fix!.description).toBe("Send the latest Unit 204 bathroom east wall position to Novak Plumbing before they start.");
   });
 
@@ -150,10 +151,10 @@ describe("proposeFixes", () => {
     const fixes = proposeFixes([order, open], sceneWith([afternoon, inspect]));
     expect(fixes.map((x) => [x.id, x.kind])).toEqual([["fix-f-order", "hold"], ["fix-f-open", "hold"]]);
     expect(fixes[0]!.messages[0]!.text).toBe(
-      "HOLD: Plumbing inspection at W-12 is not done yet per the record (m-001). Wait on Unit 204 bathroom east wall until it is done.",
+      "HOLD: Plumbing inspection at W-12 is not done yet per the record. See the incident source record. Wait on Unit 204 bathroom east wall until it is done.",
     );
     expect(fixes[1]!.messages[0]!.text).toBe(
-      "HOLD: The decision on Unit 204 bathroom east wall is not approved per the record (m-001). Wait until it is approved.",
+      "HOLD: The decision on Unit 204 bathroom east wall is not approved per the record. See the incident source record. Wait until it is approved.",
     );
     fixes.forEach((x) => FixSchema.parse(x));
   });
@@ -164,7 +165,7 @@ describe("proposeFixes", () => {
     const [fix] = proposeFixes([f], sceneWith([unsure]));
     expect(fix!.kind).toBe("ask_crew");
     expect(fix!.messages[0]!.text).toBe(
-      "Are you still planning rough in the 204 bathroom along the east wall in the morning? Unit 204 bathroom east wall moved 0.4 m east per the record (m-001).",
+      "Are you still planning rough in the 204 bathroom along the east wall in the morning? Unit 204 bathroom east wall moved 0.4 m east per the record. See the incident source record.",
     );
     // Same finding live, or confident in rehearsal: no question.
     expect(proposeFixes([fixtureFinding], sceneWith([unsure]))[0]!.kind).toBe("notify_crew");
@@ -191,15 +192,15 @@ describe("proposeFixes", () => {
       expect(fix!.messages).toEqual([
         {
           crewId: "crew-plumbing",
-          text: "Are you still planning rough in the 204 bathroom along the east wall in the morning? Unit 204 bathroom east wall moved 0.4 m east per the record (Lena Hofer, office, Thu 14:02). Reply before 07:00.",
+          text: "Are you still planning rough in the 204 bathroom along the east wall in the morning? Unit 204 bathroom east wall moved 0.4 m east per the record. Source: Lena Hofer, office, Thu 14:02. Reply before 07:00.",
         },
       ]);
     });
 
-    it("cites people, threads and times; an unknown id stays an id", () => {
+    it("cites people, threads and times; hides unknown internal ids", () => {
       expect(cite(["m-001"], [change])).toBe("Lena Hofer, office, Thu 14:02");
-      expect(cite(["m-001", "m-404"], [change])).toBe("Lena Hofer, office, Thu 14:02; m-404");
-      expect(cite(["m-001"])).toBe("m-001");
+      expect(cite(["m-001", "m-404"], [change])).toBe("Lena Hofer, office, Thu 14:02");
+      expect(cite(["m-001"])).toBe("");
     });
 
     it("crew that posted after the change gets the normal fix", () => {

@@ -47,6 +47,8 @@ interface SiteStore {
 }
 
 const settle = <T,>(p: Promise<T | undefined>): Promise<T | null> => p.then((v) => v ?? null).catch(() => null);
+// An older request must not overwrite the state fetched after an approval or replay change.
+let refreshVersion = 0;
 
 export const useSite = create<SiteStore>((set, get) => ({
   status: "loading",
@@ -57,6 +59,7 @@ export const useSite = create<SiteStore>((set, get) => ({
   phoneOpen: false,
 
   refresh: async () => {
+    const version = ++refreshVersion;
     try {
       const [state, messages, rehearsal, evalResults, unresolved, agentLog] = await Promise.all([
         api.state(get().asOf),
@@ -66,8 +69,10 @@ export const useSite = create<SiteStore>((set, get) => ({
         settle(api.unresolved()),
         settle(api.agentLog()),
       ]);
+      if (version !== refreshVersion) return;
       set({ status: "ok", error: undefined, state, messages, rehearsal, evalResults, unresolved, agentLog });
     } catch (err) {
+      if (version !== refreshVersion) return;
       // No server yet: draw the contract fixtures (the ghost-wall case) so the plan still works, and say so.
       if (!get().state) {
         set({

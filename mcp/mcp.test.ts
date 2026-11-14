@@ -79,11 +79,11 @@ describe("get_site_state", () => {
     expect((out.data.places as { id: string }[]).map((p) => p.id)).toEqual(["corridor", "room-203", "room-204"]);
   });
 
-  it("an approved fix closes its finding", async () => {
+  it("dispatch alone keeps a latest-change finding open", async () => {
     const s = baseState();
     s.fixes = [{ ...fixtureFix, status: "approved" } satisfies Fix];
     const out = await getSiteState(standard({ "GET /api/state": [200, s] }).api, {});
-    expect(out.data.openFindings).toEqual([]);
+    expect(out.data.openFindings).toHaveLength(1);
   });
 });
 
@@ -149,11 +149,11 @@ describe("is_place_clear", () => {
     expect(out.data.status).toBe("clear");
   });
 
-  it("occupied when planned but the finding is handled", async () => {
+  it("still held when a correction was approved but the risk remains", async () => {
     const s = baseState();
     s.fixes = [{ ...fixtureFix, status: "approved" }];
     const out = await ask(standard({ "GET /api/state": [200, s], "GET /api/rehearsal": [200, { day: "2026-11-14", frames: [] }] }).api, "room-204");
-    expect(out.data.status).toBe("occupied");
+    expect(out.data.status).toBe("hold");
   });
 
   it("other slot of the same day is clear; full_day overlaps", async () => {

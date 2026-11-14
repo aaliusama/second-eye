@@ -26,10 +26,10 @@ const elementName = (scene: Scene, id: string) => scene.elements.find((e) => e.i
 const describeTask = (scene: Scene, t: PlanTask) =>
   `${crewName(scene, t.crewId)}: ${label(t.taskType)} in ${elementName(scene, t.placeId)}, ${t.day} ${label(t.slot)} (${t.sourceMessageId})`;
 
-/** Findings whose fix the superintendent approved count as handled. */
+/** Sending a correction does not clear an active latest-change risk. */
 function openFindings(findings: Finding[], fixes: Fix[]): Finding[] {
   const approved = new Set(fixes.filter((x) => x.status === "approved").map((x) => x.findingId));
-  return findings.filter((f) => !approved.has(f.id));
+  return findings.filter((f) => f.check === "latest_change" || !approved.has(f.id));
 }
 
 /** One finding per (id, trigger): live and rehearsal findings may share an id. */

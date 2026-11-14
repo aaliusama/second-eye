@@ -1,5 +1,13 @@
 # Architecture
 
+## Current additions: confirmation, sheet text and review memory
+
+Approval of a confirmed geometry correction now creates a revision snapshot and a receipt; it no longer records dispatch as crew knowledge. `GET /api/acknowledgements` lists receipts; `POST /api/fixes/:id/acknowledge {crewId}` is an explicitly simulated crew confirmation. It creates a sourced crew message and geometry-history acknowledgement, rechecks findings and rejects superseded snapshots with HTTP 409. Duplicate confirmation is idempotent. Receipt state is session-local and resets with the session. This replaces the older approval/heard behavior described later in this document.
+
+`GET /api/sheets` derives a separate explicit-text ledger from recorded messages. Authorized office roles issue revisions; crews state their revision. Unknown/conflicting/tentative text remains uncertain. No attachment is read and no fifth core check type is added. A sheet mismatch is review evidence, not physical work clearance.
+
+`GET/POST /api/dismissals` and `POST /api/dismissals/:id/undo` maintain exact-incident review memory, scoped to sources, crews, element revisions and task context. The underlying checks/findings/evaluation remain intact. The companion `<LEARNING_FILE>.dismissals.json` persists preferences when configured; keepLearning retains them and a clean reset clears them. Shared contracts for these features live in separate files under `contracts/src/`, exported by the existing entry point, under the user's approved parallel-feature scope.
+
 Owner: A. Read before adding a module or a dependency.
 
 ## One loop, one engine, two triggers

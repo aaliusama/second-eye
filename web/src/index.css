@@ -387,6 +387,10 @@ input {
   border-left-color: var(--clear);
 }
 
+.fix.awaiting {
+  border-left-color: var(--pending);
+}
+
 .fix .proposal {
   font-weight: 600;
 }

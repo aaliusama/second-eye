@@ -130,9 +130,31 @@ export function digest(s: QueryState, day: string): Digest {
     .sort((a, b) => a.crewId.localeCompare(b.crewId));
   const pendingFixes = s.fixes.filter((f) => f.status === "pending").map((f) => ({ fixId: f.id, kind: f.kind, description: f.description }));
 
+  // A 06:30 huddle needs consequences first: work that could cover an unfinished inspection,
+  // then stale geometry, unresolved decisions and shared-space conflicts. This is an explicit
+  // ordering of check types, not a probability or invented risk score. Collapse live/rehearsal
+  // duplicates by incident id and preserve every source on the selected item.
+  const consequenceOrder: Record<CheckName, number> = {
+    order_of_work: 0,
+    latest_change: 1,
+    open_decision: 2,
+    space_clash: 3,
+  };
+  const onePerIncident = [...new Map(findings.map((f) => [f.id, f])).values()];
+  const huddle = [...onePerIncident]
+    .sort((a, b) => Number(a.severity !== "hold") - Number(b.severity !== "hold") ||
+      consequenceOrder[a.check] - consequenceOrder[b.check] || a.time.localeCompare(b.time) || a.id.localeCompare(b.id))
+    .slice(0, 3);
+
   const holds = findings.filter((f) => f.severity === "hold").length;
   const warns = findings.length - holds;
   const lines = [`Evening digest for ${dayText(day)}, per the record: ${holds} hold${holds === 1 ? "" : "s"}, ${warns} warning${warns === 1 ? "" : "s"}.`];
+  lines.push("06:30 huddle — first three risks to review:");
+  for (const issue of huddle) {
+    const sources = [...new Set([issue.sourceMessageId, ...issue.evidenceMessageIds])];
+    lines.push(`  - ${issue.severity.toUpperCase()}: ${issue.summary} Crews: ${issue.crewIds.map((id) => crewName(s.scene, id)).join(", ")}. Sources: ${sources.join(", ")}.`);
+  }
+  if (huddle.length === 0) lines.push("  - No recorded risks for tomorrow.");
   for (const [check, c] of Object.entries(counts)) if (c.hold + c.warn) lines.push(`  - ${check.replace(/_/g, " ")}: ${c.hold} hold, ${c.warn} warn`);
   if (openDecisions.length) lines.push(`Open decisions: ${openDecisions.map((d) => `${d.name}${d.sourceMessageId ? ` (${d.sourceMessageId})` : ""}`).join("; ")}.`);
   if (silentCrews.length) lines.push(`Silent since the change: ${silentCrews.map((c) => `${c.name} (since ${timeText(c.since)})`).join("; ")}.`);

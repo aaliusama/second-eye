@@ -38,13 +38,14 @@ export function cite(ids: string[], messages?: ChatMessage[]): string {
   return ids
     .map((id) => {
       const m = messages?.find((x) => x.id === id);
-      if (!m) return id;
+      if (!m) return "";
       const d = new Date(`${m.time.slice(0, 10)}T00:00:00Z`);
       const when = `${DAYS[d.getUTCDay()]} ${m.time.slice(11, 16)}`;
       const who = m.senderName.replace(/\s*\(.*\)$/, "");
       const where = m.thread.startsWith("dm:") ? "direct message" : m.thread.replace(/-/g, " ");
       return `${who}, ${where}, ${when}`;
     })
+    .filter(Boolean)
     .join("; ");
 }
 
@@ -86,6 +87,7 @@ export function proposeFixes(findings: Finding[], scene: Scene, messages?: ChatM
 
   return findings.map((f) => {
     const sources = cite(f.evidenceMessageIds.length > 0 ? f.evidenceMessageIds : [f.sourceMessageId], messages);
+    const sourceNote = sources ? ` Source: ${sources}.` : " See the incident source record.";
     const tasks = tasksOf(f);
     const mainElementId = f.ghost?.elementId ?? f.elementIds[0];
     const element = elementName(mainElementId);
@@ -100,12 +102,12 @@ export function proposeFixes(findings: Finding[], scene: Scene, messages?: ChatM
     switch (f.check) {
       case "latest_change": {
         reason = f.ghost
-          ? `${element} moved ${f.ghost.label} per the record (${sources}).`
-          : `${element} changed per the record (${sources}).`;
+          ? `${element} moved ${f.ghost.label} per the record.`
+          : `${element} changed per the record.`;
         fix = {
           kind: "notify_crew",
           description: `Send the latest ${element} position to ${crews} before they start.`,
-          messages: toAll(`HOLD: ${reason} Work to the new line.`),
+          messages: toAll(`HOLD: ${reason}${sourceNote} Work to the new line.`),
         };
         break;
       }
@@ -135,10 +137,10 @@ export function proposeFixes(findings: Finding[], scene: Scene, messages?: ChatM
             : "Confirm a revised slot with the superintendent.";
           return {
             crewId,
-            text: `HOLD: ${others} is also in ${place} ${when} per the record (${sources}). ${correction}`,
+            text: `HOLD: ${others} is also in ${place} ${when} per the record.${sourceNote} ${correction}`,
           };
         });
-        reason = `${place} is booked twice in the same slot per the record (${sources}).`;
+        reason = `${place} is booked twice in the same slot per the record.`;
         fix = {
           kind: "reorder",
           description: canMove
@@ -151,20 +153,20 @@ export function proposeFixes(findings: Finding[], scene: Scene, messages?: ChatM
       case "order_of_work": {
         const prereq = [...tasks].sort((a, b) => WORK_ORDER.indexOf(a.taskType) - WORK_ORDER.indexOf(b.taskType))[0];
         const prereqText = tasks.length > 1 && prereq ? lowerFirst(prereq.description) : "the prerequisite work";
-        reason = `${prereqText.charAt(0).toUpperCase()}${prereqText.slice(1)} is not done yet per the record (${sources}).`;
+        reason = `${prereqText.charAt(0).toUpperCase()}${prereqText.slice(1)} is not done yet per the record.`;
         fix = {
           kind: "hold",
           description: `Hold ${crews} until ${prereqText} is done.`,
-          messages: toAll(`HOLD: ${reason} Wait on ${element} until it is done.`),
+          messages: toAll(`HOLD: ${reason}${sourceNote} Wait on ${element} until it is done.`),
         };
         break;
       }
       case "open_decision": {
-        reason = `The decision on ${element} is not approved per the record (${sources}).`;
+        reason = `The decision on ${element} is not approved per the record.`;
         fix = {
           kind: "hold",
           description: `Hold ${crews} until the decision on ${element} is approved.`,
-          messages: toAll(`HOLD: ${reason} Wait until it is approved.`),
+          messages: toAll(`HOLD: ${reason}${sourceNote} Wait until it is approved.`),
         };
         break;
       }
@@ -172,11 +174,11 @@ export function proposeFixes(findings: Finding[], scene: Scene, messages?: ChatM
 
     // An unsure record can request confirmation; it must not turn a warning into a work order.
     if (f.severity === "warn") {
-      reason = `${f.summary} Sources: ${sources}.`;
+      reason = f.summary;
       fix = {
         kind: "notify_crew",
         description: `Ask ${crews} to confirm the record before changing the plan.`,
-        messages: toAll(`WARN: ${reason} Please confirm the record before changing the plan.`),
+        messages: toAll(`WARN: ${reason}${sourceNote} Please confirm the record before changing the plan.`),
       };
     }
 
@@ -198,7 +200,7 @@ export function proposeFixes(findings: Finding[], scene: Scene, messages?: ChatM
         ...base,
         ...fix,
         messages: fix.messages.map((m) =>
-          silent(m.crewId) ? { crewId: m.crewId, text: `${question(m.crewId)} ${reason} Reply before ${REPLY_BY}.` } : m,
+          silent(m.crewId) ? { crewId: m.crewId, text: `${question(m.crewId)} ${reason}${sourceNote} Reply before ${REPLY_BY}.` } : m,
         ),
       };
     }
@@ -219,7 +221,7 @@ export function proposeFixes(findings: Finding[], scene: Scene, messages?: ChatM
         description: silent
           ? `Ask ${crews} to confirm the plan before ${REPLY_BY}; they have not posted since the change.`
           : `Ask ${crews} to confirm the plan before the morning.`,
-        messages: f.crewIds.map((crewId) => ({ crewId, text: `${question(crewId)} ${reason}${replyBy}` })),
+        messages: f.crewIds.map((crewId) => ({ crewId, text: `${question(crewId)} ${reason}${sourceNote}${replyBy}` })),
       };
     }
 
@@ -227,7 +229,7 @@ export function proposeFixes(findings: Finding[], scene: Scene, messages?: ChatM
       ...base,
       ...fix,
       messages: fix.messages.map((m) => quiet.includes(m.crewId)
-        ? { crewId: m.crewId, text: `${question(m.crewId)} ${reason} Reply before ${REPLY_BY}.` }
+        ? { crewId: m.crewId, text: `${question(m.crewId)} ${reason}${sourceNote} Reply before ${REPLY_BY}.` }
         : m),
     };
   });

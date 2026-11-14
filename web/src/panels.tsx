@@ -131,8 +131,9 @@ export function Queue({ scene, fixes, findings, messages }: { scene: Scene; fixe
         const crews = [...new Set(fix.messages.map((m) => m.crewId))].map((id) => crewName(scene, id)).join(" and ");
         const sent = messages.filter((m) => m.id.startsWith(`sent-${fix.id}-`));
         const done = fix.status === "approved";
+          const awaiting = done && f?.check === "latest_change";
         return (
-          <li key={fix.id} className={`fix ${done ? "done" : f?.severity === "hold" ? "hold" : ""}`}>
+            <li key={fix.id} className={`fix ${awaiting ? "awaiting" : done ? "done" : f?.severity === "hold" ? "hold" : ""}`}>
             {f && <p className="problem">{f.summary}</p>}
             <p className="proposal">{fix.kind === "ask_crew" ? `Question for ${crews}: ` : ""}{fix.description}</p>
             {!done && (
@@ -145,7 +146,7 @@ export function Queue({ scene, fixes, findings, messages }: { scene: Scene; fixe
             )}
             {done && (
               <>
-                <p className="sent-mark">Fix sent</p>
+                <p className="sent-mark">{awaiting ? "Sent · confirmation or recheck pending" : "Fix sent"}</p>
                 {sent.map((m) => (
                   <p key={m.id} className="draft">
                     To {crewName(scene, m.crewId ?? "")}: “{m.text}”

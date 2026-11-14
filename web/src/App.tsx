@@ -2,6 +2,10 @@ import { Component, lazy, Suspense, useEffect, useMemo, useState, type ReactNode
 import { onChange } from "./api";
 import { elementById, findingKey, formatTime, frameAt, messageMap, resolvedFindingIds } from "./derive";
 import { FlatView } from "./FlatView";
+import { Huddle } from "./Huddle";
+import { Acknowledgements } from "./Acknowledgements";
+import { Sheets } from "./Sheets";
+import { Dismissals } from "./Dismissals";
 import { AgentLog, Inspector, Learning, Measured, Queue, Record } from "./panels";
 import { Phone } from "./Phone";
 import { Presenter } from "./present/Presenter";
@@ -218,10 +222,14 @@ function Main() {
       </main>
 
       <aside className="side">
+        {!asOf && <Acknowledgements />}
+        {!asOf && <Huddle day={rehearsal?.day} messages={messages} revision={`${state.t}:${messages.length}:${state.fixes.map((f) => `${f.id}-${f.status}`).join(",")}`} />}
         <section className="panel">
           <h2>Needs approval</h2>
           <Queue scene={state.scene} fixes={state.fixes} findings={d.all} messages={messages} />
         </section>
+        {!asOf && <Dismissals />}
+        {!asOf && <Sheets />}
         <Learning scene={state.scene} items={unresolved} />
         <AgentLog scene={state.scene} messages={messages} />
         <Record scene={state.scene} messages={messages} />

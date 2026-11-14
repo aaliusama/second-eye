@@ -42,7 +42,7 @@ vi.mock("../model/load", () => ({
 }));
 vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
-const { approveFix, getSession, postMessage, resetSession } = await import("./session");
+const { approveFix, acknowledgeFix, getAcknowledgements, getSession, postMessage, resetSession } = await import("./session");
 
 beforeEach(() => {
   resetSession({ keepLearning: false });
@@ -54,22 +54,51 @@ const latestChangeIn = (scene: Scene) =>
   rehearse(scene, getPlan(scene, "2026-11-14")).frames.flatMap((f) => f.findings).filter((f) => f.check === "latest_change");
 
 describe("session", () => {
-  it("approving the ghost-wall fix tells the crew the new line, so the rehearsal stops flagging it", async () => {
+  it("dispatch stays on hold until the crew acknowledges the sent revision", async () => {
     const s = await getSession();
     expect(latestChangeIn(s.scene)).toHaveLength(1);
     const fix = s.fixes.find((f) => f.findingId === "f-latest_change-m-002-W-12")!;
     expect(fix.kind).toBe("notify_crew");
 
     const { sent } = await approveFix(fix.id);
+    expect(latestChangeIn((await getSession()).scene)).toHaveLength(1);
+    expect((await getAcknowledgements())[0]!.status).toBe("awaiting_confirmation");
+    const ack = await acknowledgeFix(fix.id, "crew-plumbing");
+    expect(ack.receipt.status).toBe("confirmed");
     const after = await getSession();
     expect(latestChangeIn(after.scene)).toEqual([]);
     const last = after.scene.elements.find((e) => e.id === "W-12")!.history.at(-1)!;
-    expect(last).toMatchObject({ operationType: "move", thread: "dm:crew-plumbing", sourceMessageId: sent[0]!.id, confidence: 1 });
+    expect(last).toMatchObject({ operationType: "move", thread: "dm:crew-plumbing", sourceMessageId: ack.sourceMessageId, confidence: 1 });
+    expect(after.messages.find((m) => m.id === ack.sourceMessageId)?.senderRole).toBe("crew_lead");
+    expect(ack.sourceMessageId).not.toBe(sent[0]!.id);
 
     // Approving again changes nothing more.
     const version = after.scene.elements.find((e) => e.id === "W-12")!.version;
     await approveFix(fix.id);
+    await acknowledgeFix(fix.id, "crew-plumbing");
     expect((await getSession()).scene.elements.find((e) => e.id === "W-12")!.version).toBe(version);
+    expect(after.messages.filter((m) => m.id === ack.sourceMessageId)).toHaveLength(1);
+  });
+
+  it("rejects a late acknowledgement after a changed revision and a non-recipient crew", async () => {
+    const s = await getSession();
+    const fix = s.fixes.find((f) => f.findingId === "f-latest_change-m-002-W-12")!;
+    await approveFix(fix.id);
+    await expect(acknowledgeFix(fix.id, "crew-tiling")).rejects.toThrow("recipient");
+    s.scene.elements.find((e) => e.id === "W-12")!.state = "proposed";
+    await expect(acknowledgeFix(fix.id, "crew-plumbing")).rejects.toThrow("revision changed");
+    expect((await getAcknowledgements())[0]!.status).toBe("superseded");
+  });
+
+  it("rejects an older receipt even when a new revision repeats the same geometry", async () => {
+    const s = await getSession();
+    const fix = s.fixes.find((f) => f.findingId === "f-latest_change-m-002-W-12")!;
+    await approveFix(fix.id);
+    const wall = s.scene.elements.find((e) => e.id === "W-12")!;
+    wall.version++;
+    wall.history.push({ ...wall.history.at(-1)!, version: wall.version, sourceMessageId: "new-revision", time: "2026-11-13T20:01:00" });
+    await expect(acknowledgeFix(fix.id, "crew-plumbing")).rejects.toThrow("revision changed");
+    expect(s.messages.some((m) => m.id.startsWith("ack-"))).toBe(false);
   });
 
   it("a live message reads the cache under its word-based id; a repeat gets -2 but the same cache entry", async () => {

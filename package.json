@@ -13,6 +13,8 @@
     "mcp"
   ],
   "scripts": {
+    "demo:live": "node scripts/demo-live.mjs",
+    "eval:paraphrase": "tsx eval/paraphrase.ts",
     "demo": "concurrently -k -n server,web -c blue,magenta \"npm run start -w @site/server\" \"npm run dev -w @site/web\"",
     "dev": "concurrently -k -n server,web -c blue,magenta \"npm run dev -w @site/server\" \"npm run dev -w @site/web\"",
     "test": "vitest run",

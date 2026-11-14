@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import {
   Correction,
+  AcknowledgeFixRequest,
   Day,
   EvalResults,
   PostMessageRequest,
@@ -20,8 +21,14 @@ import { logLine } from "../log";
 import { getPlan } from "../model/index";
 import { evalPath } from "../paths";
 import { handleQueryRoute } from "../query/index";
+import { handleSheetsRoute } from "./sheets";
+import { handleDismissals } from "./dismissals";
+import { resetDismissals } from "../learning/dismissals";
 import {
   approveFix,
+  acknowledgeFix,
+  AcknowledgementConflictError,
+  getAcknowledgements,
   getSession,
   getUnresolved,
   latestDay,
@@ -95,6 +102,16 @@ export async function handle(req: IncomingMessage, res: ServerResponse): Promise
   const route = `${req.method} ${url.pathname}`;
 
   try {
+    if (await handleSheetsRoute(req, res)) return;
+    if (await handleDismissals(req, res)) return;
+    if (route === "GET /api/acknowledgements") {
+      return send(res, 200, { receipts: await getAcknowledgements() });
+    }
+    const ack = req.method === "POST" && /^\/api\/fixes\/([^/]+)\/acknowledge$/.exec(url.pathname);
+    if (ack) {
+      const body = parseBody(AcknowledgeFixRequest, await readJson(req));
+      return send(res, 200, await acknowledgeFix(decodeURIComponent(ack[1]!), body.crewId));
+    }
     if (route === "GET /api/health") {
       const body: HealthResponse = { ok: true, liveLlm: process.env.LIVE_LLM === "1" };
       return send(res, 200, body);
@@ -181,6 +198,7 @@ export async function handle(req: IncomingMessage, res: ServerResponse): Promise
       // Run 2 learns from run 1: crews the agent put on watch are stored before the session drops.
       const learnedCrews = keepLearning ? await learnFromRun() : 0;
       resetSession({ keepLearning });
+      resetDismissals(keepLearning);
       clearStateAt();
       const s = await getSession();
       logLine({ kind: "api.reset", keepLearning, learnedCrews, findings: s.findings.length });
@@ -208,6 +226,7 @@ export async function handle(req: IncomingMessage, res: ServerResponse): Promise
 
     return send(res, 404, { error: `not found: ${route}` });
   } catch (err) {
+    if (err instanceof AcknowledgementConflictError) return send(res, 409, { error: err.message });
     if (err instanceof HttpError) return send(res, err.status, { error: err.message });
     if (err instanceof NotFoundError) return send(res, 404, { error: err.message });
     if (err instanceof Error && err.name === "ZodError") return send(res, 400, { error: `invalid: ${err.message}` });

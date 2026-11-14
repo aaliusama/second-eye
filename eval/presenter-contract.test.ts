@@ -21,6 +21,6 @@ describe("presenter uses the real cached script", () => {
     const sent = { ...fixtureFix, findingId: warning.id, status: "approved" as const };
     expect(resolvedFindingIds([sent], [warning]).has(warning.id)).toBe(false);
     expect(resolvedFindingIds([{ ...sent, kind: "ask_crew" }], [fixtureFinding]).has(warning.id)).toBe(false);
-    expect(resolvedFindingIds([sent], [fixtureFinding]).has(warning.id)).toBe(true);
+    expect(resolvedFindingIds([sent], [fixtureFinding]).has(warning.id)).toBe(false);
   });
 });

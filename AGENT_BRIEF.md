@@ -4,10 +4,10 @@ Read this if you are an AI coding agent working for one person on this team.
 Four people run their own agents on this repo at the same time. Your job: finish your person's workstream without touching the other three.
 
 ## Start of every session
-1. Read `AGENTS.md` (project rules; they win over anything here) and `TEAM.md` (owners, tasks, timeline).
-2. If your person has not told you their workstream letter (A, B, C or D), ask. Do not guess.
-3. Reply in three lines: your workstream, the paths you may write, the first unchecked MUST task in `TEAM.md`.
-4. `git pull --rebase origin main` before you change anything.
+1. Read `AGENTS.md`, `docs/WINNING_BRIEF.md`, and `TEAM.md`. Read `docs/winning-assessment.md` for the supporting audit and research. The dated audit is a baseline, not a claim about today's checkout.
+2. Use the scope explicitly assigned by the user, including an explicitly authorized cross-directory task. If working for one lane and neither the lane nor allowed paths are established, ask one short question. Do not infer unrestricted ownership from the winning objective.
+3. State your allowed paths and the first applicable task in the winning brief. Verify implementation before relying on old unchecked MUST boxes in `TEAM.md`.
+4. Inspect branch and working-tree status before synchronizing with main. Preserve local changes and other agents' work; do not blindly pull or rebase an active integration checkout. Follow the project's synchronization policy when the branch is safe to update.
 
 ## Stay in your lane
 - Write only inside your workstream's paths (roster in `TEAM.md`). Read anything.

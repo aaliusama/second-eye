@@ -10,7 +10,10 @@ import {
   type PostMessageResponse,
   type Rehearsal,
   type Scene,
+  type IncidentReceipt,
+  type AcknowledgeFixResponse,
 } from "@site/contracts";
+import { receiptStatus, revisionSignature } from "./acknowledgement";
 import { computeProfiles, runAgent, stepsFor, suggestCorrections, type AgentRun, type TimelineStep } from "../agent/index";
 import { proposeFixes, runChecks } from "../checks/index";
 import { extract } from "../extract/index";
@@ -42,6 +45,7 @@ export interface Session extends LiveRecord {
   agentDone: string[];
   agentLog: TimelineStep[];
   escalations: AgentRun["escalations"];
+  receipts: IncidentReceipt[];
 }
 
 /**
@@ -70,6 +74,7 @@ function stepAgent(s: Session, steps: string[]): void {
 }
 
 export class NotFoundError extends Error {}
+export class AcknowledgementConflictError extends Error {}
 
 let current: Promise<Session> | undefined;
 /** Serialises writes so two quick posts cannot interleave and reuse an id. */
@@ -90,7 +95,7 @@ export function getSession(): Promise<Session> {
     const p = (async (): Promise<Session> => {
       const start = learning.applyToScene(await loadStartScene());
       const state = await runReplay(await loadGoldenReplay(), start);
-      const s: Session = { ...state, liveCount: 0, agentDone: [], agentLog: [], escalations: [] };
+      const s: Session = { ...state, liveCount: 0, agentDone: [], agentLog: [], escalations: [], receipts: [] };
       stepAgent(s, stepsFor(s.messages, s.t));
       return s;
     })();
@@ -226,6 +231,18 @@ export function approveFix(id: string): Promise<ApproveFixResponse> {
     const fix = s.fixes.find((f) => f.id === id);
     if (!fix) throw new NotFoundError(`not found: fix ${id}`);
 
+    // Never ask a crew to confirm a snapshot newer than the correction text being dispatched.
+    const dispatchFinding = findingOf(s, fix.findingId);
+    if (fix.status !== "approved" && fix.kind === "notify_crew" && dispatchFinding?.check === "latest_change" && dispatchFinding.severity === "hold") {
+      const ids = dispatchFinding.ghost ? [dispatchFinding.ghost.elementId] : dispatchFinding.elementIds;
+      const sources = new Set([dispatchFinding.sourceMessageId, ...dispatchFinding.evidenceMessageIds]);
+      for (const id of ids) {
+        const element = s.scene.elements.find((e) => e.id === id);
+        const revision = element && [...element.history].reverse().find((entry) => entry.geometry && !entry.sourceMessageId.startsWith("ack-"));
+        if (!element || !revision || !sources.has(revision.sourceMessageId)) throw new AcknowledgementConflictError("The correction is based on an older revision. Review the current finding before sending.");
+      }
+    }
+
     const time = sessionNow(s);
     const sent: ChatMessage[] = fix.messages.map((m) => ({
       id: `sent-${fix.id}-${m.crewId}`,
@@ -250,11 +267,64 @@ export function approveFix(id: string): Promise<ApproveFixResponse> {
         approved: true,
       });
       s.messages.push(...sent);
-      s.scene = applyOperations(s.scene, heardOperations(s, fix, sent));
+      const finding = findingOf(s, fix.findingId);
+      if (finding?.check === "latest_change" && finding.severity === "hold" && fix.kind === "notify_crew") {
+        const ids = finding.ghost ? [finding.ghost.elementId] : finding.elementIds;
+        s.receipts.push({
+          fixId: fix.id, findingId: finding.id, summary: finding.summary, sourceMessageId: finding.sourceMessageId,
+          evidenceMessageIds: [...finding.evidenceMessageIds], sentAt: time, status: "awaiting_confirmation",
+          revisions: ids.flatMap((id) => {
+            const el = s.scene.elements.find((e) => e.id === id);
+            if (!el) return [];
+            return [{ elementId: el.id, name: el.name, version: el.version, sourceMessageId: el.history.at(-1)!.sourceMessageId, signature: revisionSignature(el) }];
+          }),
+          crews: sent.map((m) => ({ crewId: m.crewId!, crewName: s.scene.crews.find((c) => c.id === m.crewId)?.name ?? "not found", sentMessageId: m.id })),
+        });
+      }
       logLine({ kind: "api.fix_approved", fixId: fix.id, sent: sent.map((m) => m.id) });
       stepAgent(s, [time]);
     }
     return { fix: structuredClone(fix), sent };
+  });
+}
+
+export async function getAcknowledgements(): Promise<IncidentReceipt[]> {
+  const s = await getSession();
+  return s.receipts.map((receipt) => ({ ...structuredClone(receipt), status: receiptStatus(receipt, s.scene) }));
+}
+
+/** Explicit crew simulation action: the acknowledgement is a crew message with its own source. */
+export function acknowledgeFix(fixId: string, crewId: string): Promise<AcknowledgeFixResponse> {
+  return serial(async () => {
+    const s = await getSession();
+    const receipt = s.receipts.find((r) => r.fixId === fixId);
+    if (!receipt) throw new NotFoundError("not found: dispatched geometry correction");
+    const crew = receipt.crews.find((c) => c.crewId === crewId);
+    if (!crew) throw new NotFoundError("not found: recipient crew");
+    if (receiptStatus(receipt, s.scene) === "superseded") throw new AcknowledgementConflictError("The recorded revision changed after dispatch. Review and send the current correction before acknowledging.");
+    if (crew.acknowledgedMessageId) return { receipt: { ...structuredClone(receipt), status: receiptStatus(receipt, s.scene) }, sourceMessageId: crew.acknowledgedMessageId };
+    s.liveCount++;
+    const message: ChatMessage = {
+      id: `ack-${fixId}-${crewId}`, time: sessionNow(s), thread: `dm:${crewId}`, crewId,
+      senderName: crew.crewName, senderRole: "crew_lead", kind: "text",
+      text: `Confirmed receipt of the correction: ${receipt.revisions.map((r) => `${r.name}, recorded version ${r.version}`).join("; ")}. This confirms the information received, not completed work.`,
+    };
+    const fix = s.fixes.find((f) => f.id === fixId)!;
+    s.messages.push(message);
+    s.scene = applyOperations(s.scene, heardOperations(s, fix, [message]));
+    crew.acknowledgedMessageId = message.id;
+    crew.acknowledgedAt = message.time;
+    receipt.status = receiptStatus(receipt, s.scene);
+    // Approved dispatches remain in the receipt; recheck findings against the now acknowledged record.
+    const gone = s.findings.filter((f) => f.check === "latest_change" && f.crewIds.includes(crewId) &&
+      f.elementIds.some((id) => receipt.revisions.some((r) => r.elementId === id)) &&
+      !runChecks(s.scene, getPlan(s.scene, s.liveIntents[f.id]?.day ?? latestDay(s.scene)!), s.liveIntents[f.id]).some((next) => next.id === f.id));
+    const goneIds = new Set(gone.map((f) => f.id));
+    s.findings = s.findings.filter((f) => !goneIds.has(f.id));
+    s.resolvedFindings.push(...gone);
+    logLine({ kind: "api.crew_acknowledged", fixId, crewId, sourceMessageId: message.id, status: receipt.status });
+    stepAgent(s, [message.time]);
+    return { receipt: structuredClone(receipt), sourceMessageId: message.id };
   });
 }
 
@@ -267,9 +337,8 @@ function findingOf(s: Session, id: string): Finding | undefined {
 }
 
 /**
- * An approved notify_crew fix for a latest_change finding tells the crew where the element is now:
- * one move per element and sent DM, to its current geometry, sourced from the DM. The crew has then
- * heard the latest version, so the checks and the rehearsal stop flagging it. A WARN draft requests
+ * A crew acknowledgement of a notify_crew fix records receipt of the exact dispatched revision:
+ * one geometry-history entry per element, sourced from the crew reply. A WARN draft requests
  * confirmation of an uncertain record: sending that question cannot confirm geometry. Other fix kinds
  * and warning findings change nothing in the model.
  */
@@ -292,7 +361,7 @@ function heardOperations(s: Session, fix: Fix, sent: ChatMessage[]): Operation[]
         confidence: 1,
         elementId,
         to: structuredClone(el.geometry),
-        note: "latest position sent to the crew",
+        note: "crew acknowledged the dispatched position",
       });
     }
   }

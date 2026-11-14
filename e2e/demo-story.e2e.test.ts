@@ -166,13 +166,21 @@ describe("demo story (golden replay, cached extraction)", () => {
     expect(dm?.text).toMatch(/^HOLD:/);
   });
 
-  it("beat 5: approving the W-12 fix clears the ghost from the rehearsal", async () => {
+  it("beat 5: dispatch retains the ghost until explicit crew acknowledgement", async () => {
+    const before = await get("/api/rehearsal?day=2026-11-14");
+    expect(before.body.frames.flatMap((fr: any) => fr.findings).some((f: any) => f.check === "latest_change")).toBe(true);
+    const receipts = await get("/api/acknowledgements");
+    const receipt = receipts.body.receipts.find((r: any) => r.findingId === GHOST_ID);
+    expect(receipt.status).toBe("awaiting_confirmation");
+    const ack = await post(`/api/fixes/${encodeURIComponent(receipt.fixId)}/acknowledge`, { crewId: "crew-plumbing" });
+    expect(ack.status).toBe(200);
+    expect(ack.body.receipt.status).toBe("confirmed");
     const { body } = await get("/api/rehearsal?day=2026-11-14");
     const all = body.frames.flatMap((fr: any) => fr.findings);
     expect(all.some((f: any) => f.check === "latest_change")).toBe(false);
   });
 
-  it("F: after approval the robot no longer reports unit 204 as HOLD", async () => {
+  it("F: after acknowledgement the robot no longer reports unit 204 as HOLD", async () => {
     expect(await robotLine("Unit 204")).not.toMatch(/ HOLD /);
   });
 

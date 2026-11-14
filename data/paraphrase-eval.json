@@ -1,0 +1,39 @@
+{
+  "note": "Simulated site data. Independent challenge set for live extraction; authored before running the evaluator. These cases are not part of the golden replay or its labels.",
+  "source": "Claude Code review observation plus independently authored contrast case",
+  "cases": [
+    {
+      "id": "P1",
+      "crewId": "crew-plumbing",
+      "time": "2026-11-13T20:10:00",
+      "thread": "site-group",
+      "senderName": "Novak Plumbing",
+      "senderRole": "crew_lead",
+      "text": "doing the pipes in the 204 bathroom tomorrow am, east side",
+      "expected": "latest_change",
+      "reason": "Unseen paraphrase of the cached plumber intent; it should identify next-day plumbing in Unit 204 and the outdated east wall."
+    },
+    {
+      "id": "P2",
+      "crewId": "crew-plumbing",
+      "time": "2026-11-13T20:11:00",
+      "thread": "site-group",
+      "senderName": "Novak Plumbing",
+      "senderRole": "crew_lead",
+      "text": "tomorrow morning we're running pipe in the 204 bath along the east wall",
+      "expected": "latest_change",
+      "reason": "Second independently worded intent variant; the crew still has not received the office-thread wall move."
+    },
+    {
+      "id": "N1",
+      "crewId": "crew-plumbing",
+      "time": "2026-11-13T20:12:00",
+      "thread": "site-group",
+      "senderName": "Novak Plumbing",
+      "senderRole": "crew_lead",
+      "text": "tomorrow morning the 204 bathroom gets a pipe delivery; no crew is working there",
+      "expected": "no_intent",
+      "reason": "Harmless lookalike: a delivery and explicit no-work statement should not be turned into a crew work plan or hold."
+    }
+  ]
+}

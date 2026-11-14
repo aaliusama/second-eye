@@ -4,6 +4,20 @@ Hackathon project (Talona track, "Context for the Physical World"). Code freeze:
 This file is the single source of instructions for every AI coding tool on this repo. `CLAUDE.md` imports it.
 Who owns what and when we sync: `TEAM.md`. If you work for one teammate, read `AGENT_BRIEF.md` next.
 
+## Start here: winning strategy and current handoff
+
+Read `docs/PARALLEL_STATUS.md` first for current exclusive file assignments and verified implementation status. Do not duplicate another active agent's edits. This status supersedes older assignment tables.
+
+Before choosing work, read `docs/WINNING_BRIEF.md`. It contains the user's winning objective, ordered tasks, acceptance criteria, and the proposed judge-facing story. Read `docs/winning-assessment.md` for the research, sources, verified baseline and limitations behind it.
+
+Current parallel assignments are listed in `docs/WINNING_BRIEF.md`. Check agent status, branch/worktree diffs, and the existing `n/rail`, `o/feed`, and `p/phone-slider` branches before taking overlapping work. The user's latest direction authorizes reconsidering prior KILL decisions in pursuit of winning; keep the frozen-contract review, source/uncertainty requirements, and offline demo integrity explicit.
+
+- Protect the ghost-wall demonstration. Strengthen evidence and the correction loop before adding features. The memorable promise is **"See tomorrow's mistake before it gets built."** Treat this as a demonstration of risks in the record, not a guarantee about physical outcomes.
+- The Talona rubric is technical implementation 35, autonomous operation and impact 30, learning loop and vision 15, demo and presentation 20. Do not invent subweights, guaranteed scores, savings, or claims that no competitor has similar capabilities.
+- Distinguish implemented, tested, visually verified, recorded and submitted. Old unchecked boxes in `TEAM.md` are not proof of missing code. Inspect the current checkout before rebuilding anything.
+- Proposed features in the brief are not implemented facts or permission to change frozen contracts. Work within the user's current assigned scope; explicit user authorization for a cross-directory task takes precedence over routine lane restrictions. Do not repeatedly ask for an authorization already given.
+- The brief does not waive code freeze or authorize submission, publication, real crew messages, or changes to track terms. After freeze, preserve the submitted revision; label later work separately.
+
 ## What we are building (why)
 The site checks every crew's stated plan against a live model of the building, the moment they say it and the evening before, and fixes the clashes before the work starts.
 
@@ -28,7 +42,7 @@ Stack (confirmed): TypeScript everywhere, npm workspaces, Node server, Vite + Re
 - `npm run typecheck` - run before every commit
 
 Node 22.12+. First run: `npm install`, then `npm run demo` and open http://localhost:5173. One folder's tests: `npm test -- server/checks`.
-Contracts in `contracts/` are a DRAFT until A confirms them at kickoff. Folder-specific rules: `web/AGENTS.md` for `web/`.
+Contracts in `contracts/` are frozen; see the approval rule below. Folder-specific rules: `web/AGENTS.md` for `web/`.
 
 ## Map and owners
 Only edit files inside the directory you were asked to work in. If a change is needed elsewhere, say so and stop.
@@ -50,6 +64,7 @@ Read `docs/demo-script.md` before any task that touches what a judge sees.
 Read `docs/architecture.md` before adding a module or a dependency.
 
 ## Frozen contracts
+- The user approved the coordinated acknowledgement, text-only sheet revision and dismissal-memory extensions in this session. Their schemas are exported from `contracts/src/acknowledgement.ts`, `sheets.ts`, and `dismissals.ts`. This is a scoped exception, not permission for unrelated contract changes. Text-only sheet comparison is now in scope despite the older KILL entry below; attachment/BIM extraction was not added.
 - Never change anything in `contracts/` without the owner's explicit approval in the prompt. Propose the change and stop.
 - Import types from `contracts/`. Never redefine a shape locally.
 - Operation types: `move`, `add`, `remove`, `set_status`, `plan_task`. Do not add a type.
