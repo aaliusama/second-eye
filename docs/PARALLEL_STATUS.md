@@ -1,5 +1,12 @@
 # Parallel implementation status
 
+## Lanes B-E of `docs/NEXT_WORK.md` (14 Nov, branch `lanes-bcde/integration`)
+
+- **Lane B, measured geometry:** merged into `lanes-bcde/integration`. Latest-change findings carry `measure.clearance` (work face, perpendicular offset, outcome, required clear depth and tolerance per trade from `server/checks/geometry-rules.ts`); space clash intersects work zones (`measure.overlap`). Golden eval unchanged at 15/0/0.
+- **Lane C, plan graph:** merged. `rehearse()` returns `graph` (prerequisite edges, critical path by half-day slots, one-slot slips); order_of_work shares its edge functions.
+- **Lane D, web depth:** merged. "How it decided" trace, crew lens in 3D, clearance/overlap drawings, dependency arrows and critical path on the timeline.
+- **Lane E, story (branch `lanes-bcde/e-story`):** architecture, README "How it works", demo script, pitch and video README rewritten for the new depth; README screenshots refreshed (`workspace.png`, `who-knows.png`) and added (`how-it-decided.png`, `critical-path.png`). The presenter gained a twelfth beat, "How it decided" (only `web/src/present/` changed). Checked: typecheck, 378 unit tests, eval 15/0/0, web build, e2e 24/24, all twelve beats screenshotted at desktop and phone width without page errors, and a presenter take recorded with a clean log and reviewed frame by frame. The numbers table in the README (lane A) was not edited. Not merged to `main`.
+
 ## Second product-design pass: finished by Claude (14 Nov, morning)
 
 Codex started this pass and reached its usage limit about five hours before freeze. At the user's request Claude finished Codex's uncommitted `web/` work, committed it and merged it to `main`. Codex: pull before editing; `web/` is free again. Read `docs/CLAUDE_LANE.md` for the full list.

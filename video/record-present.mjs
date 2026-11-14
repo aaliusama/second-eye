@@ -24,10 +24,11 @@ const CAPTIONS = process.argv.includes("--captions");
 /** Cue (seconds from start) per beat, in presenter order. Captions are the short spoken lines. */
 const CUES = [
   { at: 0, beat: "Problem", say: "Thursday the architect moved a bathroom wall 40 cm. The plumbers were not in that thread. Simulated site data." },
-  { at: 20, beat: "Build", say: "Every chat message becomes a change to one record of the floor, and keeps its source." },
-  { at: 40, beat: "Ghost wall", say: "Plumbing states tomorrow's work. Red: where they will measure from. Black: the wall per the record." },
-  { at: 70, beat: "Why", say: "The change was said in the office thread. Plumbing does not read it." },
-  { at: 85, beat: "Rehearse", say: "Every evening, tomorrow is played forward. The things you cannot undo come first." },
+  { at: 15, beat: "Build", say: "Every chat message becomes a change to one record of the floor, and keeps its source." },
+  { at: 30, beat: "Ghost wall", say: "Plumbing states tomorrow's work. Red: where they will measure from. Black: the wall per the record." },
+  { at: 55, beat: "Why", say: "The floor as Novak Plumbing knows it. The change was said in the office thread; they do not read it." },
+  { at: 70, beat: "How it decided", say: "The language model reads messages into facts. Below the line, rules decide, with the measured gap." },
+  { at: 85, beat: "Rehearse", say: "Tomorrow, played forward as a graph. Heavy line: the critical path. Red: work booked out of order." },
   { at: 105, beat: "Send", say: "One tap sends the correction. Sent is not heard: it stays amber." },
   { at: 120, beat: "Confirm", say: "The crew confirms this exact revision. The record is rechecked. Receipt, not proof of work." },
   { at: 135, beat: "Ask", say: "Crews ask questions and get answers from the record, with sources." },

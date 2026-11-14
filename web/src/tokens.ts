@@ -41,6 +41,8 @@ export const size = {
   controlHeight: "36px",
   /** Floating sheets (tools, inspector, phone) sit one step above the drawing. */
   radiusLarge: "10px",
+  /** One sub-row of a crew lane on the timeline; a lane grows when that crew's bars overlap. */
+  laneRow: "22px",
 } as const;
 
 /**
@@ -68,6 +70,13 @@ export const drawing = {
   labelSize: 0.55,
   smallLabel: 0.4,
   ghostOpacity: 0.18,
+  /** Hatch spacing and line weight for measured zones (work zone strip, overlap of a space clash). */
+  hatchStep: 0.28,
+  hatchWidth: 0.035,
+  /** Timeline arrows (px): arrow head size, normal and emphasised line weights. */
+  arrowHead: 5,
+  arrowLine: 1.25,
+  arrowCritical: 2.25,
 } as const;
 
 /** Motion budget: the ghost reveal, plus 150-250 ms answers to user actions. */

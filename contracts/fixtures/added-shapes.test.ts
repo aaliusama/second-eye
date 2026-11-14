@@ -129,3 +129,40 @@ describe("the server's own briefing types match the contract", () => {
     expectTypeOf<Digest>().toExtend<ServerDigest>();
   });
 });
+
+describe("measured geometry, rule trace and plan graph (optional fields)", () => {
+  it("a finding without the new fields stays valid, and one with them parses", async () => {
+    const { Finding, Rehearsal } = await import("../src/index");
+    const { fixtureFinding } = await import("./index");
+    expect(Finding.parse(fixtureFinding)).toEqual(fixtureFinding);
+    const withMeasure = {
+      ...fixtureFinding,
+      rule: { id: "latest_change.unheard_geometry", statement: "A crew's work touches an element moved in a thread it does not read." },
+      measure: {
+        clearance: {
+          believedFace: [[18.06, 2], [18.06, 5]],
+          recordedFace: [[18.46, 2], [18.46, 5]],
+          offsetM: 0.4,
+          direction: "east",
+          requiredM: 0.05,
+          outcome: "gap",
+          workZone: { kind: "polygon", points: [[17.76, 2], [18.06, 2], [18.06, 5], [17.76, 5]] },
+          text: "Per the record, the face is 0.40 m east of where the crew works.",
+        },
+      },
+    };
+    expect(Finding.parse(withMeasure)).toEqual(withMeasure);
+    const rehearsal = {
+      day: "2026-11-14",
+      frames: [],
+      graph: {
+        taskIds: ["t1", "t2"],
+        edges: [{ from: "t1", to: "t2", placeId: "room-203", reason: "close wall needs the inspection first", violated: true }],
+        criticalPath: ["t1", "t2"],
+        slips: [{ taskId: "t1", blocks: ["t2"], crewIds: ["crew-drywall"] }],
+      },
+    };
+    expect(Rehearsal.parse(rehearsal)).toEqual(rehearsal);
+    expect(Rehearsal.parse({ day: "2026-11-14", frames: [] })).toEqual({ day: "2026-11-14", frames: [] });
+  });
+});

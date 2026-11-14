@@ -3,6 +3,7 @@ import type { Element, Plan, PlanTask, Scene } from "@site/contracts";
 import { fixtureFinding, fixtureIntent, fixtureScene, fixtureTask, W12_BEFORE } from "@site/contracts/fixtures";
 import { runChecks } from "./index";
 import { moveLabel } from "./geometry";
+import { RULE } from "./rule-refs";
 
 // Owner: C. Build each test from contracts/fixtures (fixtureScene, fixtureIntent, fixtureFinding).
 
@@ -16,14 +17,26 @@ describe("checks", () => {
     const findings = runChecks(fixtureScene, planOf(fixtureScene), fixtureIntent);
     const f = findings.find((x) => x.check === "latest_change");
     expect(f).toBeDefined();
-    const { id: _id, summary, ...rest } = f!;
+    const { id: _id, summary, rule, measure, ...rest } = f!;
     const { id: _fid, summary: _fs, ...expected } = fixtureFinding;
     expect(rest).toEqual(expected);
+    expect(rule).toEqual(RULE.unheardGeometry);
     expect(f!.ghost).toEqual({ elementId: "W-12", geometry: W12_BEFORE, label: "0.4 m east" });
     expect(f!.id).toBe("f-latest_change-m-002-W-12");
     expect(summary).toMatch(/per the record/i);
     expect(summary).toContain("Unit 204 bathroom east wall");
     expect(summary).toContain("Novak Plumbing");
+    // Measured (lane B): plumbing works on the bathroom (west) face; the record moved it 0.4 m east, away from the work.
+    expect(summary).toContain("leave a 0.40 m gap at the west face");
+    expect(measure?.clearance).toMatchObject({
+      believedFace: [[17.94, 2], [17.94, 5]],
+      recordedFace: [[18.34, 2], [18.34, 5]],
+      offsetM: 0.4,
+      direction: "east",
+      requiredM: 0.6,
+      outcome: "gap",
+    });
+    expect(measure?.clearance?.text).toMatch(/^Per the record, the west face of Unit 204 bathroom east wall is 0\.40 m east/);
     // The fixture has nothing else wrong.
     expect(findings).toHaveLength(1);
   });
@@ -46,7 +59,7 @@ describe("checks", () => {
   it("moveLabel: dominant axis and diagonal", () => {
     const seg = (x: number, y: number) => ({ kind: "segment" as const, from: [x, y] as [number, number], to: [x, y + 3] as [number, number], thickness: 0.12 });
     expect(moveLabel(seg(18, 2), seg(18.4, 2))).toBe("0.4 m east");
-    expect(moveLabel(seg(18, 2), seg(17.75, 2))).toBe("0.3 m west");
+    expect(moveLabel(seg(18, 2), seg(17.75, 2))).toBe("0.25 m west");
     expect(moveLabel(seg(18, 2), seg(18.4, 2.3))).toBe("0.3 m north, 0.4 m east");
     expect(moveLabel(seg(18, 2), seg(18.02, 2))).toBe("same position, changed shape");
   });
