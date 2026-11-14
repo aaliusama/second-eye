@@ -1,4 +1,4 @@
-import { useMemo, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type KeyboardEvent, type ReactNode } from "react";
 import type { Element, ElementState, Finding, Geometry, PlanTask, Point, Scene } from "@site/contracts";
 import {
   blendGeometry,
@@ -15,6 +15,7 @@ import {
   midpoint,
   pointsOf,
   segmentOutline,
+  STORY_ELEMENT,
   type Box,
 } from "./derive";
 import { phase, REVEAL } from "./reveal";
@@ -42,6 +43,7 @@ export interface FlatViewProps {
   /** Tasks active at the slider position, for crew badges. */
   activeTasks: PlanTask[];
   selection: Selection;
+  focusElementId?: string;
   onSelect: (s: Selection) => void;
   reveal: { key?: string; elapsed: number };
 }
@@ -274,6 +276,8 @@ function RoomLabel({ el, tasks, scene }: { el: Element; tasks: PlanTask[]; scene
 export function FlatView(props: FlatViewProps) {
   const { scene, ghosts, conflictIds, clearIds, activeTasks, selection, onSelect, reveal, sentIds, tight = false } = props;
   const [whole, setWhole] = useState<string | undefined>(undefined);
+  const [comparison, setComparison] = useState<"compare" | "earlier" | "latest">("compare");
+  useEffect(() => setComparison("compare"), [reveal.key, tight]);
 
   const base = useMemo(() => {
     const all = scene.elements.flatMap((e) => pointsOf(e.geometry));
@@ -281,12 +285,14 @@ export function FlatView(props: FlatViewProps) {
   }, [scene]);
 
   // In the story beats there is one ghost on screen: frame it even after its reveal has played.
-  const revealed = ghosts.find((f) => findingKey(f) === reveal.key) ?? (tight ? ghosts[0] : undefined);
-  const revealedEl = elementById(scene, revealed?.ghost?.elementId);
+  const selectedElement = props.focusElementId ?? (selection?.kind === "element" ? selection.id : undefined);
+  const chosen = selection?.kind === "finding" ? ghosts.find((f) => findingKey(f) === selection.key) : undefined;
+  const revealed = chosen ?? (selectedElement ? ghosts.find((f) => f.ghost?.elementId === selectedElement) : ghosts.find((f) => findingKey(f) === reveal.key)) ?? (tight ? ghosts[0] : undefined);
+  const revealedEl = elementById(scene, selectedElement ?? revealed?.ghost?.elementId ?? (tight ? STORY_ELEMENT : undefined));
 
   const focus = useMemo((): Box | undefined => {
-    if (!revealed?.ghost || !revealedEl) return undefined;
-    const pts = [...pointsOf(revealed.ghost.geometry), ...pointsOf(revealedEl.geometry)];
+    if (!revealedEl) return undefined;
+    const pts = [...(revealed?.ghost ? pointsOf(revealed.ghost.geometry) : []), ...pointsOf(revealedEl.geometry)];
     if (tight) {
       // Close on the wall: the offset has to read at 1440x900 and on a projector. Room above for the dimension.
       const t = boxOf(pts, 1.6);
@@ -313,7 +319,8 @@ export function FlatView(props: FlatViewProps) {
 
   if (!base) return <p className="empty">No elements in the record.</p>;
 
-  const framing = focus && (tight || selection !== undefined) && whole !== reveal.key;
+  const frameKey = selection?.kind === "finding" ? selection.key : selectedElement ?? reveal.key ?? "story";
+  const framing = focus && (tight || selection !== undefined) && whole !== frameKey;
   const box = framing ? lerpBox(base, focus, easeInOut(phase(reveal.elapsed, 0, REVEAL.frameEnd))) : base;
   const r = drawing.bubbleRadius;
   const vb = { x: box.minX - r * 3.4, y: -box.maxY - r * 3.4, w: box.maxX - box.minX + r * 3.6, h: box.maxY - box.minY + r * 3.6 };
@@ -351,7 +358,7 @@ export function FlatView(props: FlatViewProps) {
         </defs>
         <Grid box={base} />
         {areas.map(drawEl)}
-        {solids.map(drawEl)}
+        {solids.filter((el) => !(comparison === "earlier" && ghosts.some((f) => f.ghost?.elementId === el.id))).map(drawEl)}
         {areas.map((el) => (
           <RoomLabel key={`l-${el.id}`} el={el} tasks={activeTasks} scene={scene} />
         ))}
@@ -365,7 +372,7 @@ export function FlatView(props: FlatViewProps) {
             onClick={() => onSelect({ kind: "element", id: el.id })}
           />
         ))}
-        {ghosts.map((f) => {
+        {(comparison === "latest" ? [] : ghosts).map((f) => {
           const truth = elementById(scene, f.ghost!.elementId);
           if (!truth) return null;
           const key = findingKey(f);
@@ -387,7 +394,7 @@ export function FlatView(props: FlatViewProps) {
           const tone = sent ? color.pending : color.redline;
           return (
             <g key={key}>
-              {draw > 0 && (
+              {draw > 0 && comparison !== "earlier" && (
                 <Shape g={truth.geometry} l={{ stroke: color.ink, width: drawing.heavy, fill: "none", fillOpacity: 0 }} pathLength offset={1 - draw} />
               )}
               {grow > 0 && (
@@ -398,13 +405,13 @@ export function FlatView(props: FlatViewProps) {
                   />
                   <Hit
                     g={g}
-                    label={`Ghost: where ${crews} last heard ${truth.name} is. ${f.summary}`}
+                    label={`Earlier recorded position for ${crews}: ${truth.name}. ${f.summary}`}
                     selected={selected}
                     onClick={() => onSelect({ kind: "finding", key })}
                   />
                 </g>
               )}
-              {dim > 0 && (
+              {dim > 0 && comparison === "compare" && (
                 <>
                   <Dimension ghost={f.ghost!.geometry} truth={truth.geometry} label={f.ghost!.label} opacity={dim} tone={tone} />
                   <text
@@ -417,7 +424,7 @@ export function FlatView(props: FlatViewProps) {
                   >
                     <tspan x={lx}>{crews}</tspan>
                     <tspan x={lx} dy="1.2em">
-                      {sent ? "sent, not confirmed" : "last heard this line"}
+                      {sent ? "sent, not confirmed" : "earlier recorded position"}
                     </tspan>
                   </text>
                 </>
@@ -427,8 +434,12 @@ export function FlatView(props: FlatViewProps) {
         })}
 
       </svg>
+      {ghosts.length > 0 && <div className="comparison-tools" role="group" aria-label="Compare recorded positions">
+        {([ ["earlier", "Earlier position"], ["compare", "Compare"], ["latest", "Latest record"] ] as const).map(([mode, label]) => <button type="button" key={mode} aria-pressed={comparison === mode} onClick={() => setComparison(mode)}>{label}</button>)}
+        <span>Display only · recorded geometry</span>
+      </div>}
       {framing && phase(reveal.elapsed, 0, REVEAL.total) === 1 && (
-        <button type="button" className="quiet whole" onClick={() => setWhole(reveal.key)}>
+        <button type="button" className="quiet whole" onClick={() => setWhole(frameKey)}>
           Whole floor
         </button>
       )}

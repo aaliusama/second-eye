@@ -1,5 +1,14 @@
 # Parallel implementation status
 
+## Second product-design pass: finished by Claude (14 Nov, morning)
+
+Codex started this pass and reached its usage limit about five hours before freeze. At the user's request Claude finished Codex's uncommitted `web/` work, committed it and merged it to `main`. Codex: pull before editing; `web/` is free again. Read `docs/CLAUDE_LANE.md` for the full list.
+
+- **Persona correction:** the user asked for the person *who lives this pain*. This was misheard as "who lives in Spain". `docs/SPAIN_FIELD_RESEARCH.md` was removed and replaced by `docs/SITE_MANAGER_PAIN.md`, a superintendent before 07:00. Do not reintroduce a Spain or Spanish-localisation angle.
+- **Kept from Codex:** the incident list (`web/src/IncidentFocus.tsx`), the Earlier / Compare / Latest toggle, the crew chat docked in a desk tab, folded crew plan lanes, the inspector in the desk.
+- **Claude's changes:** latest-change incidents rank first. Cards show the planned work (crew, task, day, slot) and a visible primary "Send correction to <crew>". After sending, the card shows an amber "Waiting for reply" note. The header shows "N to settle before <day> <slot>". Duplicate task lines fixed (a React key warning). The compare toolbar no longer carries a subtitle.
+- **Verified:** web typecheck and build pass. Headless Edge stepped through all eleven presenter beats with no page errors; the screenshots looked right. Ghost red, then amber after Send, then gone after Confirm. No horizontal overflow at 390 px. New screenshots: `docs/assets/design-review/desk-priorities.png` and `desk-sent.png`. Full tests, e2e and eval were not rerun; the user reruns them at the end.
+
 ## Completed Codex work: README and interface redesign
 
 README and web design work is complete; read `docs/DESIGN_REVIEW.md` and the top of `docs/CLAUDE_RESUME.md` before editing. The design ownership reservation is released. All eleven beats were exercised; 311 root tests, 24 HTTP tests, typecheck and build passed. Screenshots are retained in `docs/assets/design-review/`. Preserve the new section navigation, source disclosures and pending-confirmation semantics.

@@ -1,4 +1,5 @@
 import type { Finding, Rehearsal, Scene } from "@site/contracts";
+import { useEffect, useState } from "react";
 import { crewHue, crewName, elementById, formatTime, frameAt, SLIDER_STEPS, sliderClock, tasksOfDay, troubleSteps } from "./derive";
 import { color } from "./tokens";
 
@@ -14,6 +15,7 @@ export function Slider({
   onStep,
   resolved,
   quiet = false,
+  expandedByDefault = false,
 }: {
   scene: Scene;
   rehearsal: Rehearsal | undefined;
@@ -23,7 +25,10 @@ export function Slider({
   resolved: Set<string>;
   /** Presenter story beats: draw the plan without redline, so the one ghost on the plan is the only red thing. */
   quiet?: boolean;
+  expandedByDefault?: boolean;
 }) {
+  const [expanded, setExpanded] = useState(expandedByDefault);
+  useEffect(() => setExpanded(expandedByDefault), [expandedByDefault, quiet]);
   if (!rehearsal || rehearsal.frames.length === 0) {
     return (
       <div className="slider empty">
@@ -52,9 +57,10 @@ export function Slider({
           {!frame
             ? "Nothing planned at this time"
             : quiet
-              ? `${frame.activeTaskIds.length} on site`
-              : `${frame.activeTaskIds.length} on site, ${frameOpen.length} held per the record`}
+              ? `${frame.activeTaskIds.length} planned tasks`
+              : `${frame.activeTaskIds.length} planned tasks, ${frameOpen.length} open findings`}
         </p>
+        <button type="button" className="quiet plan-expand" aria-expanded={expanded} aria-controls="crew-plan-lanes" onClick={() => setExpanded(!expanded)}>{expanded ? "Hide crew plan" : "Show crew plan"}</button>
       </div>
       <div className="lanes">
         <div className="track-row">
@@ -80,7 +86,7 @@ export function Slider({
             />
           </div>
         </div>
-        {crews.map((crewId) => (
+        <div id="crew-plan-lanes" hidden={!expanded}>{crews.map((crewId) => (
           <div key={crewId} className="track-row">
             <span className="lane-name">
               <span className="badge" style={{ borderColor: crewHue(scene, crewId) }}>
@@ -103,7 +109,7 @@ export function Slider({
               <span className="cursor" style={{ left: pct(step + 0.5) }} aria-hidden="true" />
             </div>
           </div>
-        ))}
+        ))}</div>
       </div>
     </div>
   );

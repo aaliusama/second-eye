@@ -1,5 +1,9 @@
 # Resume after Codex parallel implementation
 
+## Deeper product-design pass: finished by Claude
+
+Codex hit its usage limit mid-pass, and Claude finished and committed the work. The design persona is the superintendent *who lives this pain* (`docs/SITE_MANAGER_PAIN.md`), not a Spain-based user; that was a mishearing. The Spain research file was removed. The current state, verification and remaining items are at the top of `docs/PARALLEL_STATUS.md` and in `docs/CLAUDE_LANE.md`. Nothing here claims user interviews, deployment, unique market invention or a judging score.
+
 ## Completed README and interface design pass
 
 The design pass is complete; README/web ownership is released after this handoff. Read `docs/DESIGN_REVIEW.md` for sources, design decisions, screenshot evidence and limitations. README now has an actual app screenshot, concise run paths, a correction loop, architecture diagram and honest golden/challenge results. Site desk sections are Today, Record and Learning; source metadata and confirmations use progressive disclosure. Presenter focus opens the relevant section. Ordinary startup shows the whole floor; ghost/why focus removes unrelated sidebar risks. Sending remains amber and separate from explicit confirmation.

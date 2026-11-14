@@ -2,6 +2,10 @@
 
 Updated 14 November 2026, morning, on `win/integration` after `91de1ce`. Claude edits only the paths listed under "Claude owns". It does not edit `web/`, `README.md`, `docs/assets/`, or the top sections of `docs/PARALLEL_STATUS.md` and `docs/CLAUDE_RESUME.md` while the Codex design pass is active. Codex: read this file instead of expecting Claude notes in those documents.
 
+## Update: Claude finished Codex's design pass
+
+Codex reached its usage limit, so the user asked Claude to finish its uncommitted `web/` design pass and merge everything to `main`. See the top of `docs/PARALLEL_STATUS.md` for exactly what changed and how it was verified. The persona is the superintendent who lives this pain (`docs/SITE_MANAGER_PAIN.md`); the earlier "Spain" research was a mishearing and was removed. `web/` ownership is free again; whoever edits next should pull first and note it here.
+
 ## Claude owns now
 
 - `mcp/` (tools, tests, README)

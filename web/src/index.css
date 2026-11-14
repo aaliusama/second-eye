@@ -913,3 +913,76 @@ button, summary, a { touch-action: manipulation; }
   .phone.compact { height: 300px; }
   .presenter { max-width: calc(100% - var(--pad)); bottom: 58px; }
 }
+
+/* Decision workspace: messages and evidence never cover the floor. */
+.workspace-heading { padding-bottom: var(--pad); }
+.workspace-heading h2 { font-size: var(--title); }
+.workspace-nav { gap: var(--gap); justify-content: space-between; }
+.workspace-nav button { min-height: 44px; }
+.side .inspector { position: static; width: 100%; max-height: none; border: none; border-bottom: var(--rule) solid var(--paper-rule); padding: var(--pad); border-radius: 0; }
+.side .inspector header h2 { font-size: var(--title); }
+.side .inspector .source { margin: var(--gap) 0; line-height: 1.65; }
+.incident-focus { padding: var(--pad); }
+.incident-focus > header { margin-bottom: var(--pad); }
+.incident-count { font-size: var(--heading); font-weight: 650; letter-spacing: -0.02em; }
+.incident-count span { font-weight: 400; color: var(--ink-soft); }
+.incident-work { list-style: none; margin: 6px 0 var(--gap); padding: 0; font-size: var(--small); color: var(--ink-soft); line-height: 1.55; }
+.incident-action.primary { width: 100%; min-height: 48px; margin-top: var(--gap); text-align: left; padding: 10px 14px; font-weight: 600; }
+.incident-waiting { margin-top: var(--gap); padding: 10px 12px; border-left: 3px solid var(--pending); background: color-mix(in srgb, var(--pending) 9%, transparent); font-size: var(--small); line-height: 1.5; }
+.incident-links { display: flex; flex-wrap: wrap; align-items: flex-start; column-gap: var(--pad); margin-top: var(--gap); }
+.incident-links > button.quiet { padding: 8px 0; min-height: 36px; }
+.incident-links > .incident-detail { flex: 1 1 100%; }
+.incident-item.awaiting .incident-offset { color: var(--ink-soft); }
+@media (prefers-reduced-motion: no-preference) {
+  /* One state change worth noticing: the card that was just sent settles into amber. */
+  .incident-waiting { animation: incident-settle 420ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+  @keyframes incident-settle { from { opacity: 0; transform: translateY(-4px); } }
+}
+.incident-focus > .sim { display: none; }
+.incident-list { list-style: none; margin: 0; padding: 0; }
+.incident-item { padding: var(--pad) 0; border-bottom: var(--rule) solid var(--paper-rule); }
+.incident-item:first-child { padding-top: 0; }
+.incident-place { display: flex; justify-content: space-between; gap: var(--gap); align-items: baseline; font-size: var(--title); font-weight: 650; letter-spacing: -0.03em; }
+.incident-place .severity { font-size: var(--small); letter-spacing: 0; border-bottom: 2px solid var(--pending); padding-bottom: 3px; white-space: nowrap; }
+.incident-item.hold .severity { border-color: var(--redline); }
+.incident-title { font-size: var(--heading); font-weight: 500; line-height: 1.45; margin-top: var(--gap); }
+.incident-crew { color: var(--ink-soft); font-size: var(--small); margin: 6px 0 var(--gap); }
+.incident-offset { font-size: var(--display); font-weight: 550; letter-spacing: -0.04em; margin: var(--gap) 0; }
+.incident-offset span { display: block; letter-spacing: 0; font-weight: 400; }
+.incident-action { min-height: 44px; width: 100%; text-align: left; }
+button.incident-action.quiet { padding: 0; text-underline-offset: 5px; font-size: var(--text); }
+.incident-detail { margin-top: 4px; font-size: var(--small); }
+.incident-detail > summary { cursor: pointer; min-height: 36px; display: list-item; padding-top: 8px; color: var(--ink-soft); }
+.incident-detail p { line-height: 1.6; }
+.incident-detail blockquote { margin: var(--gap) 0; border-left: 2px solid var(--paper-rule); padding-left: var(--gap); }
+.incident-detail footer { color: var(--ink-soft); margin-top: 6px; }
+.incident-next { border-top: var(--rule) solid var(--paper-rule); padding-top: var(--gap); }
+.incident-next h4 { margin: 0 0 var(--gap); font-size: var(--text); }
+.incident-empty p { margin-top: var(--gap); line-height: 1.6; }
+.crew-dock { padding: var(--pad); }
+.dock-intro { font-size: var(--small); color: var(--ink-soft); margin-bottom: var(--gap); }
+.crew-dock .phone.compact { width: 100%; height: min(640px, calc(100dvh - 340px)); min-height: 330px; border: none; border-radius: 0; }
+.crew-dock .phone header { padding: 0 0 var(--gap); flex-wrap: wrap; }
+.crew-dock .phone .bubbles { padding: var(--gap) 0; }
+.crew-dock .phone form { padding-left: 0; padding-right: 0; }
+.crew-dock .phone form input { min-height: 44px; }
+.crew-dock > a { display: inline-block; margin-top: var(--gap); }
+.comparison-tools { position: absolute; top: 8px; left: var(--pad); display: flex; flex-wrap: wrap; align-items: center; gap: 2px; background: var(--surface); padding: 4px; border: var(--rule) solid var(--paper-rule); border-radius: var(--radius); }
+.comparison-tools button { background: transparent; color: var(--ink-soft); border: none; min-height: 36px; padding: 6px 10px; font-size: var(--small); }
+.comparison-tools button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+.comparison-tools span { display: none; }
+.slider-head .plan-expand { margin-left: auto; min-height: 36px; }
+#crew-plan-lanes { display: flex; flex-direction: column; gap: 4px; }
+.model > .flat, .model > .view3d { bottom: 48px; }
+.drawing-legend { bottom: var(--pad); }
+@media (max-width: 760px) {
+  .app { grid-template-rows: auto minmax(390px, 50dvh) auto auto; }
+  .comparison-tools { max-width: calc(100% - 100px); }
+  .comparison-tools button { padding: 6px; min-height: 36px; }
+  .comparison-tools span { display: none; }
+  .model-caption { height: 72px; }
+  .model > .flat, .model > .view3d { top: 72px; }
+  .crew-dock .phone.compact { height: 540px; }
+  .track-row { grid-template-columns: 110px minmax(0, 1fr); }
+  .slider-head { flex-wrap: wrap; }
+}
