@@ -1,0 +1,65 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "c-060",
+  "operations": [
+    {
+      "id": "op-c-060-1",
+      "time": "2026-11-17T15:10:00",
+      "sourceMessageId": "c-060",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-c-060-1",
+        "crewId": "crew-electrical",
+        "day": "2026-11-18",
+        "slot": "morning",
+        "order": 0,
+        "taskType": "install_fixtures",
+        "description": "fit the 206 bathroom light",
+        "placeId": "room-206",
+        "elementIds": [
+          "light-206-bath"
+        ],
+        "status": "planned",
+        "sourceMessageId": "c-060",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-c-060-1",
+      "crewId": "crew-electrical",
+      "time": "2026-11-17T15:10:00",
+      "sourceMessageId": "c-060",
+      "confidence": 1,
+      "day": "2026-11-18",
+      "slot": "morning",
+      "taskType": "install_fixtures",
+      "description": "fit the 206 bathroom light",
+      "placeId": "room-206",
+      "elementIds": [
+        "light-206-bath"
+      ]
+    }
+  ],
+  "facts": {
+    "id": "c-060",
+    "plans": [
+      {
+        "day": "2026-11-18",
+        "slot": "morning",
+        "taskType": "install_fixtures",
+        "placeId": "room-206",
+        "placeSaid": null,
+        "elementIds": [
+          "light-206-bath"
+        ],
+        "description": "fit the 206 bathroom light",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

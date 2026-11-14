@@ -1,0 +1,65 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "c-030",
+  "operations": [
+    {
+      "id": "op-c-030-1",
+      "time": "2026-11-16T15:20:00",
+      "sourceMessageId": "c-030",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-c-030-1",
+        "crewId": "crew-electrical",
+        "day": "2026-11-17",
+        "slot": "afternoon",
+        "order": 0,
+        "taskType": "rough_in_electrical",
+        "description": "first fix on the 204 bath east wall, sockets and shaver point",
+        "placeId": "room-204",
+        "elementIds": [
+          "W-12"
+        ],
+        "status": "planned",
+        "sourceMessageId": "c-030",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-c-030-1",
+      "crewId": "crew-electrical",
+      "time": "2026-11-16T15:20:00",
+      "sourceMessageId": "c-030",
+      "confidence": 1,
+      "day": "2026-11-17",
+      "slot": "afternoon",
+      "taskType": "rough_in_electrical",
+      "description": "first fix on the 204 bath east wall, sockets and shaver point",
+      "placeId": "room-204",
+      "elementIds": [
+        "W-12"
+      ]
+    }
+  ],
+  "facts": {
+    "id": "c-030",
+    "plans": [
+      {
+        "day": "2026-11-17",
+        "slot": "afternoon",
+        "taskType": "rough_in_electrical",
+        "placeId": "room-204",
+        "placeSaid": null,
+        "elementIds": [
+          "W-12"
+        ],
+        "description": "first fix on the 204 bath east wall, sockets and shaver point",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

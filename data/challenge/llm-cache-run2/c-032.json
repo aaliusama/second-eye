@@ -1,0 +1,59 @@
+{
+  "provenance": "llm: groq openai/gpt-oss-120b",
+  "messageId": "c-032",
+  "operations": [
+    {
+      "id": "op-c-032-1",
+      "time": "2026-11-16T15:50:00",
+      "sourceMessageId": "c-032",
+      "thread": "site-group",
+      "confidence": 1,
+      "type": "plan_task",
+      "task": {
+        "id": "task-c-032-1",
+        "crewId": "crew-electrical",
+        "day": "2026-11-17",
+        "slot": "morning",
+        "order": 0,
+        "taskType": "rough_in_electrical",
+        "description": "pull cable in 203",
+        "placeId": "room-203",
+        "elementIds": [],
+        "status": "planned",
+        "sourceMessageId": "c-032",
+        "confidence": 1
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-c-032-1",
+      "crewId": "crew-electrical",
+      "time": "2026-11-16T15:50:00",
+      "sourceMessageId": "c-032",
+      "confidence": 1,
+      "day": "2026-11-17",
+      "slot": "morning",
+      "taskType": "rough_in_electrical",
+      "description": "pull cable in 203",
+      "placeId": "room-203",
+      "elementIds": []
+    }
+  ],
+  "facts": {
+    "id": "c-032",
+    "plans": [
+      {
+        "day": "2026-11-17",
+        "slot": "morning",
+        "taskType": "rough_in_electrical",
+        "placeId": "room-203",
+        "placeSaid": null,
+        "elementIds": [],
+        "description": "pull cable in 203",
+        "confidence": 1
+      }
+    ],
+    "changes": []
+  }
+}

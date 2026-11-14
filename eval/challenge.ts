@@ -14,7 +14,12 @@ import { rehearsalFindings, score, scoreDetail } from "./score";
 // data/challenge/llm-cache/ with provenance; the golden data/llm-cache/ is never read or written here.
 // A missed case is split into an extraction failure (a message it rests on was read wrong) or a check miss.
 
-const CACHE = ["challenge", "llm-cache"];
+// Run 1 (the unseen result): data/challenge/llm-cache/ -> eval/results.challenge.json.
+// --run=2: the same set after the calendar prompt fix, which run 1's failures motivated, so run 2 is NOT unseen:
+// data/challenge/llm-cache-run2/ -> eval/results.challenge.run2.json. Run 1's stored outputs are never touched.
+const runArg = process.argv.find((a) => a.startsWith("--run="))?.slice("--run=".length) ?? "1";
+const CACHE = ["challenge", runArg === "1" ? "llm-cache" : `llm-cache-run${runArg}`];
+const OUT = runArg === "1" ? "results.challenge.json" : `results.challenge.run${runArg}.json`;
 const BATCH = 8;
 
 async function readJson<T>(path: string): Promise<T | undefined> {
@@ -62,7 +67,7 @@ async function main(): Promise<void> {
   if (missing.length > 0) {
     if (!process.env.GROQ_API_KEY) {
       const out = { status: "unavailable", reason: `GROQ_API_KEY is missing; ${missing.length} of ${messages.length} challenge messages have no stored extraction. Nothing scored.` };
-      await writeFile(evalPath("results.challenge.json"), JSON.stringify(out, null, 2) + "\n");
+      await writeFile(evalPath(OUT), JSON.stringify(out, null, 2) + "\n");
       console.log(out.reason);
       return;
     }
@@ -166,7 +171,7 @@ async function main(): Promise<void> {
     nonCases,
     extractionMismatches: extraction,
   };
-  await writeFile(evalPath("results.challenge.json"), JSON.stringify(out, null, 2) + "\n");
+  await writeFile(evalPath(OUT), JSON.stringify(out, null, 2) + "\n");
 
   const row = (name: string, c: { caught: number; missed: number; falseAlarms: number }) =>
     `${name.padEnd(17)} ${String(c.caught).padStart(6)} ${String(c.missed).padStart(6)} ${String(c.falseAlarms).padStart(12)}`;
@@ -181,7 +186,7 @@ async function main(): Promise<void> {
   for (const c of cases) console.log(`${c.id.padEnd(8)} ${c.check.padEnd(14)} ${c.outcome}${c.misreadMessages.length ? ` (${c.misreadMessages.join(", ")})` : ""}`);
   for (const n of nonCases) console.log(`non-case ${n.kind}: ${n.raisedFalseAlarm ? "FALSE ALARM" : "quiet"}`);
   for (const f of falseAlarms) console.log(`false alarm ${f.key}${f.restsOnMisreadMessage ? " (rests on a misread message)" : ""}`);
-  console.log("\nWrote eval/results.challenge.json");
+  console.log(`\nWrote eval/${OUT}`);
 }
 
 await main();
