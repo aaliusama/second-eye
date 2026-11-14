@@ -1,0 +1,10 @@
+/* What it has learned: before and after side by side, with Undo. Base rules for .lesson live in index.css. */
+.lesson-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--gap); }
+.lesson-undo { flex: none; font-size: var(--small); }
+.lesson-summary { margin: 0; font-size: 13px; line-height: 1.45; color: var(--ink); }
+.lesson-side.before .lesson-label { color: var(--pending); }
+.lesson-side p { margin: 0; }
+.lesson-missing { color: var(--ink-soft); font-style: italic; }
+.lesson-src { font-size: 11.5px; color: var(--ink-soft); }
+.lesson-uses { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.lesson-uses li { display: flex; flex-direction: column; gap: 4px; }

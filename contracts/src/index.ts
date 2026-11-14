@@ -307,7 +307,7 @@ export const EvalResults = z.object({
  * (GET /api/health); the web app compares it with its own copy and says so when the server is older,
  * instead of failing route by route.
  */
-export const API_VERSION = 2;
+export const API_VERSION = 3;
 
 export const HealthResponse = z.object({ ok: z.literal(true), liveLlm: z.boolean(), apiVersion: z.number().int().optional() });
 

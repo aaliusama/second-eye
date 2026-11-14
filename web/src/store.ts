@@ -50,6 +50,8 @@ interface SiteStore {
   approve: (fixId: string) => Promise<void>;
   runAgain: (keepLearning: boolean) => Promise<void>;
   teach: (item: UnresolvedItem, alias: string, elementId: string) => Promise<void>;
+  /** Undo a lesson: the server removes the correction and reruns without it. */
+  undo: (correctionId: string) => Promise<void>;
   setPhoneOpen: (open: boolean) => void;
   setFocus: (focus: string | undefined) => void;
   /** Open the phone and send `text` as `crewId` through the phone's own send. Resolves when answered. */
@@ -154,6 +156,20 @@ export const useSite = create<SiteStore>((set, get) => ({
       await get().refresh();
     } catch (err) {
       set({ error: `Not stored: ${String(err)}` });
+    } finally {
+      set({ busy: undefined });
+    }
+  },
+
+  undo: async (correctionId) => {
+    set({ busy: `undo:${correctionId}` });
+    try {
+      await api.undoCorrection(correctionId);
+      set({ asOf: undefined, selection: undefined, run: get().run + 1 });
+      announceChange();
+      await get().refresh();
+    } catch (err) {
+      set({ error: `Not undone: ${String(err)}` });
     } finally {
       set({ busy: undefined });
     }
