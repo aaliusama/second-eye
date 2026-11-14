@@ -1,6 +1,9 @@
 import type { CheckName, CrewIntent, Element, Finding, Id, Plan, PlanTask, Scene, Slot, TaskType } from "@site/contracts";
 import { inside, knownGeometry, midpoint, moveLabel, sameGeometry, unheardGeometryChanges } from "./geometry";
 import { DEFAULT_RULE, RULE } from "./rule-refs";
+import type { Overlap } from "@site/contracts";
+import { OVERLAP_RULE } from "./geometry-rules";
+import { measureClearance, measureOverlap, workZone } from "./measure";
 import {
   DECISION_INSIDE_PLACE,
   HOLD_ON_OPEN_DECISION,
@@ -164,7 +167,12 @@ function sure(severity: Finding["severity"], summary: string, isUnsure: boolean)
   return isUnsure ? { severity: "warn", summary: summary + UNSURE_NOTE } : { severity, summary };
 }
 
-/** latest_change: the crew's heard geometry of a touched element differs from the current one. */
+/**
+ * latest_change: the crew's heard geometry of a touched element differs from the current one.
+ * Walls are measured (measure.ts): the perpendicular offset of the face the crew works on, the outcome
+ * (inside the recorded wall, gap, within tolerance) and severity from that distance (geometry-rules.ts).
+ * Anything that is not a wall keeps the plain hold.
+ */
 function latestChange(ctx: Ctx, work: Work): Finding[] {
   const crew = ctx.scene.crews.find((c) => c.id === work.crewId);
   if (!crew) return [];
@@ -178,15 +186,25 @@ function latestChange(ctx: Ctx, work: Work): Finding[] {
     if (missed.length === 0) continue; // differs without an unheard source: no source, no finding
     const label = moveLabel(heard, el.geometry);
     const threads = uniqSorted(missed.map((m) => m.thread)).join(", ");
-    const summary = `Per the record, ${el.name} moved ${label} in the ${threads} thread, which ${crew.name} does not read, so their ${taskLabel(work.taskType)} may follow the old line.`;
+    const measured = measureClearance({
+      name: el.name,
+      crewName: crew.name,
+      taskType: work.taskType,
+      believed: heard,
+      recorded: el.geometry,
+      place: elementOf(ctx.scene, work.placeId)?.geometry,
+    });
+    const base = `Per the record, ${el.name} moved ${label} in the ${threads} thread, which ${crew.name} does not read, so their ${taskLabel(work.taskType)} may follow the old line`;
+    const summary = measured ? `${base} and ${measured.clause}.` : `${base}.`;
     out.push(
       finding(ctx, "latest_change", elementId, work, {
-        ...sure("hold", summary, unsure(ctx, [work.confidence, ...missed.map((m) => m.confidence)], [elementId, work.placeId])),
+        ...sure(measured?.severity ?? "hold", summary, unsure(ctx, [work.confidence, ...missed.map((m) => m.confidence)], [elementId, work.placeId])),
         evidenceMessageIds: missed.map((m) => m.sourceMessageId),
         crewIds: [work.crewId],
         elementIds: [elementId],
         taskIds: work.taskIds,
         ghost: { elementId, geometry: heard, label },
+        ...(measured ? { measure: { clearance: measured.clearance } } : {}),
       }),
     );
   }
@@ -265,26 +283,59 @@ function openDecision(ctx: Ctx, work: Work): Finding[] {
   return out;
 }
 
-function clashSummary(ctx: Ctx, crewA: Id, crewB: Id, placeId: Id, day: string): string {
-  return `Per the record, ${crewName(ctx.scene, crewA)} and ${crewName(ctx.scene, crewB)} are both planned in ${elementName(ctx.scene, placeId)} at the same time on ${day}.`;
+function clashSummary(ctx: Ctx, crewA: Id, crewB: Id, placeIds: Id[], day: string, areaM2?: number): string {
+  const places = uniqSorted(placeIds).map((id) => elementName(ctx.scene, id)).join(" and ");
+  const area = areaM2 === undefined ? "" : `, and their work zones overlap by ${areaM2.toFixed(2)} m²`;
+  return `Per the record, ${crewName(ctx.scene, crewA)} and ${crewName(ctx.scene, crewB)} are both planned in ${places} at the same time on ${day}${area}.`;
 }
 
-/** space_clash (live): the intent against other crews' tasks on the same day, place and overlapping slot. */
+/**
+ * Whether two pieces of work clash in space (owner B). Both work zones known: they must overlap by at least
+ * MIN_OVERLAP_M2 (measure.ts), whatever their place ids. A zone that cannot be drawn: fall back to the same
+ * place id, unmeasured. Undefined: no clash.
+ */
+function spaceClash(ctx: Ctx, a: Work, b: Work): { overlap?: Overlap } | undefined {
+  const za = workZone(ctx.scene.elements, ctx.scene.crews, a);
+  const zb = workZone(ctx.scene.elements, ctx.scene.crews, b);
+  if (!za || !zb) return a.placeId === b.placeId ? {} : undefined;
+  const side = (w: Work, zone: NonNullable<typeof za>) => ({
+    crewId: w.crewId,
+    crewName: crewName(ctx.scene, w.crewId),
+    // A live intent has no task id: use the crew's matching plan task, else its source message.
+    taskId: w.taskId ?? w.taskIds[0] ?? w.sourceMessageId,
+    zone,
+  });
+  const overlap = measureOverlap(side(a, za), side(b, zb), `on ${a.day}`);
+  return overlap ? { overlap } : undefined;
+}
+
+function clashFinding(ctx: Ctx, key: string, a: Work, b: PlanTask, clash: NonNullable<ReturnType<typeof spaceClash>>): Finding {
+  const places = [a.placeId!, b.placeId];
+  return finding(ctx, "space_clash", key, a, {
+    ...sure(
+      "hold",
+      clashSummary(ctx, a.crewId, b.crewId, places, a.day, clash.overlap?.areaM2),
+      unsure(ctx, [a.confidence, b.confidence], uniqSorted(places)),
+    ),
+    evidenceMessageIds: [b.sourceMessageId],
+    crewIds: [a.crewId, b.crewId],
+    elementIds: places,
+    taskIds: [...a.taskIds, b.id],
+    ...(clash.overlap ? { measure: { overlap: clash.overlap }, rule: OVERLAP_RULE } : {}),
+  });
+}
+
+/** space_clash (live): the intent against other crews' tasks on the same day and overlapping slot whose work zones overlap. */
 function spaceClashLive(ctx: Ctx, work: Work): Finding[] {
   if (!knownPlace(ctx.scene, work.placeId)) return [];
   return ctx.tasks
     .filter(
-      (t) => t.status === "planned" && t.crewId !== work.crewId && t.day === work.day && t.placeId === work.placeId && slotsOverlap(t.slot, work.slot),
+      (t) => t.status === "planned" && t.crewId !== work.crewId && t.day === work.day && knownPlace(ctx.scene, t.placeId) && slotsOverlap(t.slot, work.slot),
     )
-    .map((t) =>
-      finding(ctx, "space_clash", t.id, work, {
-        ...sure("hold", clashSummary(ctx, work.crewId, t.crewId, work.placeId!, work.day), unsure(ctx, [work.confidence, t.confidence], [work.placeId])),
-        evidenceMessageIds: [t.sourceMessageId],
-        crewIds: [work.crewId, t.crewId],
-        elementIds: [work.placeId!],
-        taskIds: [...work.taskIds, t.id],
-      }),
-    );
+    .flatMap((t) => {
+      const clash = spaceClash(ctx, work, taskToWork(t));
+      return clash ? [clashFinding(ctx, t.id, work, t, clash)] : [];
+    });
 }
 
 /** space_clash (rehearsal): each clashing pair once, sourced from the task with the smaller id. */
@@ -295,17 +346,10 @@ function spaceClashRehearsal(ctx: Ctx, tasks: PlanTask[]): Finding[] {
     for (let j = i + 1; j < sorted.length; j++) {
       const a = sorted[i];
       const b = sorted[j];
-      if (a.crewId === b.crewId || a.day !== b.day || a.placeId !== b.placeId || !slotsOverlap(a.slot, b.slot)) continue;
-      if (!knownPlace(ctx.scene, a.placeId)) continue;
-      out.push(
-        finding(ctx, "space_clash", b.id, taskToWork(a), {
-          ...sure("hold", clashSummary(ctx, a.crewId, b.crewId, a.placeId, a.day), unsure(ctx, [a.confidence, b.confidence], [a.placeId])),
-          evidenceMessageIds: [b.sourceMessageId],
-          crewIds: [a.crewId, b.crewId],
-          elementIds: [a.placeId],
-          taskIds: [a.id, b.id],
-        }),
-      );
+      if (a.crewId === b.crewId || a.day !== b.day || !slotsOverlap(a.slot, b.slot)) continue;
+      if (!knownPlace(ctx.scene, a.placeId) || !knownPlace(ctx.scene, b.placeId)) continue;
+      const clash = spaceClash(ctx, taskToWork(a), taskToWork(b));
+      if (clash) out.push(clashFinding(ctx, b.id, taskToWork(a), b, clash));
     }
   }
   return out;
