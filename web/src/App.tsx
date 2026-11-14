@@ -19,10 +19,11 @@ import { FlatView } from "./FlatView";
 import { Huddle } from "./Huddle";
 import { IncidentFocus } from "./IncidentFocus";
 import { Knowledge } from "./Knowledge";
+import { Autonomy } from "./Autonomy";
 import { Acknowledgements } from "./Acknowledgements";
 import { Sheets } from "./Sheets";
 import { Dismissals } from "./Dismissals";
-import { AgentLog, Inspector, Learning, Measured, MeasuredLarge, Queue, Record } from "./panels";
+import { Inspector, Learning, Measured, MeasuredLarge, Queue, Record } from "./panels";
 import { Phone } from "./Phone";
 import { Presenter } from "./present/Presenter";
 import { useReveal } from "./reveal";
@@ -108,7 +109,7 @@ function Main() {
   const refresh = useSite((s) => s.refresh);
   const [view, setView] = useState<"flat" | "3d">("flat");
   const [no3D, setNo3D] = useState(false);
-  const [workspace, setWorkspace] = useState<"today" | "knows" | "record" | "learning" | "crew">("today");
+  const [workspace, setWorkspace] = useState<"today" | "knows" | "auto" | "record" | "learning" | "crew">("today");
   const lens = useSite((s) => s.lens);
   const setLens = useSite((s) => s.setLens);
   const phoneOpen = useSite((s) => s.phoneOpen);
@@ -294,7 +295,7 @@ function Main() {
       <aside className="side">
         <div className="workspace-heading"><h2>Before work starts</h2><p className="meta">Which crew is about to work from old information, and who to tell.</p></div>
         <nav className="workspace-nav" aria-label="Site desk sections">
-          {([ ["today", "Priorities"], ["knows", "Who knows"], ["crew", "Crew"], ["record", "Record"], ["learning", "Learning"] ] as const).map(([id, label]) =>
+          {([ ["today", "Priorities"], ["knows", "Who knows"], ["auto", "On its own"], ["crew", "Crew"], ["record", "Record"], ["learning", "Learning"] ] as const).map(([id, label]) =>
             <button key={id} type="button" aria-pressed={workspace === id} aria-controls={`desk-${id}`} onClick={() => { setWorkspace(id); if (id === "crew") setPhoneOpen(true); }}>{label}</button>
           )}
         </nav>
@@ -319,10 +320,12 @@ function Main() {
         <div id="desk-knows" hidden={workspace !== "knows"}>
           <Knowledge scene={state.scene} flagged={knowledge?.flagged} lens={lens} selectedElementId={selectedId} onLens={(id) => { setLens(id); if (view === "3d") setView("flat"); }} onSelectElement={(id) => select({ kind: "element", id })} />
         </div>
+        <div id="desk-auto" hidden={workspace !== "auto"}>
+          <Autonomy scene={state.scene} messages={messages} asOf={asOf} />
+        </div>
         <div id="desk-record" hidden={workspace !== "record"}>
         {!asOf && <Huddle day={rehearsal?.day} messages={messages} revision={`${state.t}:${messages.length}:${state.fixes.map((f) => `${f.id}-${f.status}`).join(",")}`} />}
         {!asOf && <Sheets />}
-        <AgentLog scene={state.scene} messages={messages} asOf={asOf} />
         <Record scene={state.scene} messages={messages} />
         <Measured />
         </div>
