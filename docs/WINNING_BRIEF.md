@@ -1,5 +1,7 @@
 # Winning brief for the next agent
 
+Latest challenge interpretation and prioritized gaps: [TALONA_ALIGNMENT.md](TALONA_ALIGNMENT.md). It distinguishes requirements from optional Talona integration, records the newer huddle/pitch/recorder commits, and defines the next shared-record demonstration. Its next-work plan supersedes historical lane assignments below.
+
 Current implementation ownership and completion evidence: `docs/PARALLEL_STATUS.md`. Its assignments supersede the historical parallel table below.
 
 Completed Codex implementation and exact continuation tasks: `docs/CLAUDE_RESUME.md`. Read that before restarting any of the historical tasks below.
@@ -60,7 +62,7 @@ The useful model has three parts: latest site record, crew-accessible record, an
 
 ## Work queue
 
-### Current parallel assignments (14 Nov 2026)
+### Historical parallel assignments (superseded)
 
 These assignments were launched in separate agent tasks after inspecting the checked-out `win/integration` worktree. They are active investigations/implementation tasks, not completed features. Check branch/worktree status and agent reports before changing their files or assigning a duplicate task. Claude Code's other branches (`n/rail`, `o/feed`, `p/phone-slider`) exist locally; inspect their diffs before integrating or redoing their work.
 

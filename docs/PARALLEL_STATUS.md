@@ -1,5 +1,7 @@
 # Parallel implementation status
 
+Latest documentation-only review: see `docs/TALONA_ALIGNMENT.md` and the top of `docs/CLAUDE_RESUME.md`. The checkout includes subsequent commits through `a26c680`; preserve them. Next proposed lanes are visual demonstration, live extraction evidence and an existing MCP consumer of the shared incident record. No new lane was launched during this review.
+
 Final status: both batches committed as `5a9fd3b` and pushed to `origin/win/integration`; not merged into main. Read the TOP of `docs/CLAUDE_RESUME.md` for completed features, final checks and proposed next lanes. All agents finished; no exclusive edit locks remain. Proposed lanes have not started. Historical in-progress notes below are retained as history, not current assignments.
 
 ## Second implementation batch in progress

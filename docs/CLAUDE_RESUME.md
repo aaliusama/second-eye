@@ -1,5 +1,13 @@
 # Resume after Codex parallel implementation
 
+## Latest documentation update: challenge alignment
+
+Read `docs/TALONA_ALIGNMENT.md` before choosing further work. It records the actual problem, optional versus required integration, weaknesses, acceptance criteria and proposed non-overlapping lanes. This update changes documentation only; it starts no implementation agents.
+
+The checkout now also includes `0163fa6` (huddle incident grouping and crew-filtered phone questions), `02bb5f9` (eleven-beat pitch) and `a26c680` (submission wording and presenter-driven recorder). Preserve these commits. Older statements below about finding-ID-only huddle deduplication and an untouched recorder are historical. None of these commits alone proves visual rehearsal or a reviewed video.
+
+Prioritize visual proof, live extraction evidence, and an existing MCP consumer seeing the same incident before/after confirmation. Do not build a speculative Talona integration: none was required in the inspected brief, and no partner API/access has been confirmed. Pitch/submission editing already advanced; inspect it before duplicating work. The next lanes in the alignment document supersede the earlier proposed batch below. Earlier test totals belong to the earlier implementation revision, not automatically to these later commits.
+
 ## Latest completed batch: acknowledgement, sheet text and dismissal memory
 
 This section supersedes the earlier remaining-lanes list below. Both implementation batches are committed as `5a9fd3b` and pushed to `origin/win/integration`. They are not merged into main. No Codex agent is still editing these files. Fetch and inspect branch/worktree status before resuming; preserve any later local edits.
