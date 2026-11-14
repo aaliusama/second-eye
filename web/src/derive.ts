@@ -160,3 +160,39 @@ export const easeInOut = (t: number) => {
   const x = Math.min(1, Math.max(0, t));
   return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 };
+
+// ---------- Presenter focus ----------
+
+/** The wall the demo story is about (the presenter's ghost-wall beats). */
+export const STORY_ELEMENT = "W-12";
+/** Beats that tell the one ghost-wall story: only that finding is drawn in redline. */
+export const STORY_BEATS: ReadonlySet<string> = new Set(["ghost", "why", "fix", "confirm"]);
+
+/** Whether a finding concerns work on `day`. A finding with no known task is kept (nothing to say it is another day). */
+export function onDay(scene: Scene, f: Finding, day: string | undefined): boolean {
+  if (!day) return true;
+  const days = f.taskIds.map((id) => scene.tasks.find((t) => t.id === id)?.day).filter((d): d is string => d !== undefined);
+  return days.length === 0 || days.includes(day);
+}
+
+/**
+ * One ghost per incident: the same element, the same crews and the same ghost line (a crew restating
+ * its plan live and the replayed message are one mistake, not two). Live wins, then the latest.
+ */
+export function oneGhostPerIncident(ghosts: Finding[]): Finding[] {
+  const key = (f: Finding) => `${f.ghost!.elementId}|${[...f.crewIds].sort().join(",")}|${JSON.stringify(f.ghost!.geometry)}`;
+  const rank = (f: Finding) => `${f.trigger === "live" ? 1 : 0}|${f.time}|${f.id}`;
+  const best = new Map<string, Finding>();
+  for (const f of ghosts) {
+    const k = key(f);
+    const cur = best.get(k);
+    if (!cur || rank(f) > rank(cur)) best.set(k, f);
+  }
+  return [...best.values()].sort((a, b) => a.id.localeCompare(b.id));
+}
+
+/** Latest-change findings whose correction was sent but not yet confirmed by the crew (they stay open). */
+export function sentNotConfirmed(fixes: Fix[], findings: Finding[]): Set<string> {
+  const latest = new Set(findings.filter((f) => f.check === "latest_change").map((f) => f.id));
+  return new Set(fixes.filter((x) => x.status === "approved" && x.kind !== "ask_crew" && latest.has(x.findingId)).map((x) => x.findingId));
+}

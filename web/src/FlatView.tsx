@@ -35,6 +35,10 @@ export interface FlatViewProps {
   conflictIds: Set<string>;
   /** Elements whose finding was fixed. */
   clearIds: Set<string>;
+  /** Findings whose correction was sent and awaits the crew's confirmation: drawn amber, not red. */
+  sentIds?: Set<string>;
+  /** Presenter story beats: frame the revealed wall tightly so the offset reads on a projector. */
+  tight?: boolean;
   /** Tasks active at the slider position, for crew badges. */
   activeTasks: PlanTask[];
   selection: Selection;
@@ -83,8 +87,9 @@ function Shape({ g, l, pathLength, offset }: { g: Geometry; l: Look; pathLength?
   };
   const outline = outlineOf(g);
   if (outline) return <polygon points={poly(outline)} {...common} />;
+  // A point item (a fixture, a tile choice) is a small quiet marker, never a blot over labels.
   const [x, y] = P((g as { at: Point }).at);
-  return <circle cx={x} cy={y} r={0.18} {...common} />;
+  return <circle cx={x} cy={y} r={0.11} {...common} strokeWidth={drawing.hairline} fill={color.paper} fillOpacity={1} />;
 }
 
 const onKey = (fn: () => void) => (e: KeyboardEvent) => {
@@ -112,7 +117,12 @@ function Hit({ g, label, onClick, selected }: { g: Geometry; label: string; onCl
   };
   if (g.kind === "point") {
     const [x, y] = P(g.at);
-    return <circle cx={x} cy={y} r={0.5} {...props} />;
+    // Transparent: an SVG circle with no fill paints black.
+    return (
+      <circle cx={x} cy={y} r={0.35} fill="transparent" {...props}>
+        <title>{label}</title>
+      </circle>
+    );
   }
   return (
     <polygon
@@ -162,7 +172,19 @@ function Grid({ box }: { box: Box }) {
 }
 
 /** Dimension line between where the crew thinks the element is and where it is per the record. */
-function Dimension({ ghost, truth, label, opacity }: { ghost: Geometry; truth: Geometry; label: string; opacity: number }) {
+function Dimension({
+  ghost,
+  truth,
+  label,
+  opacity,
+  tone = color.redline,
+}: {
+  ghost: Geometry;
+  truth: Geometry;
+  label: string;
+  opacity: number;
+  tone?: string;
+}) {
   const g = midpoint(ghost);
   const c = midpoint(truth);
   const dx = c[0] - g[0];
@@ -171,7 +193,7 @@ function Dimension({ ghost, truth, label, opacity }: { ghost: Geometry; truth: G
   if (len < 1e-3) {
     const [x, y] = P(g);
     return (
-      <text x={x} y={y - 0.4} className="dim-label" fontSize={drawing.smallLabel} opacity={opacity}>
+      <text x={x} y={y - 0.4} className="dim-label" fontSize={drawing.smallLabel} opacity={opacity} style={{ fill: tone }}>
         {label}
       </text>
     );
@@ -201,13 +223,13 @@ function Dimension({ ghost, truth, label, opacity }: { ghost: Geometry; truth: G
   };
   const mid = P([(a[0] + b[0]) / 2 + nx * 0.45, (a[1] + b[1]) / 2 + ny * 0.45]);
   return (
-    <g opacity={opacity} stroke={color.redline} strokeWidth={drawing.hairline}>
+    <g opacity={opacity} stroke={tone} strokeWidth={drawing.hairline}>
       {line(ext(g), "eg")}
       {line(ext(c), "ec")}
       {line([a, b], "d")}
       {tick(a)}
       {tick(b)}
-      <text x={mid[0]} y={mid[1]} className="dim-label" fontSize={drawing.smallLabel} stroke="none">
+      <text x={mid[0]} y={mid[1]} className="dim-label" fontSize={drawing.smallLabel} stroke="none" style={{ fill: tone }}>
         {label}
       </text>
     </g>
@@ -249,7 +271,7 @@ function RoomLabel({ el, tasks, scene }: { el: Element; tasks: PlanTask[]; scene
 }
 
 export function FlatView(props: FlatViewProps) {
-  const { scene, ghosts, conflictIds, clearIds, activeTasks, selection, onSelect, reveal } = props;
+  const { scene, ghosts, conflictIds, clearIds, activeTasks, selection, onSelect, reveal, sentIds, tight = false } = props;
   const [whole, setWhole] = useState<string | undefined>(undefined);
 
   const base = useMemo(() => {
@@ -257,12 +279,25 @@ export function FlatView(props: FlatViewProps) {
     return all.length ? boxOf(all, 1.5) : undefined;
   }, [scene]);
 
-  const revealed = ghosts.find((f) => findingKey(f) === reveal.key);
+  // In the story beats there is one ghost on screen: frame it even after its reveal has played.
+  const revealed = ghosts.find((f) => findingKey(f) === reveal.key) ?? (tight ? ghosts[0] : undefined);
   const revealedEl = elementById(scene, revealed?.ghost?.elementId);
 
   const focus = useMemo((): Box | undefined => {
     if (!revealed?.ghost || !revealedEl) return undefined;
     const pts = [...pointsOf(revealed.ghost.geometry), ...pointsOf(revealedEl.geometry)];
+    if (tight) {
+      // Close on the wall: the offset has to read at 1440x900 and on a projector. Room above for the dimension.
+      const t = boxOf(pts, 1.6);
+      t.maxY += 1.2;
+      const minW = 7;
+      const w = t.maxX - t.minX;
+      if (w < minW) {
+        t.minX -= (minW - w) / 2;
+        t.maxX += (minW - w) / 2;
+      }
+      return t;
+    }
     const place = containingPlace(scene, midpoint(revealedEl.geometry));
     const b = boxOf(place && place.geometry.kind === "polygon" ? [...pts, ...place.geometry.points] : pts, 2.5);
     // Keep the framed view wide enough that the neighbouring rooms still give context.
@@ -273,7 +308,7 @@ export function FlatView(props: FlatViewProps) {
       b.maxX += (minW - w) / 2;
     }
     return b;
-  }, [revealed, revealedEl, scene]);
+  }, [revealed, revealedEl, scene, tight]);
 
   if (!base) return <p className="empty">No elements in the record.</p>;
 
@@ -346,6 +381,9 @@ export function FlatView(props: FlatViewProps) {
           const west = midpoint(truth.geometry)[0] >= gm[0];
           const [lx, ly] = P([gm[0] + (west ? -0.35 : 0.35), gm[1]]);
           const anchor = west ? "end" : "start";
+          // Correction sent, crew has not confirmed: still open, but amber, not red.
+          const sent = sentIds?.has(f.id) ?? false;
+          const tone = sent ? color.pending : color.redline;
           return (
             <g key={key}>
               {draw > 0 && (
@@ -355,7 +393,7 @@ export function FlatView(props: FlatViewProps) {
                 <g className="ghost">
                   <Shape
                     g={g}
-                    l={{ stroke: color.redline, width: drawing.outline, dash: "0.2 0.12", fill: color.redline, fillOpacity: drawing.ghostOpacity }}
+                    l={{ stroke: tone, width: drawing.outline, dash: "0.2 0.12", fill: tone, fillOpacity: drawing.ghostOpacity }}
                   />
                   <Hit
                     g={g}
@@ -367,11 +405,18 @@ export function FlatView(props: FlatViewProps) {
               )}
               {dim > 0 && (
                 <>
-                  <Dimension ghost={f.ghost!.geometry} truth={truth.geometry} label={f.ghost!.label} opacity={dim} />
-                  <text x={lx} y={ly} className="ghost-note" fontSize={drawing.smallLabel} opacity={dim} style={{ textAnchor: anchor }}>
+                  <Dimension ghost={f.ghost!.geometry} truth={truth.geometry} label={f.ghost!.label} opacity={dim} tone={tone} />
+                  <text
+                    x={lx}
+                    y={ly}
+                    className="ghost-note"
+                    fontSize={drawing.smallLabel * 0.8}
+                    opacity={dim}
+                    style={{ textAnchor: anchor, fill: tone }}
+                  >
                     <tspan x={lx}>{crews}</tspan>
                     <tspan x={lx} dy="1.2em">
-                      last heard this line
+                      {sent ? "sent, not confirmed" : "last heard this line"}
                     </tspan>
                   </text>
                 </>

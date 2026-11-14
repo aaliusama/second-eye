@@ -1,12 +1,24 @@
 import { Component, lazy, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
 import { onChange } from "./api";
-import { elementById, findingKey, formatTime, frameAt, messageMap, resolvedFindingIds } from "./derive";
+import {
+  elementById,
+  findingKey,
+  formatTime,
+  frameAt,
+  messageMap,
+  onDay,
+  oneGhostPerIncident,
+  resolvedFindingIds,
+  sentNotConfirmed,
+  STORY_BEATS,
+  STORY_ELEMENT,
+} from "./derive";
 import { FlatView } from "./FlatView";
 import { Huddle } from "./Huddle";
 import { Acknowledgements } from "./Acknowledgements";
 import { Sheets } from "./Sheets";
 import { Dismissals } from "./Dismissals";
-import { AgentLog, Inspector, Learning, Measured, Queue, Record } from "./panels";
+import { AgentLog, Inspector, Learning, Measured, MeasuredLarge, Queue, Record } from "./panels";
 import { Phone } from "./Phone";
 import { Presenter } from "./present/Presenter";
 import { useReveal } from "./reveal";
@@ -94,6 +106,8 @@ function Main() {
   const [no3D, setNo3D] = useState(false);
   const phoneOpen = useSite((s) => s.phoneOpen);
   const setPhoneOpen = useSite((s) => s.setPhoneOpen);
+  const focus = useSite((s) => s.focus);
+  const story = focus !== undefined && STORY_BEATS.has(focus);
 
   const d = useMemo(() => {
     if (!state) return undefined;
@@ -104,18 +118,21 @@ function Main() {
     const rehearsalFindings = plan?.frames.flatMap((f) => f.findings) ?? [];
     const all = [...state.findings, ...rehearsalFindings];
     const resolved = resolvedFindingIds(state.fixes, all);
-    const visible = [...state.findings, ...(frame?.findings ?? [])].filter((f) => !resolved.has(f.id));
-    // One ghost per finding id; the live one wins so the reveal key stays stable.
-    const ghosts = [...new Map(visible.filter((f) => f.ghost).reverse().map((f) => [f.id, f])).values()].sort((a, b) =>
-      a.id.localeCompare(b.id),
-    );
+    // Only the rehearsed day's work is drawn on that day's plan (Friday's ghosts are not Saturday's).
+    const visible = [...state.findings, ...(frame?.findings ?? [])].filter((f) => !resolved.has(f.id) && onDay(state.scene, f, plan?.day));
+    // One ghost per finding id (live wins so the reveal key stays stable), then one per incident.
+    const perId = [...new Map(visible.filter((f) => f.ghost).reverse().map((f) => [f.id, f])).values()];
+    const incidents = oneGhostPerIncident(perId);
+    // Presenter story beats: one red thing on screen, the ghost wall the demo is about.
+    const ghosts = story ? incidents.filter((g) => g.ghost!.elementId === STORY_ELEMENT) : incidents;
     const ghostEls = new Set(ghosts.map((g) => g.ghost!.elementId));
-    const conflictIds = new Set(visible.flatMap((f) => f.elementIds).filter((id) => !ghostEls.has(id)));
+    const conflictIds = story ? new Set<string>() : new Set(visible.flatMap((f) => f.elementIds).filter((id) => !ghostEls.has(id)));
+    const sent = sentNotConfirmed(state.fixes, all);
     const clearIds = new Set(all.filter((f) => resolved.has(f.id)).flatMap((f) => f.elementIds));
     const active = new Set(frame?.activeTaskIds ?? []);
     const activeTasks = state.scene.tasks.filter((t) => active.has(t.id));
-    return { all, visible, ghosts, conflictIds, clearIds, activeTasks, resolved };
-  }, [state, rehearsal, slider, asOf]);
+    return { all, visible, ghosts, conflictIds, clearIds, activeTasks, resolved, sent };
+  }, [state, rehearsal, slider, asOf, story]);
 
   const reveal = useReveal(d?.ghosts.map(findingKey) ?? [], run);
   const msgMap = useMemo(() => messageMap(messages), [messages]);
@@ -141,6 +158,8 @@ function Main() {
       ghosts={d.ghosts}
       conflictIds={d.conflictIds}
       clearIds={d.clearIds}
+      sentIds={d.sent}
+      tight={story}
       activeTasks={d.activeTasks}
       selection={selection}
       onSelect={select}
@@ -207,6 +226,7 @@ function Main() {
           flat
         )}
         <Inspector scene={state.scene} selection={selection} findings={d.all} messages={msgMap} onClose={() => select(undefined)} />
+        {focus === "numbers" && <MeasuredLarge />}
         <Presenter />
         <div className="phone-inset">
           {phoneOpen && <Phone scene={state.scene} messages={messages} day={rehearsal?.day} compact onPosted={() => void refresh()} />}
@@ -231,13 +251,13 @@ function Main() {
         {!asOf && <Dismissals />}
         {!asOf && <Sheets />}
         <Learning scene={state.scene} items={unresolved} />
-        <AgentLog scene={state.scene} messages={messages} />
+        <AgentLog scene={state.scene} messages={messages} asOf={asOf} />
         <Record scene={state.scene} messages={messages} />
         <Measured />
       </aside>
 
       <footer className="bottom">
-        <Slider scene={state.scene} rehearsal={asOf ? undefined : rehearsal} step={slider} onStep={setSlider} resolved={d.resolved} />
+        <Slider scene={state.scene} rehearsal={asOf ? undefined : rehearsal} step={slider} onStep={setSlider} resolved={d.resolved} quiet={story} />
       </footer>
     </div>
   );

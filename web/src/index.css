@@ -795,3 +795,44 @@ input {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/* ---------- Numbers beat: measured results, readable in a recording ---------- */
+
+.measured-large {
+  position: absolute;
+  inset: 48px 48px 72px;
+  z-index: 5;
+  background: var(--paper);
+  border: var(--rule) solid var(--ink);
+  border-radius: var(--radius);
+  padding: 32px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow: auto;
+}
+
+.measured-large h2 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.measured-large .caveat {
+  margin: 0;
+  font-size: 18px;
+  color: var(--ink-soft);
+}
+
+.measured-large .numbers {
+  font-size: 24px;
+  max-width: 760px;
+}
+
+.measured-large .numbers th,
+.measured-large .numbers td {
+  padding: 10px 18px;
+}
+
+.measured-large .sim {
+  align-self: flex-start;
+}
