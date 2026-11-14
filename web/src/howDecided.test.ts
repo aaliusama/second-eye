@@ -3,7 +3,7 @@ import type { Finding, Fix, IncidentReceipt } from "@site/contracts";
 import { fixtureFinding, fixtureFix, fixtureMessages, fixtureScene } from "@site/contracts/fixtures";
 import { sampleClearance } from "./fixtures/laneSamples";
 import { UNSURE_BELOW as SERVER_UNSURE_BELOW } from "../../server/checks/rules";
-import { RECEIPT_TONE, UNSURE_BELOW, confidenceView, traceOf } from "./howDecided";
+import { RECEIPT_TONE, UNSURE_BELOW, confidenceView, ruleInputs, traceOf } from "./howDecided";
 
 const rule = { id: "latest_change.unheard_geometry", statement: "A crew's planned work touches an element whose latest position was said in a thread that crew does not read." };
 const finding: Finding = { ...fixtureFinding, rule };
@@ -24,6 +24,18 @@ describe("how it decided", () => {
     expect(t.rule).toEqual(rule);
     expect(t.finding.offset).toBe("0.4 m east");
     expect(t.finding.numbers).toEqual([]);
+  });
+
+  it("lists what the rule compared: the threads the crew reads and whether it heard the change", () => {
+    expect(traceOf(finding, fixtureScene, fixtureMessages, [], []).inputs).toEqual([
+      "Novak Plumbing reads: site group thread, and its own direct messages",
+      "Unit 204 bathroom east wall, version 2: said in the office thread · not heard by Novak Plumbing",
+    ]);
+  });
+
+  it("says not found for a crew or element the record does not have, and lists nothing for other checks", () => {
+    expect(ruleInputs({ ...finding, crewIds: ["crew-ghost"] }, fixtureScene)).toEqual(["Crew not found in the record"]);
+    expect(ruleInputs({ ...finding, check: "space_clash", ghost: undefined }, fixtureScene)).toEqual([]);
   });
 
   it("says not found instead of inventing a fact or a rule", () => {

@@ -1,5 +1,5 @@
 import type { ChatMessage, Element, ElementChange, Finding, Fix, IncidentReceipt, Measure, PlanTask, RuleRef, Scene } from "@site/contracts";
-import { crewName, elementById, offsetLabel } from "./derive";
+import { crewById, crewName, elementById, heardThread, offsetLabel, threadLabel } from "./derive";
 import { describeSource, type SourceView } from "./sources";
 
 // Owner: D. "How it decided": one finding, traced from the message to the fix. Pure function of the
@@ -35,6 +35,8 @@ export interface TraceFix {
 export interface Trace {
   messages: TraceMessage[];
   rule?: RuleRef;
+  /** What the rule compared for this finding, from the record: e.g. the threads a crew reads, and whether it heard the change. */
+  inputs: string[];
   finding: { check: string; severity: string; when: string; summary: string; offset?: string; numbers: string[]; note?: string };
   fixes: TraceFix[];
 }
@@ -141,6 +143,7 @@ export function traceOf(
       facts: factsFrom(scene, id, finding),
     })),
     rule: finding.rule,
+    inputs: ruleInputs(finding, scene),
     finding: {
       check: CHECK_LABEL[finding.check],
       severity: finding.severity === "hold" ? "Hold" : "Confirm first",
@@ -152,6 +155,46 @@ export function traceOf(
     },
     fixes: fixes.filter((f) => f.findingId === finding.id).map((f) => fixOf(scene, finding, f, receipts)),
   };
+}
+
+/**
+ * The inputs the rule compared, read from the record with the same "heard" rule as the lens (derive.ts).
+ * latest_change: the threads each crew reads, and for each change behind the finding where it was said
+ * and whether that crew heard it. open_decision: the element's state. Other checks: none here, their
+ * numbers are in the measured result. Missing crews or elements say "not found".
+ */
+export function ruleInputs(finding: Finding, scene: Scene): string[] {
+  if (finding.check === "open_decision") {
+    return finding.elementIds.map((id) => {
+      const el = elementById(scene, id);
+      return el ? `${el.name} is ${el.state} per the record` : "Element not found in the record";
+    });
+  }
+  if (finding.check !== "latest_change") return [];
+  const out: string[] = [];
+  const elementIds = finding.ghost ? [finding.ghost.elementId] : finding.elementIds;
+  const evidence = new Set(finding.evidenceMessageIds);
+  for (const crewId of finding.crewIds) {
+    const crew = crewById(scene, crewId);
+    if (!crew) {
+      out.push("Crew not found in the record");
+      continue;
+    }
+    const reads = crew.threads.map((t) => threadLabel(scene, t).toLowerCase());
+    out.push(`${crew.name} reads: ${reads.length ? reads.join(", ") : "no shared threads"}, and its own direct messages`);
+    for (const id of elementIds) {
+      const el = elementById(scene, id);
+      if (!el) {
+        out.push("Element not found in the record");
+        continue;
+      }
+      for (const h of el.history.filter((x) => evidence.has(x.sourceMessageId))) {
+        const heard = heardThread(h.thread, crew) ? "heard" : `not heard by ${crew.name}`;
+        out.push(`${el.name}, version ${h.version}: said in the ${threadLabel(scene, h.thread).toLowerCase()} · ${heard}`);
+      }
+    }
+  }
+  return out;
 }
 
 /**

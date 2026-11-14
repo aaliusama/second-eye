@@ -80,3 +80,9 @@
 .trace .trace-receipt.confirmed { color: var(--clear); }
 .trace .trace-receipt.closed { color: var(--ink-soft); }
 .trace .trace-status.clear { background: color-mix(in srgb, var(--clear) 10%, transparent); }
+
+/* What the rule compared for this finding: inputs read from the record. */
+.trace .trace-inputs { list-style: none; margin: 8px 0 0; padding: 0; }
+.trace .trace-inputs li { font-size: var(--small); line-height: 1.5; padding: 3px 0 3px 12px; position: relative; color: var(--ink); }
+.trace .trace-inputs li::before { content: ""; position: absolute; left: 0; top: 12px; width: 5px; border-top: 1px solid var(--ink-soft); }
+.trace .trace-inputs li.broken { color: var(--redline); }

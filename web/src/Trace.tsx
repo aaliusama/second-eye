@@ -169,6 +169,13 @@ export function Trace({
               ) : (
                 <p className="meta missing">Rule {NOT_FOUND}: it was not recorded with this finding.</p>
               )}
+              {trace.inputs.length > 0 && (
+                <ul className="trace-inputs" aria-label="What the rule compared">
+                  {trace.inputs.map((line) => (
+                    <li key={line} className={/not heard|not found/.test(line) ? "broken" : undefined}>{line}</li>
+                  ))}
+                </ul>
+              )}
             </Step>
             <Step n={4} side="rule" title="Measured result">
               <p className="trace-verdict">
