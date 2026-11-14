@@ -50,7 +50,9 @@ All site data is simulated: 190 messages over two days on one floor of six units
 | Open decision | 4 | 0 | 0 |
 | Total (15 cases) | 15 | 0 | 0 |
 
-These are results on this synthetic labelled scenario, not field validation or a measurement of general extraction accuracy. The scenario and its offline cache are available for inspection. If the replay, extraction cache or checks change, rerun evaluation and refresh this table before submission.
+These are results on this synthetic labelled scenario, not field validation or a measurement of general extraction accuracy.
+
+**Unseen text.** On the scenario we built during development, the checks caught all 15 labelled cases with no false alarms; live checks alone caught 14, and the evening rehearsal caught the 15th. On a separate challenge set of 64 new messages and 14 cases, written and committed before the system first read it, the first live run caught 6 of 14 with 5 false alarms; every miss traced to the language model misreading a message, mostly weekday dates. After we gave the model a computed calendar, a second run (no longer unseen) caught 8 of 14 with 4 false alarms. The remaining failures are cancellations, missed approvals and plans more than a day ahead. (`npm run eval`, `npm run eval:challenge`; `eval/results.challenge.json`, `eval/results.challenge.run2.json`.) The scenario and its offline cache are available for inspection. If the replay, extraction cache or checks change, rerun evaluation and refresh this table before submission.
 
 ## Tech stack
 
@@ -67,7 +69,7 @@ These are results on this synthetic labelled scenario, not field validation or a
 - Plan slots are morning / afternoon / full day, not clock times.
 - Who heard a change is inferred from which threads a crew reads, unless the crew stated which sheet revision it holds. Thread membership is a proxy, not proof.
 - Crew confirmation in the demo is a simulated reply. It confirms receipt of a revision, not completed or correct work. "Clear" means no conflict found in the record, never physical safety or permission to enter.
-- The recorded demo runs offline from cached extraction. Unseen text needs `npm run demo:live` (Groq key in `.env`). [[Live challenge result, exactly as printed.]]
+- The recorded demo runs offline from cached extraction. Unseen text needs `npm run demo:live` (Groq key in `.env`). Live reading of unseen text is weaker than the cached scenario: see Results.
 - The frozen scene contract has no decision-category field. Dependencies inferred from a room use conservative material/fixture words in the recorded element names; explicitly named dependencies remain sourced.
 
 ## Links

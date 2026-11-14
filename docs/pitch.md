@@ -34,7 +34,7 @@ Numbers: say only what `npm run eval` (and, if used, the challenge report) print
 "Crews call 204 'the blue room'. The first time, the record doesn't guess. The superintendent maps it once. Next run, same words, it knows. Learning here is stored decisions you can see and undo, not a retrained model."
 
 **2:45 Numbers and close (15 s)**
-"On [[n]] simulated messages and [[cases]] labelled cases: [[caught]] caught, [[missed]] missed, [[false alarms]] false alarms. Live checking alone misses one; the evening rehearsal catches it. That's why there are two triggers. [[If the challenge set ran: On [[m]] cases we wrote after building it, read live: [[result]].]] The language model reads messages. Rules decide. See tomorrow's mistake before it gets built."
+"On 190 simulated messages and 15 labelled cases: 15 caught, none missed, no false alarms. Live checking alone misses one; the evening rehearsal catches it. That's why there are two triggers. And on 14 cases we wrote before the system ever read them, live, it caught 6 the first time and 8 after a calendar fix, so we know exactly where it breaks: dates and cancellations. The language model reads messages. Rules decide. See tomorrow's mistake before it gets built."
 
 ## 60 seconds, 16:00 finals (VCs, founders, tech leads)
 
@@ -44,12 +44,12 @@ Site Rehearsal reads the chats the site already uses and keeps one record of the
 
 The superintendent sends the correction with one tap, and it stays open until the crew confirms the exact revision. Every decision cites its message, so when the argument starts about who told whom, there's a receipt.
 
-The language model only reads messages. Rules decide, so it's explainable and repeatable. On our simulated test set: [[caught]] of [[cases]] caught, [[false alarms]] false alarms. Built for Talona's users: superintendents at mid-size general contractors building multifamily housing."
+The language model only reads messages. Rules decide, so it's explainable and repeatable. On our simulated scenario: 15 of 15 caught, no false alarms; on new text it has never seen, 8 of 14, and we show the misses. Built for Talona's users: superintendents at mid-size general contractors building multifamily housing."
 
 ## Questions we expect
 
 - **Is this real data?** No. Simulated, labelled on every screen. Say so first.
-- **What if a crew types something new?** `npm run demo:live` reads unseen text with the LLM; the recorded demo uses the cache so it is repeatable. [[Quote the live challenge result exactly, including misses.]]
+- **What if a crew types something new?** `npm run demo:live` reads unseen text with the LLM; the recorded demo uses the cache so it is repeatable. Challenge set, written before the first run: 6 of 14 caught with 5 false alarms on run 1, 8 of 14 with 4 after a calendar fix (run 2 is not unseen). Misses: cancellations, approvals, plans more than a day ahead. Free-tier rate limits can fail a burst of messages; the phone says so instead of hanging.
 - **How do you know who heard it?** Two bases, and we show which one: what the crew said about the sheet revision it holds ("we're on A-201 rev B"), otherwise which threads it reads. Reading a thread is a proxy, not proof.
 - **Does confirmation mean it's safe?** No. It means the crew confirmed receiving the revision. Rechecking the record never certifies physical work.
 - **Won't superintendents drown in alerts?** The huddle shows three, ranked by what can't be undone; a dismissal with a reason is stored for that exact incident and comes back if the evidence changes.
