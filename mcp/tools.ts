@@ -232,7 +232,7 @@ export async function isPlaceClear(api: SiteApi, args: { placeId: string; day: s
   ];
   const head =
     status === "clear"
-      ? `CLEAR: per the record nothing is planned in ${place.name} on ${args.day} ${label(args.slot)} and no finding touches it.`
+      ? `CLEAR: no conflict found in the record. Nothing is planned in ${place.name} on ${args.day} ${label(args.slot)} and no finding touches it.`
       : `${status.toUpperCase()}: ${place.name} on ${args.day} ${label(args.slot)}${crews.length ? `, crews: ${crews.join(", ")}` : ""}.`;
   return {
     text: [head, ...reasons.map((r) => `- ${r}`)].join("\n"),

@@ -241,7 +241,8 @@ function RoomLabel({ el, tasks, scene }: { el: Element; tasks: PlanTask[]; scene
   const b = boxOf(el.geometry.points);
   const cx = (b.minX + b.maxX) / 2;
   const top = -(b.maxY - 1.1);
-  const here = tasks.filter((t) => t.placeId === el.id);
+  // One badge per crew: a crew restating a recorded plan is still one crew in the room.
+  const here = [...new Map(tasks.filter((t) => t.placeId === el.id).map((t) => [t.crewId, t])).values()];
   const s = drawing.labelSize;
   return (
     <g pointerEvents="none">
