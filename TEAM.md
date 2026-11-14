@@ -21,12 +21,12 @@ Shared: `docs/decisions.md`. Anyone appends one line per decision; on a merge co
 
 ## Status (updated on every merge to main)
 
-Last update: Sat 14 Nov, after PR #1 (`must/integration`) merged. `main`: e2e 14 pass / 5 todo (the 5 need lane B's data). Live extraction code landed (Groq JSON mode, zod, one retry, cache write) but has not been run on real Groq yet. C and D MUST audits done. Lane B data (full chat, labels, phone script, real cache) still missing.
+Last update: Sat 14 Nov, after PR #2 (live findings resolve, `LEARNING_FILE`, docs), PR #3 (full lane B data), PR #4 (C full-data validation), PR #5 (extraction gaps, safe approvals, full-data presenter) and the lane A PR (`a/integration-3`: server warm-up, `?t=` cache, copy-on-write model, label-driven e2e). `main` has 6 units, 5 crews, 190 chat messages, 15 labelled cases, and `data/llm-cache/` with 192 entries, all with `"provenance": "llm: groq openai/gpt-oss-120b"`. `npm run eval`: 15 caught / 0 missed / 0 false alarms over 15 cases. All three phone texts have their cache entries (the question goes to `/api/ask`). e2e has no `it.todo` left: beat 3 live, the blue room run 1/run 2 (A's "Done when") and every caught label are tested over HTTP.
 
 | Lane | What | State |
 |---|---|---|
-| A | live chat cache ids, learned nicknames, approve clears ghost, agent + query routes wired | on main |
-| B | live Groq extraction code (prompt, validation, cache builder) on main; 6-unit scenario, ~200 messages, labels, real cache, phone script still missing | building |
+| A | live chat cache ids, learned nicknames, approve clears ghost, agent + query routes wired; live findings resolve when a later message fixes them, opt-in `LEARNING_FILE` (PR #2) | on main |
+| B | 6-unit scenario, 190 messages, 15 labels, golden replay, phone script, Groq-built llm-cache + `extraction-report.json` (PR #3) | on main |
 | C | eval of live + rehearsal, planted-incident and false-alarm tests; MUST audit done (unsure = warn, live listen step) | on main |
 | D | flat drafting view, ghost reveal, approvals, slider, phone, panels, demo script; MUST audit done (fixture fallback, sources as who/where/when) | on main |
 | E | crews ask questions, briefings, digest (`/api/ask`, `/api/briefing`, `/api/digest`) | on main |
@@ -110,14 +110,14 @@ Done when: the golden replay runs end to end through the real model and API, and
 
 ### B - Data + extraction (<name>)
 MUST
-- [ ] `data/scenario.md` from the kickoff.
-- [ ] `data/floor.json`: starting scene (elements with ids, positions, nicknames).
-- [ ] 10-message slice for the ghost-wall incident, with cached extraction, **by 23:00**.
-- [ ] `data/chat.json`: about 200 messages over two days, messy like real site chat; each has id, time, sender, crew.
-- [ ] `data/labels.json`: expected findings per case with message ids. Written from the scenario sheet before checks run, never adjusted to match check output. C reviews it.
-- [ ] `server/extract/`: prompt plus zod-validated output. Unsure means state `unconfirmed` with the confidence. Never guess a location or direction.
-- [ ] `data/llm-cache/`: run live once with `LIVE_LLM=1`, cache per message. The demo reads only the cache.
-- [ ] `data/replay.golden.json`: ordered events the demo plays.
+- [x] `data/scenario.md` from the kickoff.
+- [x] `data/floor.json`: starting scene (elements with ids, positions, nicknames).
+- [x] 10-message slice for the ghost-wall incident, with cached extraction, **by 23:00**.
+- [x] `data/chat.json`: about 200 messages over two days, messy like real site chat; each has id, time, sender, crew.
+- [x] `data/labels.json`: expected findings per case with message ids. Written from the scenario sheet before checks run, never adjusted to match check output. C reviews it.
+- [x] `server/extract/`: prompt plus zod-validated output. Unsure means state `unconfirmed` with the confidence. Never guess a location or direction.
+- [x] `data/llm-cache/`: run live once with `LIVE_LLM=1`, cache per message. The demo reads only the cache.
+- [x] `data/replay.golden.json`: ordered events the demo plays.
 
 NICE
 - [ ] Voice note in, transcribed to a message.
@@ -148,7 +148,7 @@ Done when: all planted demo incidents are caught on the golden replay and `npm r
 MUST
 - [x] `web/`: Vite + React app. Works from `contracts/fixtures/` until A's API is ready.
 - [x] Flat top-down view: elements colored by state, ghost element in red at the conflicting position. Clicking it shows the finding and the source message.
-- [ ] Crew chat simulator: send a message as a crew -> live check -> ghost appears.
+- [x] Crew chat simulator: send a message as a crew -> live check -> ghost appears.
 - [x] Rehearsal time slider over tomorrow's plan.
 - [x] Approval queue: one tap approves a fix and shows the message sent to the crew.
 - [x] "Simulated site data" label on every screen. Eval panel shows only `eval/results.json`.

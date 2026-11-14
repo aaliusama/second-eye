@@ -1,4 +1,5 @@
 import { spawn, execFile, execSync, type ChildProcess } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -257,5 +258,50 @@ describe("demo story (golden replay, cached extraction)", () => {
     expect(rehearsal.status).toBe(200);
     expect(rehearsal.body.frames.flatMap((fr: any) => fr.findings).some((f: any) =>
       f.check === check && f.elementIds.includes(element) && f.trigger === "rehearsal")).toBe(true);
+  });
+});
+
+// Planted cases from data/labels.json, checked over HTTP with eval's rule (eval/score.ts): a case is
+// caught when a live or rehearsal finding has its check and its trigger message (space_clash: source or
+// evidence, the clash is symmetric). Expected = the cases eval/results.detail.json reports caught, so
+// this suite follows lane C's measured numbers instead of inventing its own. A case eval reports
+// missed is skipped here (lane C's work, not hidden by a test expectation).
+const ROOT_FILE = (p: string) => readFileSync(fileURLToPath(new URL(`../${p}`, import.meta.url)), "utf8");
+const labels: { id: string; check: string; triggerMessageId: string }[] = JSON.parse(ROOT_FILE("data/labels.json")).cases;
+const detail: { cases: { id: string; caught: boolean }[] } = JSON.parse(ROOT_FILE("eval/results.detail.json"));
+const caughtIds = new Set(detail.cases.filter((c) => c.caught).map((c) => c.id));
+const CHECKS = ["latest_change", "space_clash", "order_of_work", "open_decision"] as const;
+
+describe("planted cases (data/labels.json) over HTTP", () => {
+  let pooled: any[] = [];
+
+  beforeAll(async () => {
+    expect((await post("/api/reset", { keepLearning: false })).status).toBe(200);
+    const { body: state } = await get("/api/state");
+    const days = [...new Set<string>(state.scene.tasks.map((t: any) => t.day))].sort();
+    pooled = [...state.findings];
+    for (const day of days) {
+      const { body } = await get(`/api/rehearsal?day=${day}`);
+      pooled.push(...body.frames.flatMap((fr: any) => fr.findings));
+    }
+  });
+
+  it("eval detail is current with labels.json (same case ids)", () => {
+    expect(detail.cases.map((c) => c.id).sort()).toEqual(labels.map((c) => c.id).sort());
+  });
+
+  it.each(CHECKS)("%s: every case eval reports caught has a finding on its trigger message", (check) => {
+    const cases = labels.filter((c) => c.check === check && caughtIds.has(c.id));
+    expect(cases.length).toBeGreaterThan(0);
+    const missing = cases.filter(
+      (c) =>
+        !pooled.some(
+          (f) =>
+            f.check === c.check &&
+            (f.sourceMessageId === c.triggerMessageId ||
+              (f.check === "space_clash" && f.evidenceMessageIds.includes(c.triggerMessageId))),
+        ),
+    );
+    expect(missing.map((c) => c.id)).toEqual([]);
   });
 });

@@ -16,12 +16,21 @@ let file: string | undefined;
 
 const StoreFile = Correction.array();
 
+/** Goes up on every change to the store, so caches of replays (api/state-at.ts) know when they are stale. */
+let storeVersion = 0;
+
+/** Store version: same version, same corrections. */
+export function version(): number {
+  return storeVersion;
+}
+
 /**
  * Persistence from LEARNING_FILE (a relative path resolves against the repo root).
  * Unset or empty: in memory only. Set: the store is replaced by the file's corrections;
  * a missing file starts empty, a corrupt or invalid one logs one JSON line and starts empty.
  */
 export function usePersistence(path: string | undefined): void {
+  storeVersion++;
   corrections.length = 0;
   file = path ? (isAbsolute(path) ? path : join(REPO_ROOT, path)) : undefined;
   if (!file) return;
@@ -51,11 +60,13 @@ function save(): void {
 
 export function record(correction: Correction): void {
   corrections.push(Correction.parse(correction));
+  storeVersion++;
   save();
 }
 
 /** Clears the store, and deletes the file when persistence is on. */
 export function reset(): void {
+  storeVersion++;
   corrections.length = 0;
   if (!file) return;
   try {
