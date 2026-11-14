@@ -16,6 +16,8 @@ import {
   type UnresolvedResponse,
 } from "@site/contracts";
 import { rehearse } from "../checks/index";
+import { extractStatus } from "../extract/index";
+import { liveCacheId } from "./live-id";
 import * as learning from "../learning/index";
 import { logLine } from "../log";
 import { getPlan } from "../model/index";
@@ -147,7 +149,9 @@ export async function handle(req: IncomingMessage, res: ServerResponse): Promise
 
     if (route === "POST /api/message") {
       const body = parseBody(PostMessageRequest, await readJson(req));
-      return send(res, 200, await postMessage(body));
+      const posted = await postMessage(body);
+      // How the words were read: cached, live, an offline cache miss, or a failed live call. Lets the phone say why nothing came back.
+      return send(res, 200, { ...posted, extraction: extractStatus(liveCacheId(body.text, body.crewId)) ?? "cached" });
     }
 
     if (route === "GET /api/rehearsal") {

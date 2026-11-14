@@ -9,3 +9,6 @@ CLAUDE.local.md
 Thumbs.db
 .claude/worktrees/
 .learning/
+
+# Messages extracted live in a demo session (npm run demo:live); never the golden cache
+data/llm-cache-live/
