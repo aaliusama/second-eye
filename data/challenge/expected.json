@@ -1,0 +1,289 @@
+{
+  "note": "Simulated site data. Hand-written before any extraction run: the facts a careful reader takes from each message. Messages not listed carry no fact.",
+  "facts": {
+    "c-007": [
+      "move W-22 25 cm south"
+    ],
+    "c-008": [
+      "move W-12 20 cm west"
+    ],
+    "c-009": [
+      "move W-16 15 cm west"
+    ],
+    "c-011": [
+      "move W-21 20 cm south"
+    ],
+    "c-013": [
+      "move W-03 30 cm east"
+    ],
+    "c-014": [
+      "move W-03 30 cm east"
+    ],
+    "c-016": [
+      "status vanity-203 proposed"
+    ],
+    "c-018": [
+      "status light-206-bath proposed"
+    ],
+    "c-019": [
+      "status light-202-kitchen proposed"
+    ],
+    "c-020": [
+      "move W-22 25 cm south"
+    ],
+    "c-023": [
+      "plan crew-plumbing 2026-11-18 morning inspection room-204"
+    ],
+    "c-026": [
+      "plan crew-tiling 2026-11-17 morning other room-203"
+    ],
+    "c-027": [
+      "plan crew-painting 2026-11-17 full_day paint room-202"
+    ],
+    "c-028": [
+      "cancel crew-tiling 2026-11-17 morning room-203"
+    ],
+    "c-029": [
+      "on crew-electrical 2026-11-17 W-21",
+      "plan crew-electrical 2026-11-17 afternoon rough_in_electrical room-206"
+    ],
+    "c-030": [
+      "on crew-electrical 2026-11-17 W-12",
+      "plan crew-electrical 2026-11-17 afternoon rough_in_electrical room-204"
+    ],
+    "c-031": [
+      "plan crew-drywall 2026-11-17 afternoon finish_drywall room-202"
+    ],
+    "c-032": [
+      "plan crew-electrical 2026-11-17 morning rough_in_electrical room-203"
+    ],
+    "c-033": [
+      "on crew-drywall 2026-11-17 W-11",
+      "plan crew-drywall 2026-11-17 morning close_wall room-204"
+    ],
+    "c-034": [
+      "on crew-plumbing 2026-11-17 vanity-203",
+      "plan crew-plumbing 2026-11-17 afternoon install_fixtures room-203"
+    ],
+    "c-035": [
+      "on crew-tiling 2026-11-17 W-16",
+      "plan crew-tiling 2026-11-17 morning layout room-205"
+    ],
+    "c-036": [
+      "plan crew-drywall 2026-11-17 morning finish_drywall (no place)"
+    ],
+    "c-037": [
+      "on crew-plumbing 2026-11-17 W-03",
+      "plan crew-plumbing 2026-11-17 morning rough_in_plumbing room-201"
+    ],
+    "c-045": [
+      "move W-08 15 cm north"
+    ],
+    "c-047": [
+      "status light-202-kitchen approved"
+    ],
+    "c-048": [
+      "status W-05 unconfirmed"
+    ],
+    "c-049": [
+      "plan crew-plumbing 2026-11-18 morning inspection room-203"
+    ],
+    "c-050": [
+      "move W-22 10 cm south"
+    ],
+    "c-053": [
+      "plan crew-drywall 2026-11-18 afternoon finish_drywall room-205"
+    ],
+    "c-054": [
+      "plan crew-painting 2026-11-18 morning paint room-205"
+    ],
+    "c-055": [
+      "plan crew-tiling 2026-11-18 morning tile room-205"
+    ],
+    "c-057": [
+      "cancel crew-painting 2026-11-18 morning room-205",
+      "plan crew-painting 2026-11-18 afternoon paint room-205"
+    ],
+    "c-058": [
+      "on crew-drywall 2026-11-18 W-08",
+      "plan crew-drywall 2026-11-18 afternoon close_wall room-203"
+    ],
+    "c-059": [
+      "on crew-drywall 2026-11-18 W-05",
+      "plan crew-drywall 2026-11-18 morning close_wall room-202"
+    ],
+    "c-060": [
+      "on crew-electrical 2026-11-18 light-206-bath",
+      "plan crew-electrical 2026-11-18 morning install_fixtures room-206"
+    ],
+    "c-061": [
+      "on crew-drywall 2026-11-18 W-22",
+      "plan crew-drywall 2026-11-18 afternoon finish_drywall room-206"
+    ],
+    "c-062": [
+      "on crew-electrical 2026-11-18 light-202-kitchen",
+      "plan crew-electrical 2026-11-18 afternoon install_fixtures room-202"
+    ]
+  },
+  "cases": {
+    "CH-LC1": {
+      "kind": "unseen phrasing of a real incident",
+      "needs": [
+        "c-009",
+        "c-035"
+      ]
+    },
+    "CH-LC2": {
+      "kind": "second revision after an earlier correction",
+      "needs": [
+        "c-007",
+        "c-020",
+        "c-050",
+        "c-061"
+      ]
+    },
+    "CH-LC3": {
+      "kind": "unseen phrasing of a real incident",
+      "needs": [
+        "c-045",
+        "c-058"
+      ]
+    },
+    "CH-LC4": {
+      "kind": "unseen phrasing of a real incident",
+      "needs": [
+        "c-008",
+        "c-030"
+      ]
+    },
+    "CH-SC1": {
+      "kind": "unseen phrasing of a real incident",
+      "needs": [
+        "c-027",
+        "c-031"
+      ]
+    },
+    "CH-SC2": {
+      "kind": "unseen phrasing of a real incident",
+      "needs": [
+        "c-054",
+        "c-055"
+      ]
+    },
+    "CH-SC3": {
+      "kind": "plan correction that creates a different clash",
+      "needs": [
+        "c-053",
+        "c-057"
+      ]
+    },
+    "CH-OW1": {
+      "kind": "unseen phrasing of a real incident",
+      "needs": [
+        "c-027",
+        "c-031"
+      ]
+    },
+    "CH-OW2": {
+      "kind": "unseen phrasing of a real incident",
+      "needs": [
+        "c-033"
+      ]
+    },
+    "CH-OW3": {
+      "kind": "unseen phrasing of a real incident",
+      "needs": [
+        "c-053",
+        "c-054"
+      ]
+    },
+    "CH-OW4": {
+      "kind": "plan correction that creates a different clash",
+      "needs": [
+        "c-053",
+        "c-057"
+      ]
+    },
+    "CH-OD1": {
+      "kind": "unseen phrasing of a real incident",
+      "needs": [
+        "c-018",
+        "c-060"
+      ]
+    },
+    "CH-OD2": {
+      "kind": "uncertain move",
+      "needs": [
+        "c-048",
+        "c-059"
+      ]
+    },
+    "CH-OD3": {
+      "kind": "unseen phrasing of a real incident",
+      "needs": [
+        "c-016",
+        "c-034"
+      ]
+    }
+  },
+  "nonCases": [
+    {
+      "kind": "unambiguous harmless look-alike",
+      "why": "W-21 moved in the site group, which electrical reads: electrical heard it.",
+      "messageIds": [
+        "c-011",
+        "c-029"
+      ]
+    },
+    {
+      "kind": "already informed crew",
+      "why": "W-03 moved in the office thread, and the superintendent told plumbing in a DM before they planned the work.",
+      "messageIds": [
+        "c-013",
+        "c-014",
+        "c-037"
+      ]
+    },
+    {
+      "kind": "cancellation",
+      "why": "Tiling withdrew its 203 visit before electrical planned 203 for the same morning: no clash.",
+      "messageIds": [
+        "c-026",
+        "c-028",
+        "c-032"
+      ]
+    },
+    {
+      "kind": "ambiguous room nickname",
+      "why": "\"the corner unit\" could be 201 or 206. No place may be guessed; it goes to the superintendent as unresolved.",
+      "messageIds": [
+        "c-036"
+      ]
+    },
+    {
+      "kind": "unambiguous harmless look-alike",
+      "why": "The 202 kitchen lights were proposed, then approved before electrical planned to hang them.",
+      "messageIds": [
+        "c-019",
+        "c-047",
+        "c-062"
+      ]
+    },
+    {
+      "kind": "unambiguous harmless look-alike",
+      "why": "203 inspection Wednesday morning, wall closed Wednesday afternoon: right order. (The moved wall is CH-LC3, not an order problem.)",
+      "messageIds": [
+        "c-049",
+        "c-058"
+      ]
+    },
+    {
+      "kind": "unambiguous harmless look-alike",
+      "why": "The 202 inspection passed on Tuesday, so closing the wall Wednesday is in order. (The uncertain move is CH-OD2.)",
+      "messageIds": [
+        "c-051",
+        "c-059"
+      ]
+    }
+  ]
+}
