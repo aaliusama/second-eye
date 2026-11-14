@@ -25,9 +25,10 @@ and coordinate corrections before work begins.
 
 <br>
 
-<img src="docs/assets/readme/ghost-story.gif" alt="Illustrated sequence: the crew's old wall line differs from the latest record by 40 cm; a red ghost reveals the risk; sending a correction leaves it amber until a simulated crew reply confirms the revision and triggers a recheck. Simulated site data." width="100%">
+<a href="docs/assets/readme/second-eye-demo-silent.mp4"><img src="docs/assets/readme/product-film-poster.jpg" alt="Watch the silent Second Eye product film: the real superintendent workspace, recorded wall changes, ghost-wall warning and correction loop. Simulated site data." width="100%"></a>
 
-<sub>A twelve-second illustrated story, not an app recording. Plays once. <a href="docs/assets/readme/ghost-story.png">View the still image.</a></sub>
+<strong><a href="docs/assets/readme/second-eye-demo-silent.mp4">▶ Watch the product film · 2:18 · No sound</a></strong><br>
+<sub>On-screen captions tell the story. Click the preview to open the MP4. Simulated site data.</sub>
 
 </div>
 
@@ -53,9 +54,12 @@ No installation or API key is required for the prepared demonstration.
 | **Superintendent workspace** | [Open the application](https://site-rehearsal.onrender.com) | Floor plan, incident evidence, corrections and tomorrow's work |
 | **Guided demonstration** | [Start the presenter](https://site-rehearsal.onrender.com/?present=1) | Press **R** to reset, then **→** to follow the twelve-beat story |
 | **Crew phone** | [Open the phone interface](https://site-rehearsal.onrender.com/phone) | Prepared crew messages and sourced responses |
+| **Silent product film** | [Watch or download the MP4](docs/assets/readme/second-eye-demo-silent.mp4) | A captioned 2:18 overview of the ghost wall, correction and learning loop |
 | **Pitch deck** | [Read the PDF](docs/deck/deck.pdf) | The problem, product and demonstration story |
 
 The hosted demo uses cached extraction and simulated data. Visitors share one session; resetting it also resets the shared demonstration. For an isolated session or unfamiliar message wording, use the [local setup](#quick-start).
+
+The film is an earlier recorded walkthrough of the 15-case scenario, assembled from app captures with captions and camera motion. The current application includes additional technical views shown below. It is a product overview, separate from the full presenter recording. [Video source and export details](docs/assets/readme/VIDEO.md).
 
 ## One wall. Two versions. One chance to intervene.
 

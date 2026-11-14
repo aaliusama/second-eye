@@ -1,5 +1,7 @@
 # README refresh and readiness review
 
+Video follow-up: replaced the illustrated GIF in the README with a real film still linked to a silent MP4. Exported the existing local 1080p film without audio; output is 138.3 seconds and 13,835,978 bytes. ffprobe confirms one H.264 video stream and no audio, full-file decoding passed, sampled source frames and the poster were visually inspected, and typecheck passed. Original film sources remain untouched. See [video provenance](assets/readme/VIDEO.md). The earlier animation notes below are historical.
+
 Follow-up: the user requested equal emphasis on engineering and marketing. The README now exposes the architecture diagram, module responsibilities, engineering principles and technology stack directly, adds a prominent live-demo button and direct-access table, and includes a professional project overview. Local links, section anchors and typecheck passed. The web tool could not access the hosted URL; uptime was not verified. This follow-up supersedes the disclosure-layout description below.
 
 14 November 2026. Reviewed local branch `win/integration` after pulling `origin/main` at `946b998`. Nothing pushed or submitted in this pass.
