@@ -1,0 +1,49 @@
+{
+  "provenance": "hand-written expected extraction (lane B), not LLM output; see data/scenario.md",
+  "messageId": "m-191",
+  "operations": [
+    {
+      "id": "op-m-191-1",
+      "time": "2026-11-13T19:20:00",
+      "sourceMessageId": "m-191",
+      "thread": "site-group",
+      "confidence": 0.87,
+      "type": "plan_task",
+      "task": {
+        "id": "task-m-191-1",
+        "crewId": "crew-electrical",
+        "day": "2026-11-14",
+        "slot": "afternoon",
+        "order": 1,
+        "taskType": "rough_in_electrical",
+        "description": "Set the 204 shaver socket on the bathroom east wall",
+        "placeId": "room-204",
+        "elementIds": [
+          "W-12",
+          "socket-204-shaver"
+        ],
+        "status": "planned",
+        "sourceMessageId": "m-191",
+        "confidence": 0.87
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-m-191-1",
+      "crewId": "crew-electrical",
+      "time": "2026-11-13T19:20:00",
+      "sourceMessageId": "m-191",
+      "confidence": 0.87,
+      "day": "2026-11-14",
+      "slot": "afternoon",
+      "taskType": "rough_in_electrical",
+      "description": "Set the 204 shaver socket on the bathroom east wall",
+      "placeId": "room-204",
+      "elementIds": [
+        "W-12",
+        "socket-204-shaver"
+      ]
+    }
+  ]
+}

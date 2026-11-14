@@ -177,6 +177,43 @@
       "note": "Plumbing sets the 203 vanity while it is only proposed."
     },
     {
+      "id": "LC5",
+      "check": "latest_change",
+      "triggerMessageId": "m-191",
+      "crewIds": [
+        "crew-electrical"
+      ],
+      "elementIds": [
+        "W-12"
+      ],
+      "note": "Same Rev C move as LC1: electrical only reads site-group and sets the 204 shaver socket on the old W-12 line."
+    },
+    {
+      "id": "LC6",
+      "check": "latest_change",
+      "triggerMessageId": "m-192",
+      "crewIds": [
+        "crew-tiling"
+      ],
+      "elementIds": [
+        "W-12"
+      ],
+      "note": "Same Rev C move as LC1: tiling only reads site-group and sets out the 204 shower tile off the old W-12 line."
+    },
+    {
+      "id": "SC5",
+      "check": "space_clash",
+      "triggerMessageId": "m-192",
+      "crewIds": [
+        "crew-electrical",
+        "crew-tiling"
+      ],
+      "elementIds": [
+        "room-204"
+      ],
+      "note": "Electrical and tiling both work the 204 bathroom east wall on Saturday afternoon."
+    },
+    {
       "id": "OD4",
       "check": "open_decision",
       "triggerMessageId": "m-170",

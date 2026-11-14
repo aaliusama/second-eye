@@ -2412,6 +2412,44 @@
       }
     },
     {
+      "kind": "message",
+      "message": {
+        "id": "m-191",
+        "time": "2026-11-13T19:20:00",
+        "thread": "site-group",
+        "senderName": "Jonas (Brandt Electric)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-electrical",
+        "text": "forgot one: sat arvo ana sets the 204 shaver socket on the bathroom east wall",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "m-192",
+        "time": "2026-11-13T19:31:00",
+        "thread": "site-group",
+        "senderName": "Luca (Sorel Tiling)",
+        "senderRole": "crew_lead",
+        "crewId": "crew-tiling",
+        "text": "sat afternoon we start the 204 shower tile, working off the east wall",
+        "kind": "text"
+      }
+    },
+    {
+      "kind": "message",
+      "message": {
+        "id": "m-193",
+        "time": "2026-11-13T19:36:00",
+        "thread": "site-group",
+        "senderName": "Dana Pierce",
+        "senderRole": "superintendent",
+        "text": "thanks both, rehearsal at 8",
+        "kind": "text"
+      }
+    },
+    {
       "kind": "rehearse",
       "time": "2026-11-13T20:00:00",
       "day": "2026-11-14"

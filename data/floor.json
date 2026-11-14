@@ -1080,6 +1080,182 @@
           "confidence": 1
         }
       ]
+    },
+    {
+      "id": "vanity-204",
+      "type": "fixture",
+      "name": "Unit 204 vanity",
+      "aliases": [],
+      "geometry": {
+        "kind": "point",
+        "at": [
+          17.5,
+          4.2
+        ]
+      },
+      "state": "approved",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "point",
+            "at": [
+              17.5,
+              4.2
+            ]
+          },
+          "state": "approved",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "socket-204-shaver",
+      "type": "fixture",
+      "name": "Unit 204 shaver socket",
+      "aliases": [],
+      "geometry": {
+        "kind": "point",
+        "at": [
+          17.85,
+          3.6
+        ]
+      },
+      "state": "planned",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "point",
+            "at": [
+              17.85,
+              3.6
+            ]
+          },
+          "state": "planned",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "tile-204-shower",
+      "type": "fixture",
+      "name": "Unit 204 shower tile",
+      "aliases": [],
+      "geometry": {
+        "kind": "point",
+        "at": [
+          16.2,
+          2.8
+        ]
+      },
+      "state": "planned",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "point",
+            "at": [
+              16.2,
+              2.8
+            ]
+          },
+          "state": "planned",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "window-204",
+      "type": "window",
+      "name": "Unit 204 living room window",
+      "aliases": [],
+      "geometry": {
+        "kind": "segment",
+        "from": [
+          16,
+          10
+        ],
+        "to": [
+          19,
+          10
+        ],
+        "thickness": 0.2
+      },
+      "height": 1.5,
+      "state": "approved",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "segment",
+            "from": [
+              16,
+              10
+            ],
+            "to": [
+              19,
+              10
+            ],
+            "thickness": 0.2
+          },
+          "state": "approved",
+          "confidence": 1
+        }
+      ]
+    },
+    {
+      "id": "door-204",
+      "type": "door",
+      "name": "Unit 204 entrance door",
+      "aliases": [],
+      "geometry": {
+        "kind": "point",
+        "at": [
+          19.2,
+          2
+        ]
+      },
+      "state": "built",
+      "version": 1,
+      "history": [
+        {
+          "version": 1,
+          "time": "2026-11-10T08:00:00",
+          "sourceMessageId": "drawing:rev-B",
+          "thread": "drawing",
+          "operationType": "add",
+          "geometry": {
+            "kind": "point",
+            "at": [
+              19.2,
+              2
+            ]
+          },
+          "state": "built",
+          "confidence": 1
+        }
+      ]
     }
   ],
   "crews": [

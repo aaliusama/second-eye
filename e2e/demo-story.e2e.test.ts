@@ -131,10 +131,10 @@ describe("demo story (golden replay, cached extraction)", () => {
     expect(holds.some((h: any) => h.findingId === GHOST_ID)).toBe(true);
   });
 
-  it("E: the superintendent's digest counts one latest_change hold", async () => {
+  it("E: the superintendent's digest counts three latest_change holds (Rev C on W-12: plumbing, electrical, tiling)", async () => {
     const { status, body } = await get("/api/digest");
     expect(status).toBe(200);
-    expect(body.counts.latest_change.hold).toBe(1);
+    expect(body.counts.latest_change.hold).toBe(3);
   });
 
   it("G: the site agent escalated the ghost wall on its own at Fri 17:40", async () => {
@@ -177,7 +177,11 @@ describe("demo story (golden replay, cached extraction)", () => {
     expect(ack.body.receipt.status).toBe("confirmed");
     const { body } = await get("/api/rehearsal?day=2026-11-14");
     const all = body.frames.flatMap((fr: any) => fr.findings);
-    expect(all.some((f: any) => f.check === "latest_change")).toBe(false);
+    const latest = all.filter((f: any) => f.check === "latest_change");
+    expect(latest.some((f: any) => f.crewIds.includes("crew-plumbing"))).toBe(false);
+    // Plumbing confirming does not tell the other trades: electrical and tiling still work from the old W-12 line.
+    expect([...new Set(latest.flatMap((f: any) => f.crewIds))].sort()).toEqual(["crew-electrical", "crew-tiling"]);
+    expect(latest.every((f: any) => f.elementIds.includes("W-12"))).toBe(true);
   });
 
   it("F: after acknowledgement the robot no longer reports unit 204 as HOLD", async () => {

@@ -1,0 +1,49 @@
+{
+  "provenance": "hand-written expected extraction (lane B), not LLM output; see data/scenario.md",
+  "messageId": "m-192",
+  "operations": [
+    {
+      "id": "op-m-192-1",
+      "time": "2026-11-13T19:31:00",
+      "sourceMessageId": "m-192",
+      "thread": "site-group",
+      "confidence": 0.86,
+      "type": "plan_task",
+      "task": {
+        "id": "task-m-192-1",
+        "crewId": "crew-tiling",
+        "day": "2026-11-14",
+        "slot": "afternoon",
+        "order": 0,
+        "taskType": "tile",
+        "description": "Start the 204 shower tile, working off the east wall",
+        "placeId": "room-204",
+        "elementIds": [
+          "W-12",
+          "tile-204-shower"
+        ],
+        "status": "planned",
+        "sourceMessageId": "m-192",
+        "confidence": 0.86
+      }
+    }
+  ],
+  "intents": [
+    {
+      "id": "intent-m-192-1",
+      "crewId": "crew-tiling",
+      "time": "2026-11-13T19:31:00",
+      "sourceMessageId": "m-192",
+      "confidence": 0.86,
+      "day": "2026-11-14",
+      "slot": "afternoon",
+      "taskType": "tile",
+      "description": "Start the 204 shower tile, working off the east wall",
+      "placeId": "room-204",
+      "elementIds": [
+        "W-12",
+        "tile-204-shower"
+      ]
+    }
+  ]
+}

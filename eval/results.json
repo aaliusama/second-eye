@@ -1,14 +1,14 @@
 {
   "replayId": "golden",
-  "cases": 15,
+  "cases": 18,
   "perCheck": {
     "latest_change": {
-      "caught": 4,
+      "caught": 6,
       "missed": 0,
       "falseAlarms": 0
     },
     "space_clash": {
-      "caught": 4,
+      "caught": 5,
       "missed": 0,
       "falseAlarms": 0
     },
@@ -24,7 +24,7 @@
     }
   },
   "total": {
-    "caught": 15,
+    "caught": 18,
     "missed": 0,
     "falseAlarms": 0
   }

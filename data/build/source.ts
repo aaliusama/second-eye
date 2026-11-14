@@ -54,6 +54,13 @@ export const ELEMENTS: ElementDef[] = [
   { id: "vanity-203", type: "fixture", name: "Unit 203 bathroom vanity", geometry: pt(11.5, 3.5), state: "planned" },
   { id: "light-206-bath", type: "fixture", name: "Unit 206 bathroom light", geometry: pt(27, 3.5), state: "planned" },
   { id: "paint-206-living", type: "fixture", name: "Unit 206 living room paint colour", geometry: pt(27.5, 9), state: "planned" },
+  // Unit 204 in depth: what hangs on, or sits against, the bathroom east wall W-12 (drawing rev B positions).
+  // Names avoid "bathroom" and "wall" so the query parser keeps resolving "the 204 bath" and "the east wall" to W-12.
+  { id: "vanity-204", type: "fixture", name: "Unit 204 vanity", geometry: pt(17.5, 4.2), state: "approved" },
+  { id: "socket-204-shaver", type: "fixture", name: "Unit 204 shaver socket", geometry: pt(17.85, 3.6), state: "planned" },
+  { id: "tile-204-shower", type: "fixture", name: "Unit 204 shower tile", geometry: pt(16.2, 2.8), state: "planned" },
+  { id: "window-204", type: "window", name: "Unit 204 living room window", geometry: seg([16, 10], [19, 10], 0.2), height: 1.5, state: "approved" },
+  { id: "door-204", type: "door", name: "Unit 204 entrance door", geometry: pt(19.2, 2), state: "built" },
 ];
 
 export const CREWS = [
@@ -365,6 +372,13 @@ export const MESSAGES: Msg[] = [
   { at: "Fri 18:15", by: "dana", text: "Locking up at 18:30" },
   { at: "Fri 18:31", by: "dana", text: "All out. Have a good evening" },
   { at: "Fri 19:12", by: "priya", text: "Owner sends thanks for the Rev C turnaround." },
+  // Unit 204 in depth: two more trades plan work against W-12. Appended last so earlier message ids, and the
+  // LLM cache entries keyed by them, stay where they are.
+  { key: "lc5-elec", at: "Fri 19:20", by: "jonas", text: "forgot one: sat arvo ana sets the 204 shaver socket on the bathroom east wall",
+    x: [{ plan: { day: "Sat", slot: "afternoon", task: "rough_in_electrical", place: "room-204", els: ["W-12", "socket-204-shaver"], desc: "Set the 204 shaver socket on the bathroom east wall", order: 1 }, conf: 0.87 }] },
+  { key: "lc6-tile", at: "Fri 19:31", by: "luca", text: "sat afternoon we start the 204 shower tile, working off the east wall",
+    x: [{ plan: { day: "Sat", slot: "afternoon", task: "tile", place: "room-204", els: ["W-12", "tile-204-shower"], desc: "Start the 204 shower tile, working off the east wall" }, conf: 0.86 }] },
+  { at: "Fri 19:36", by: "dana", text: "thanks both, rehearsal at 8" },
 ];
 
 /** Evening rehearsals: replay time and the day they play. */
@@ -417,5 +431,8 @@ export const CASES: CaseDef[] = [
   { id: "OD1", check: "open_decision", trigger: "od1-tile", crews: ["crew-tiling"], elements: ["tile-205-bath"], note: "Tiling starts the 205 bath floor while the tile is only proposed." },
   { id: "OD2", check: "open_decision", trigger: "od2-elec", crews: ["crew-electrical"], elements: ["light-202-kitchen"], note: "Electrical hangs the 202 kitchen lights while they are only proposed." },
   { id: "OD3", check: "open_decision", trigger: "od3-plumb", crews: ["crew-plumbing"], elements: ["vanity-203"], note: "Plumbing sets the 203 vanity while it is only proposed." },
+  { id: "LC5", check: "latest_change", trigger: "lc5-elec", crews: ["crew-electrical"], elements: ["W-12"], note: "Same Rev C move as LC1: electrical only reads site-group and sets the 204 shaver socket on the old W-12 line." },
+  { id: "LC6", check: "latest_change", trigger: "lc6-tile", crews: ["crew-tiling"], elements: ["W-12"], note: "Same Rev C move as LC1: tiling only reads site-group and sets out the 204 shower tile off the old W-12 line." },
+  { id: "SC5", check: "space_clash", trigger: "lc6-tile", crews: ["crew-electrical", "crew-tiling"], elements: ["room-204"], note: "Electrical and tiling both work the 204 bathroom east wall on Saturday afternoon." },
   { id: "OD4", check: "open_decision", trigger: "sc1-paint", crews: ["crew-painting"], elements: ["paint-206-living"], note: "Painting paints the 206 living room while the colour is only proposed." },
 ];

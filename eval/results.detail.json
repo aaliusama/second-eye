@@ -2,18 +2,18 @@
   "replayId": "golden",
   "rule": "live + rehearsal pooled; one count per incident (check, source message or clash pair, elements)",
   "findings": {
-    "live": 14,
-    "rehearsal": 15,
-    "incidents": 15
+    "live": 17,
+    "rehearsal": 18,
+    "incidents": 18
   },
   "perTrigger": {
     "live": {
-      "caught": 14,
+      "caught": 17,
       "missed": 1,
       "falseAlarms": 0
     },
     "rehearsal": {
-      "caught": 15,
+      "caught": 18,
       "missed": 0,
       "falseAlarms": 0
     }
@@ -25,7 +25,7 @@
       "falseAlarms": 0
     },
     "crew-electrical": {
-      "caught": 5,
+      "caught": 7,
       "missed": 0,
       "falseAlarms": 0
     },
@@ -40,7 +40,7 @@
       "falseAlarms": 0
     },
     "crew-tiling": {
-      "caught": 2,
+      "caught": 4,
       "missed": 0,
       "falseAlarms": 0
     }
@@ -235,6 +235,46 @@
       ]
     },
     {
+      "id": "LC5",
+      "check": "latest_change",
+      "triggerMessageId": "m-191",
+      "caught": true,
+      "caughtBy": "both",
+      "incidentKeys": [
+        "latest_change|m-191|W-12"
+      ],
+      "findingIds": [
+        "f-latest_change-m-191-W-12"
+      ]
+    },
+    {
+      "id": "LC6",
+      "check": "latest_change",
+      "triggerMessageId": "m-192",
+      "caught": true,
+      "caughtBy": "both",
+      "incidentKeys": [
+        "latest_change|m-192|W-12"
+      ],
+      "findingIds": [
+        "f-latest_change-m-192-W-12"
+      ]
+    },
+    {
+      "id": "SC5",
+      "check": "space_clash",
+      "triggerMessageId": "m-192",
+      "caught": true,
+      "caughtBy": "both",
+      "incidentKeys": [
+        "space_clash|m-191,m-192|room-204"
+      ],
+      "findingIds": [
+        "f-space_clash-m-191-task-m-192-1",
+        "f-space_clash-m-192-task-m-191-1"
+      ]
+    },
+    {
       "id": "OD4",
       "check": "open_decision",
       "triggerMessageId": "m-170",
@@ -251,9 +291,9 @@
   "falseAlarms": [],
   "repeats": [],
   "messages": {
-    "total": 190,
-    "labelled": 13,
-    "unlabelled": 177,
+    "total": 193,
+    "labelled": 15,
+    "unlabelled": 178,
     "unlabelledWithFalseAlarm": 0
   },
   "labelsNotInReplay": [],
@@ -261,18 +301,18 @@
     {
       "threshold": 0.5,
       "total": {
-        "caught": 15,
+        "caught": 18,
         "missed": 0,
         "falseAlarms": 0
       },
       "perCheck": {
         "latest_change": {
-          "caught": 4,
+          "caught": 6,
           "missed": 0,
           "falseAlarms": 0
         },
         "space_clash": {
-          "caught": 4,
+          "caught": 5,
           "missed": 0,
           "falseAlarms": 0
         },
@@ -291,18 +331,18 @@
     {
       "threshold": 0.7,
       "total": {
-        "caught": 15,
+        "caught": 18,
         "missed": 0,
         "falseAlarms": 0
       },
       "perCheck": {
         "latest_change": {
-          "caught": 4,
+          "caught": 6,
           "missed": 0,
           "falseAlarms": 0
         },
         "space_clash": {
-          "caught": 4,
+          "caught": 5,
           "missed": 0,
           "falseAlarms": 0
         },
@@ -322,18 +362,18 @@
       "threshold": 0.9,
       "total": {
         "caught": 15,
-        "missed": 0,
+        "missed": 3,
         "falseAlarms": 0
       },
       "perCheck": {
         "latest_change": {
           "caught": 4,
-          "missed": 0,
+          "missed": 2,
           "falseAlarms": 0
         },
         "space_clash": {
           "caught": 4,
-          "missed": 0,
+          "missed": 1,
           "falseAlarms": 0
         },
         "order_of_work": {

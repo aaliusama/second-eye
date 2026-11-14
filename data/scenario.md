@@ -24,6 +24,11 @@ Units from west to east: 201 (x 0-5), 202, 203, 204, 205, 206 (x 25-30). Units: 
 | `vanity-203` | Unit 203 bathroom vanity | planned |
 | `light-206-bath` | Unit 206 bathroom light | planned |
 | `paint-206-living` | Unit 206 living room paint colour | planned |
+| `vanity-204` | Unit 204 vanity (the reason for Rev C) | approved |
+| `socket-204-shaver` | Unit 204 shaver socket, on the west face of W-12 | planned |
+| `tile-204-shower` | Unit 204 shower tile, set out off W-12 | planned |
+| `window-204` | Unit 204 living room window, north facade | approved |
+| `door-204` | Unit 204 entrance door (the blue door sample) | built |
 
 No unit starts with a nickname (the corridor carries its drawing name "corridor" as an alias, nothing more). Crews call Unit 204 "the blue room" (its door was painted blue as a sample); the record has to learn that.
 
@@ -67,6 +72,11 @@ Each row is one labelled case in `data/labels.json`. "Trigger" is the message ke
 | OD2 | open decision | Sat | The 202 kitchen light fixtures are only proposed. Electrical plans to hang them Saturday morning. | `od2-elec` |
 | OD3 | open decision | Fri | The 203 vanity is only proposed. Plumbing plans to set it Friday morning. | `od3-plumb` |
 | OD4 | open decision | Sat | The 206 living room paint colour is only proposed. Painting plans 206 on Saturday morning (same message as SC1). | `sc1-paint` |
+| LC5 | latest change | Sat | Same Rev C move of W-12 as LC1. Electrical reads only site-group. Fri 19:20 electrical: the 204 shaver socket on the bathroom east wall, Saturday afternoon. | `lc5-elec` |
+| LC6 | latest change | Sat | Same Rev C move of W-12. Tiling reads only site-group. Fri 19:31 tiling: the 204 shower tile, working off the east wall, Saturday afternoon. | `lc6-tile` |
+| SC5 | space clash | Sat | Electrical and tiling both work the 204 bathroom east wall on Saturday afternoon. | `lc6-tile` |
+
+Unit 204 in depth: one office change (Rev C) reaches three trades who never read the office thread. Plumbing (morning) is the scripted ghost wall; electrical and tiling (afternoon) show the same ghost from their side. Tiling after the plumbing rough-in is the right order, so no order-of-work finding there. The 204 messages are the last of Friday so earlier message ids and their LLM cache entries do not move; their cache entries are hand-written.
 
 ## Planted non-cases (no finding expected)
 
