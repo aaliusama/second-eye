@@ -17,7 +17,7 @@ describe("checks", () => {
     const findings = runChecks(fixtureScene, planOf(fixtureScene), fixtureIntent);
     const f = findings.find((x) => x.check === "latest_change");
     expect(f).toBeDefined();
-    const { id: _id, summary, rule, ...rest } = f!;
+    const { id: _id, summary, rule, measure, ...rest } = f!;
     const { id: _fid, summary: _fs, ...expected } = fixtureFinding;
     expect(rest).toEqual(expected);
     expect(rule).toEqual(RULE.unheardGeometry);
@@ -26,6 +26,17 @@ describe("checks", () => {
     expect(summary).toMatch(/per the record/i);
     expect(summary).toContain("Unit 204 bathroom east wall");
     expect(summary).toContain("Novak Plumbing");
+    // Measured (lane B): plumbing works on the bathroom (west) face; the record moved it 0.4 m east, away from the work.
+    expect(summary).toContain("leave a 0.40 m gap at the west face");
+    expect(measure?.clearance).toMatchObject({
+      believedFace: [[17.94, 2], [17.94, 5]],
+      recordedFace: [[18.34, 2], [18.34, 5]],
+      offsetM: 0.4,
+      direction: "east",
+      requiredM: 0.6,
+      outcome: "gap",
+    });
+    expect(measure?.clearance?.text).toMatch(/^Per the record, the west face of Unit 204 bathroom east wall is 0\.40 m east/);
     // The fixture has nothing else wrong.
     expect(findings).toHaveLength(1);
   });
