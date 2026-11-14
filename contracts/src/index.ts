@@ -203,6 +203,55 @@ export const Ghost = z.object({
   label: z.string(),
 });
 
+// ---------- Measured geometry and rule trace (lanes B and D, optional: older findings stay valid) ----------
+
+/** Two points: a wall face, as a line in plan metres. */
+export const Face = z.tuple([Point, Point]);
+
+/**
+ * Latest change, measured. The crew works against the face of the wall it believes in; the record has
+ * the wall elsewhere. Distances are perpendicular to the wall, in metres. Thresholds come from one rules file.
+ */
+export const Clearance = z.object({
+  /** The face the crew's work runs along, where they believe it is. */
+  believedFace: Face,
+  /** The same face per the record. */
+  recordedFace: Face,
+  /** Perpendicular distance between the two faces, metres (>= 0). */
+  offsetM: z.number().nonnegative(),
+  /** Which way the record moved the face, from the crew's belief. */
+  direction: z.enum(["north", "south", "east", "west"]),
+  /** Clearance the trade needs from the face, metres (rules file). */
+  requiredM: z.number().nonnegative(),
+  /** inside_new_wall: work on the believed face lands inside the recorded wall; gap: it leaves a gap beyond tolerance. */
+  outcome: z.enum(["inside_new_wall", "gap", "within_tolerance"]),
+  /** The strip the trade works in, along the believed face (polygon), for the web to draw. */
+  workZone: Geometry,
+  /** One plain sentence with the numbers, worded "per the record". */
+  text: z.string(),
+});
+
+/** Space clash, measured: where two crews' work zones intersect. */
+export const Overlap = z.object({
+  /** Intersection area, square metres (> 0 for a clash). */
+  areaM2: z.number().nonnegative(),
+  /** The intersection itself (polygon). */
+  zone: Geometry,
+  /** Each crew's work zone. */
+  zones: z.array(z.object({ crewId: Id, taskId: Id, zone: Geometry })),
+  text: z.string(),
+});
+
+export const Measure = z.object({ clearance: Clearance.optional(), overlap: Overlap.optional() });
+
+/** The rule that produced a finding, for the "How it decided" trace. */
+export const RuleRef = z.object({
+  /** Stable id, e.g. "latest_change.unheard_geometry". */
+  id: z.string().min(1),
+  /** The rule in plain words, as a superintendent would read it. */
+  statement: z.string().min(1),
+});
+
 export const Finding = z.object({
   id: Id,
   check: CheckName,
@@ -219,6 +268,10 @@ export const Finding = z.object({
   /** One sentence, worded "per the record", never as verified reality. */
   summary: z.string(),
   ghost: Ghost.optional(),
+  /** Measured geometry behind the finding (lane B). */
+  measure: Measure.optional(),
+  /** The rule that fired (trace view). */
+  rule: RuleRef.optional(),
 });
 
 export const Fix = z.object({
@@ -242,7 +295,30 @@ export const RehearsalFrame = z.object({
   findings: z.array(Finding),
 });
 
-export const Rehearsal = z.object({ day: Day, frames: z.array(RehearsalFrame) });
+// ---------- Dependency graph of tomorrow's plan (lane C, optional) ----------
+
+/** "to" cannot start before "from" is done: one prerequisite, between two plan tasks. */
+export const PlanEdge = z.object({
+  from: Id,
+  to: Id,
+  placeId: Id,
+  /** Plain words: "close wall needs the inspection first". */
+  reason: z.string(),
+  /** True when the plan schedules "to" before "from" finishes. */
+  violated: z.boolean(),
+});
+
+export const PlanGraph = z.object({
+  /** Task ids in the graph (tomorrow's planned tasks and the prerequisites they wait on). */
+  taskIds: z.array(Id),
+  edges: z.array(PlanEdge),
+  /** The longest dependency chain, task ids in order. */
+  criticalPath: z.array(Id),
+  /** If this task slips, these tasks (other crews included) cannot start as planned. */
+  slips: z.array(z.object({ taskId: Id, blocks: z.array(Id), crewIds: z.array(Id) })),
+});
+
+export const Rehearsal = z.object({ day: Day, frames: z.array(RehearsalFrame), graph: PlanGraph.optional() });
 
 // ---------- Learning ----------
 
@@ -570,6 +646,13 @@ export type CrewIntent = z.infer<typeof CrewIntent>;
 export type ExtractResult = z.infer<typeof ExtractResult>;
 export type CheckName = z.infer<typeof CheckName>;
 export type Ghost = z.infer<typeof Ghost>;
+export type Face = z.infer<typeof Face>;
+export type Clearance = z.infer<typeof Clearance>;
+export type Overlap = z.infer<typeof Overlap>;
+export type Measure = z.infer<typeof Measure>;
+export type RuleRef = z.infer<typeof RuleRef>;
+export type PlanEdge = z.infer<typeof PlanEdge>;
+export type PlanGraph = z.infer<typeof PlanGraph>;
 export type Finding = z.infer<typeof Finding>;
 export type Fix = z.infer<typeof Fix>;
 export type RehearsalFrame = z.infer<typeof RehearsalFrame>;

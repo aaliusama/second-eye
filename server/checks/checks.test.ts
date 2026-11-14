@@ -3,6 +3,7 @@ import type { Element, Plan, PlanTask, Scene } from "@site/contracts";
 import { fixtureFinding, fixtureIntent, fixtureScene, fixtureTask, W12_BEFORE } from "@site/contracts/fixtures";
 import { runChecks } from "./index";
 import { moveLabel } from "./geometry";
+import { RULE } from "./rule-refs";
 
 // Owner: C. Build each test from contracts/fixtures (fixtureScene, fixtureIntent, fixtureFinding).
 
@@ -16,9 +17,10 @@ describe("checks", () => {
     const findings = runChecks(fixtureScene, planOf(fixtureScene), fixtureIntent);
     const f = findings.find((x) => x.check === "latest_change");
     expect(f).toBeDefined();
-    const { id: _id, summary, ...rest } = f!;
+    const { id: _id, summary, rule, ...rest } = f!;
     const { id: _fid, summary: _fs, ...expected } = fixtureFinding;
     expect(rest).toEqual(expected);
+    expect(rule).toEqual(RULE.unheardGeometry);
     expect(f!.ghost).toEqual({ elementId: "W-12", geometry: W12_BEFORE, label: "0.4 m east" });
     expect(f!.id).toBe("f-latest_change-m-002-W-12");
     expect(summary).toMatch(/per the record/i);

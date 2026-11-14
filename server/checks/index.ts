@@ -1,5 +1,6 @@
 import type { CheckName, CrewIntent, Element, Finding, Id, Plan, PlanTask, Scene, Slot, TaskType } from "@site/contracts";
 import { inside, knownGeometry, midpoint, moveLabel, sameGeometry, unheardGeometryChanges } from "./geometry";
+import { DEFAULT_RULE, RULE } from "./rule-refs";
 import {
   DECISION_INSIDE_PLACE,
   HOLD_ON_OPEN_DECISION,
@@ -113,6 +114,9 @@ function finding(
   work: Work,
   fields: Pick<Finding, "severity" | "evidenceMessageIds" | "crewIds" | "elementIds" | "taskIds" | "summary"> & {
     ghost?: Finding["ghost"];
+    measure?: Finding["measure"];
+    /** Defaults to the check's one rule (rule-refs.ts). */
+    rule?: Finding["rule"];
   },
 ): Finding {
   const f: Finding = {
@@ -129,6 +133,9 @@ function finding(
     summary: fields.summary,
   };
   if (fields.ghost) f.ghost = fields.ghost;
+  if (fields.measure) f.measure = fields.measure;
+  const rule = fields.rule ?? DEFAULT_RULE[check];
+  if (rule) f.rule = rule;
   return f;
 }
 
@@ -220,6 +227,7 @@ function orderOfWork(ctx: Ctx, work: Work): Finding[] {
       crewIds: [work.crewId, ...prereqs.map((t) => t.crewId)],
       elementIds: [work.placeId, ...work.elementIds],
       taskIds: [...work.taskIds, ...prereqs.map((t) => t.id)],
+      rule: prereqs.length === 0 ? RULE.prerequisiteMissing : RULE.prerequisiteLater,
     }),
   ];
 }
