@@ -7,25 +7,24 @@
 **See tomorrow's mistake before it gets built.**
 
 A wall moves in the office chat. The plumber still plans from the old line.<br>
-Second Eye turns crew messages into a sourced model of one floor, checks every stated plan against it,<br>
-and shows the conflicting position as a red **ghost wall** before work starts.
+**Second Eye makes that mismatch visible before the crew starts.**<br>
+Crew messages become a shared floor plan, an early warning, and a correction someone can act on.
 
 [![Talona track](https://img.shields.io/badge/Talona-Context%20for%20the%20Physical%20World-1C2B3A?style=flat-square)](docs/TALONA_ALIGNMENT.md)
-[![Node 22.12+](https://img.shields.io/badge/node-22.12%2B-1C2B3A?style=flat-square)](#quick-start)
-[![TypeScript](https://img.shields.io/badge/TypeScript-strict-1C2B3A?style=flat-square)](docs/architecture.md)
 [![Offline demo](https://img.shields.io/badge/demo-offline%2C%20no%20API%20key-1F8A4C?style=flat-square)](#quick-start)
 [![Simulated data](https://img.shields.io/badge/site%20data-simulated-E0A100?style=flat-square)](#boundaries)
-[![MCP](https://img.shields.io/badge/agents-MCP-526575?style=flat-square)](mcp/README.md)
 
 **[Open the live demo](https://site-rehearsal.onrender.com)** · [Guided presenter](https://site-rehearsal.onrender.com/?present=1) · [Crew phone](https://site-rehearsal.onrender.com/phone)
 
-[Pitch deck](docs/deck/index.html) ([PDF](docs/deck/deck.pdf))
+[Read the pitch deck (PDF)](docs/deck/deck.pdf) · [Run it locally](#quick-start)
 
 [Quick start](#quick-start) · [How it works](#how-it-works) · [Measured results](#measured-not-assumed) · [Architecture](docs/architecture.md) · [Demo script](docs/demo-script.md)
 
 <br>
 
-<img src="docs/assets/readme/workspace.png" alt="Second Eye: the floor plan beside the superintendent's site desk. Unit 204's recorded wall with its ghost position and the measured note '0.40 m gap · needs 0.60 m clear', two shared work zones hatched red, and the rehearsal bar naming the critical path. All site data is simulated." width="100%">
+<img src="docs/assets/readme/ghost-story.gif" alt="Illustrated sequence: the crew's old wall line differs from the latest record by 40 cm; a red ghost reveals the risk; sending a correction leaves it amber until a simulated crew reply confirms the revision and triggers a recheck. Simulated site data." width="100%">
+
+<sub>A twelve-second illustrated story, not an app recording. Plays once. <a href="docs/assets/readme/ghost-story.png">View the still image.</a></sub>
 
 </div>
 
@@ -34,38 +33,72 @@ and shows the conflicting position as a red **ghost wall** before work starts.
 > [!IMPORTANT]
 > **Hackathon prototype on simulated data.** Built for the Talona · Context for the Physical World track at proximata Hackathon '26. The model reflects what was *said in the record*, not what was built. A crew acknowledgement records receipt in the simulation; it does not establish inspection, completed work or physical safety.
 
-## What it is
+## One wall. Two versions. One chance to intervene.
+
+It is the evening before work starts. The architect has moved the bathroom wall in Unit 204 by **40 cm**. That change is in the office thread. Plumbing's stated plan still uses the old line.
+
+Second Eye puts both lines on the floor plan. The red **ghost wall** shows the mismatch. Beside it are the messages that explain the risk, the crew affected, and a correction ready for the superintendent to review.
+
+**The promise is simple: make a coordination mistake visible while there is still time to question the plan.**
+
+| In the site record | On the superintendent's desk |
+|---|---|
+| A change is buried in another thread | The old and latest wall lines appear together |
+| Two crews book the same work area | Their overlapping work zones are highlighted |
+| A crew plans to close a wall before inspection | The missing prerequisite is shown on tomorrow's timeline |
+| A crew plans around an unresolved decision | The decision and its source stay visible for review |
+
+## From a warning to a closed loop
 
 The superintendent needs to know, before 07:00, which crew is about to work from old information, and who to tell. Second Eye answers with one shared record and one checking engine, run at two moments: the instant a crew states its plan, and again the evening before.
 
 | Step | What the product does |
 |---|---|
 | **Understand the plan** | Extracts crew intent and scene changes from messages. Every fact keeps its source message and a confidence. |
-| **Expose the mismatch** | Runs four deterministic checks: latest change, shared space, order of work and open decision. Measures the gap between the wall face a crew believes in and the recorded face, and the floor two crews' work zones share. Draws the ghost beside the recorded wall. |
+| **Expose the mismatch** | Checks changes, shared space, work order and open decisions. Measures the difference between recorded wall versions and the overlap between work areas. |
 | **Show how it decided** | Traces every finding from the message, through the facts the language model read, to the rule that fired and the measured result. |
-| **Rehearse tomorrow** | Plays the planned work forward on a time slider, draws what must finish first, marks the critical path and says who is blocked if a task slips. Puts the three most important items first. |
+| **Rehearse tomorrow** | Checks morning and afternoon plans, shows what must happen first, and identifies which crews a delay would block. Puts the three most important items first. |
 | **Send the correction** | The superintendent approves a sourced crew message in one tap. The risk stays open, in amber, until the crew confirms. |
 | **Confirm and recheck** | Records an explicit simulated reply for that exact revision, rejects stale replies and keeps an incident receipt. |
 | **Remember the lesson** | Reuses a corrected location nickname. Remembers a reviewed incident, with the reason and an Undo. |
 
 Text-only sheet comparisons also flag a difference between an issued revision and the one a crew says it holds. No drawing attachments are read.
 
+<img src="docs/assets/readme/workspace.png" alt="Actual Second Eye interface: a floor plan, ghost wall, sourced incident cards and tomorrow's crew timeline. Simulated site data." width="100%">
+
+*The working prototype: one floor, one shared record, and a desk organized around what needs attention before work starts.*
+
+## A three-minute tour
+
+Open the [guided presenter](https://site-rehearsal.onrender.com/?present=1), press **R** to start clean, then **→** to advance. The hosted prototype shares a session across visitors; use the [local demo](#quick-start) for an isolated presentation.
+
+1. **See the mistake.** Compare the latest wall line with the version available in the crew's threads.
+2. **Inspect the evidence.** Open “How it decided”: message → extracted fact → rule → measured result.
+3. **Check tomorrow.** See the order of work and the crews affected by a delay.
+4. **Close the communication loop.** Send the correction, see amber while waiting, then simulate a revision-specific reply and recheck.
+5. **Show the lesson sticking.** Map “the blue room” once, then reuse the same words on the next run.
+
+The [presenter script](docs/demo-script.md) contains all twelve beats. The [pitch deck](docs/deck/deck.pdf) gives the short story; the [architecture guide](docs/architecture.md) supplies the technical detail.
+
 ## How it works
 
 ### One floor, many versions of it
 
-Most tools keep one model of the building. A site doesn't have one. Each crew works from **its own version**: the changes said in the threads it reads, and none of the ones it doesn't.
+The latest project record and the information available to a crew can be different. Second Eye compares **three things: the latest record, the crew-accessible record, and the work that crew intends to do.**
 
-Second Eye models that directly. Every change to every element keeps the thread it was said in. From that history the engine derives, **per crew**, where that crew believes each wall is (`knownGeometry(element, crew)`). A ghost wall is the difference between one crew's belief and the record, at the place where its planned work meets it. The same view works in the flat plan and in 3D, where the walls glide to where the chosen crew believes they are.
+Every change keeps its source message and thread. The engine uses thread access to derive the wall version available to each crew. That is a proxy for information availability, not proof of what anyone read or believes. A ghost highlights the difference where the crew's stated work meets the wall. The flat plan and optional 3D view show the same record.
 
 <div align="center">
-<img src="docs/assets/readme/who-knows.png" alt="The floor as Novak Plumbing knows it: their wall drawn where they believe it is, the record dashed red 0.4 m east. Beside it, the Who knows what matrix: every change since the drawing against every crew, with the Unit 204 wall row marked red for Novak Plumbing. Simulated site data." width="100%">
-<br><sub>"See the floor as" any crew. The matrix shows every change against every crew: heard, not heard, or not heard where the checks find that crew's work meets it.</sub>
+<img src="docs/assets/readme/who-knows.png" alt="Novak Plumbing's thread-access view of the floor, compared with the latest recorded wall 0.4 m east. The matrix highlights a change absent from that crew's available threads. Simulated site data." width="100%">
+<br><sub>Compare the latest record with the version available in each crew's threads. The matrix highlights information gaps that intersect planned work.</sub>
 </div>
+
+<details>
+<summary><strong>For technical judges: measured geometry, decision traces and the plan graph</strong></summary>
 
 ### Measured, not just flagged
 
-The checks work in metres. Walls are thick segments and rooms are polygons. For a latest change, the engine finds the face of the wall the crew works on, measures perpendicular to it between the face the crew believes in and the recorded face, and compares that with the clear working depth and the tolerance for that trade. A move into the work side lands the work inside the new wall; a move away leaves a gap. For a space clash, it intersects the two crews' work zones and reports the shared floor area. Every number comes from one rules file, [`geometry-rules.ts`](server/checks/geometry-rules.ts), with a one-line reason per value: a building code where one applies, otherwise a labelled assumption. None were tuned on the labelled cases.
+The checks work in metres. Walls are thick segments and rooms are polygons. For a latest change, the engine measures the perpendicular offset between recorded wall faces and compares it with configured trade clearances and tolerances. For a space clash, it intersects the crews' work zones and reports the shared floor area. Thresholds and their stated rationale are inspectable in [`geometry-rules.ts`](server/checks/geometry-rules.ts). These prototype rules are not a certification of code compliance or physical safety.
 
 On the simulated data, per the record, the ghost wall measures a **0.40 m gap** at the west face of the Unit 204 bathroom wall, where plumbing rough-in needs 0.60 m clear and tolerates 13 mm. So it is a hold.
 
@@ -112,6 +145,8 @@ It is TypeScript throughout:
 - Replays run on recorded time, so results repeat exactly.
 - Agents and the [demo robot planner](mcp/README.md) query the same record through MCP.
 
+</details>
+
 ## Quick start
 
 Requires **Node.js 22.12+** and npm. From the repository root:
@@ -135,7 +170,7 @@ Prepared messages still use their cache; unfamiliar wording goes to live extract
 
 ## Measured, not assumed
 
-Every number below comes from `npm run eval` or `npm run eval:challenge`. All data is synthetic, so these are **not field results**.
+Results below are retained in the reports produced by `npm run eval` and `npm run eval:challenge`. All data is synthetic, so these are **not field results**. “Caught” means a labelled risk was detected; a “false alarm” is a finding without a matching labelled risk.
 
 | Evaluation | Caught | Missed | False alarms | Notes |
 |---|---:|---:|---:|---|
@@ -156,6 +191,14 @@ Methodology: [evaluation guide](eval/README.md) · [golden case details](eval/re
 - **Sent is not confirmed.** A geometry risk turns green only after an explicit reply for the current revision.
 - **Learning is explicit.** It stores corrections and review decisions with Undo. No model is retrained.
 - **Scope.** A standalone prototype: one floor, text input, no deployed Talona integration.
+- **Starting model.** The floor geometry is seeded; messages update it. Chat does not reconstruct a building from scratch.
+- **Rehearsal.** Checks and dependencies run in time slots. It does not simulate construction physics or verify completed tasks.
+
+## Where this goes next
+
+The next useful step is a **shadow-mode trial on one floor**: a superintendent reviews alerts against authorized records before any real crew instruction. Measure which warnings help, which are missed, and how much review effort the system creates. That is a proposed trial, not a deployed customer or a claimed saving.
+
+The immediate priority is stronger extraction on unfamiliar wording, followed by a reviewed release and complete submission materials. See the [current readiness review](docs/README_REVIEW.md) for verified work and outstanding items, and [ready-to-use project copy](docs/project-description.md) for the repository description and short pitch.
 
 ## Develop and verify
 
