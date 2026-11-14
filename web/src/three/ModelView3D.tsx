@@ -6,7 +6,7 @@ import { Box3, ExtrudeGeometry, Shape, Sphere, Vector2, Vector3, type Group, typ
 import type { Line2, LineSegments2 } from "three-stdlib";
 import type { Crew, Element, Finding, Scene } from "@site/contracts";
 import { beliefGeometry, beliefState, easeInOut, offsetLabel, sameGeometry } from "../derive";
-import { font } from "../tokens";
+import { font, scene3d } from "../tokens";
 import { elementToMesh, type MeshProps } from "./elementToMesh";
 import { boxEdges, planBounds, slabOutline, solidBounds, solidFor, elementSolid, type Solid } from "./geometry";
 import { color, ghostFill, ghostRevealFill, groundShadow, unitBox } from "./materials";
@@ -211,7 +211,7 @@ function Model({ scene, findings, selectedId, onSelect, revealFindingKey, lens, 
 
   return (
     <>
-      <hemisphereLight args={[color.paper, color.inkSoft, 1.15]} />
+      <hemisphereLight args={[scene3d.sky, scene3d.groundLight, 1.15]} />
       <directionalLight
         position={[span * 0.12, span * 0.85, span * 0.55]}
         intensity={2.1}
@@ -237,15 +237,15 @@ function Model({ scene, findings, selectedId, onSelect, revealFindingKey, lens, 
         args={[10, 10]}
         cellSize={1}
         cellThickness={0.55}
-        cellColor={color.inkSoft}
+        cellColor={scene3d.gridCell}
         sectionSize={5}
         sectionThickness={1}
-        sectionColor={color.inkSoft}
+        sectionColor={scene3d.gridSection}
         fadeDistance={span * 2.4}
         fadeStrength={2.2}
         infiniteGrid
       />
-      <ContactShadows position-y={0.004} scale={span * 2.2} resolution={1024} blur={2.6} far={1.4} opacity={0.38} color={color.ink} />
+      <ContactShadows position-y={0.004} scale={span * 2.2} resolution={1024} blur={2.6} far={1.4} opacity={0.6} color={scene3d.shadow} />
 
       <group position={offset}>
         <GridBubbles bounds={bounds} />

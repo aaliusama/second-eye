@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import type { Finding, Fix, IncidentReceipt } from "@site/contracts";
 import { fixtureFinding, fixtureFix, fixtureMessages, fixtureScene } from "@site/contracts/fixtures";
 import { sampleClearance } from "./fixtures/laneSamples";
-import { traceOf } from "./howDecided";
+import { UNSURE_BELOW as SERVER_UNSURE_BELOW } from "../../server/checks/rules";
+import { RECEIPT_TONE, UNSURE_BELOW, confidenceView, traceOf } from "./howDecided";
 
 const rule = { id: "latest_change.unheard_geometry", statement: "A crew's planned work touches an element whose latest position was said in a thread that crew does not read." };
 const finding: Finding = { ...fixtureFinding, rule };
@@ -49,5 +50,20 @@ describe("how it decided", () => {
     expect(status([sent], [receipt("confirmed")])).toBe("confirmed");
     expect(status([sent], [receipt("superseded")])).toBe("superseded");
     expect(traceOf(finding, fixtureScene, fixtureMessages, [sent], []).fixes[0].words).toContain("Sent is not confirmed");
+  });
+});
+
+describe("how it decided: display helpers", () => {
+  it("marks readings below the server's unsure threshold as unconfirmed, with the real number", () => {
+    expect(UNSURE_BELOW).toBe(SERVER_UNSURE_BELOW);
+    expect(confidenceView(0.88)).toEqual({ pct: "88%", unsure: false });
+    expect(confidenceView(0.7)).toEqual({ pct: "70%", unsure: false });
+    expect(confidenceView(0.55)).toEqual({ pct: "55%", unsure: true });
+  });
+
+  it("only a crew confirmation reads green", () => {
+    expect(Object.entries(RECEIPT_TONE).filter(([, t]) => t === "confirmed").map(([s]) => s)).toEqual(["confirmed"]);
+    expect(RECEIPT_TONE.sent).toBe("waiting");
+    expect(RECEIPT_TONE.waiting).toBe("waiting");
   });
 });

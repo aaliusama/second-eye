@@ -1,0 +1,103 @@
+/* Owner: D (lane W1). A drafting table at night (docs/DESIGN_DIRECTION_PREMIUM.md): dark theme layer
+   and the floating HUD over the canvas. Selectors carry #root so they win over index.css whatever the
+   import order. Colours, blur and shadows come from tokens.ts as variables. Glass is for HUD only. */
+
+html { color-scheme: dark; background: var(--paper); }
+
+/* Header and side panel: slate surfaces, hairline rules, no shadows. */
+#root .top { background: var(--surface); border-bottom: var(--rule) solid var(--paper-rule); }
+#root .side { background: var(--surface); border-left: var(--rule) solid var(--paper-rule); }
+#root .workspace-nav { background: var(--surface); }
+
+/* The canvas: near-black floor, a fine dot field over a quiet 5-cell line grid (about 4% white). */
+#root .model {
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(var(--depth-dot) 1px, transparent 1.2px),
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size:
+    var(--depth-dot-step) var(--depth-dot-step),
+    calc(var(--depth-dot-step) * 5) calc(var(--depth-dot-step) * 5),
+    calc(var(--depth-dot-step) * 5) calc(var(--depth-dot-step) * 5);
+  background-position: -1px -1px;
+}
+#root .model-caption { background: linear-gradient(var(--paper) 45%, transparent); }
+
+/* ---------- Glass HUD: panels that float over the canvas ---------- */
+
+#root .bottom,
+#root .lens-switch,
+#root .drawing-legend,
+#root .comparison-tools,
+#root .presenter {
+  background: var(--hud-bg);
+  border: var(--rule) solid var(--hud-border);
+  border-radius: var(--radius-large);
+  box-shadow: var(--depth-hud);
+  -webkit-backdrop-filter: blur(var(--depth-blur));
+  backdrop-filter: blur(var(--depth-blur));
+}
+
+/* Lens switch: a condensed caps kicker over a segmented control. */
+#root .lens-label {
+  color: var(--ink-soft);
+  font-size: 11px;
+  font-stretch: var(--condensed);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+#root .lens-switch { padding: 3px; }
+#root .lens-switch button { border-radius: var(--radius); }
+#root .lens-switch button:hover:not(:disabled) { background: var(--surface-raised); color: var(--ink); }
+#root .lens-switch button[aria-pressed="true"] { background: var(--surface-raised); color: var(--ink); box-shadow: var(--depth-ink-highlight), 0 0 0 1px var(--hud-border); }
+#root .lens-switch button.lens-crew[aria-pressed="true"] { background: var(--ink); color: var(--paper); box-shadow: none; }
+
+/* Flat / 3D toggle in the header: same segmented look, no glass (it is not over the canvas). */
+#root .toggle { background: var(--paper); border: var(--rule) solid var(--paper-rule); }
+#root .toggle button:hover:not(:disabled) { background: var(--surface-raised); color: var(--ink); }
+#root .toggle button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+
+/* Wide screens: the rehearsal slider floats on the canvas instead of taking a row below it, so the
+   floor plan keeps its full height. Small screens keep the stacked layout from index.css. */
+@media (min-width: 761px) {
+  #root .app {
+    --hud-dock: 100px;
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas:
+      "top top"
+      "model side";
+  }
+  #root .bottom {
+    grid-area: model;
+    align-self: end;
+    position: relative;
+    z-index: 6;
+    margin: 0 var(--pad) var(--pad);
+    max-height: min(60%, 520px);
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  #root .model > .flat,
+  #root .model > .view3d { bottom: calc(var(--hud-dock) + var(--pad)); }
+  #root .drawing-legend,
+  #root .presenter { bottom: calc(var(--hud-dock) + var(--pad) + 12px); }
+  #root .presenter { left: var(--pad); }
+}
+
+#root .bottom .slider { background: transparent; }
+#root .drawing-legend { padding: 6px 12px; }
+
+/* Without blur support, a solid slate panel keeps text contrast. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  #root .bottom, #root .lens-switch, #root .drawing-legend, #root .comparison-tools, #root .presenter { background: var(--surface); }
+}
+
+/* Controls on dark. */
+#root select, #root input, #root textarea { background: var(--paper); color: var(--ink); }
+#root .track input[type="range"] { accent-color: var(--ink); }
+
+@media (prefers-reduced-motion: reduce) {
+  #root .lens-switch button, #root .toggle button { transition: none !important; }
+}

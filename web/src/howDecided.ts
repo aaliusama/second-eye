@@ -153,3 +153,31 @@ export function traceOf(
     fixes: fixes.filter((f) => f.findingId === finding.id).map((f) => fixOf(scene, finding, f, receipts)),
   };
 }
+
+/**
+ * Below this confidence a reading is unsure. Mirrors UNSURE_BELOW in server/checks/rules.ts (a finding
+ * resting on an unsure entry is a warn, never a hold); howDecided.test.ts fails if the two drift.
+ */
+export const UNSURE_BELOW = 0.7;
+
+export interface ConfidenceView {
+  /** "88%", the stored confidence rounded. */
+  pct: string;
+  /** Below UNSURE_BELOW: the reading is shown as unconfirmed. */
+  unsure: boolean;
+}
+
+export function confidenceView(c: number): ConfidenceView {
+  return { pct: `${Math.round(c * 100)}%`, unsure: c < UNSURE_BELOW };
+}
+
+/** How a fix's crew receipt reads at a glance: amber until the crew confirms, green only on a confirmation. */
+export type ReceiptTone = "waiting" | "confirmed" | "closed";
+export const RECEIPT_TONE: Record<FixStatus, ReceiptTone> = {
+  pending: "waiting",
+  waiting: "waiting",
+  sent: "waiting",
+  superseded: "waiting",
+  confirmed: "confirmed",
+  rejected: "closed",
+};

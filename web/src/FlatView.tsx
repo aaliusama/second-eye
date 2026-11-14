@@ -28,9 +28,25 @@ import { clearanceTone, clearanceWords, faceGeometry, overlapLabel } from "./dep
 import { phase, REVEAL } from "./reveal";
 import type { Selection } from "./store";
 import { color, drawing, font } from "./tokens";
+import "./risk.css";
 
 // Owner: D. Top-down SVG plan in drafting conventions (web/AGENTS.md). Works without WebGL.
 // Plan coordinates: metres, x east, y north. SVG y points down, so every y is negated.
+
+/**
+ * Risk hierarchy accents (lane W2). Red is the active conflict only, amber a correction sent or a
+ * decision still open, emerald a confirmation on record. Neutrals stay on the tokens.
+ */
+const RISK = { conflict: "#EF4444", amber: "#F59E0B", confirmed: "#10B981" } as const;
+
+/** A soft glow under active conflict geometry, so a 0.40 m gap reads on a projector. Style only. */
+function RiskGlow({ g, width }: { g: Geometry; width: number }) {
+  return (
+    <g className="risk-pulse" filter="url(#risk-glow)" pointerEvents="none" aria-hidden="true">
+      <Shape g={g} l={{ stroke: RISK.conflict, width: width * 2.2, fill: "none", fillOpacity: 0 }} />
+    </g>
+  );
+}
 
 const P = (p: Point): [number, number] => [p[0], -p[1]];
 const poly = (ps: Point[]) => ps.map((p) => P(p).join(",")).join(" ");
@@ -93,16 +109,16 @@ function look(state: ElementState, type: Element["type"]): Look {
     case "planned":
       return { stroke: color.inkSoft, width: drawing.hairline, fill: "none", fillOpacity: 0 };
     case "proposed":
-      return { stroke: color.pending, width: drawing.outline, dash: "0.25 0.15", fill: "none", fillOpacity: 0 };
+      return { stroke: RISK.amber, width: drawing.outline, dash: "0.25 0.15", fill: "none", fillOpacity: 0 };
     case "approved":
       return { stroke: color.ink, width: area ? drawing.hairline * 1.5 : drawing.outline, fill: "none", fillOpacity: 0 };
     case "built":
       // A built room is not a black block: rooms and zones get a light ink wash, walls solid ink.
       return { stroke: color.ink, width: drawing.outline, fill: color.ink, fillOpacity: area ? 0.06 : 1 };
     case "unconfirmed":
-      return { stroke: color.pending, width: drawing.outline, fill: "url(#hatch-pending)", fillOpacity: 1 };
+      return { stroke: RISK.amber, width: drawing.outline, fill: "url(#hatch-pending)", fillOpacity: 1 };
     case "conflict":
-      return { stroke: color.redline, width: drawing.heavy, fill: "none", fillOpacity: 0 };
+      return { stroke: RISK.conflict, width: drawing.heavy, fill: "none", fillOpacity: 0 };
   }
 }
 
@@ -216,7 +232,7 @@ function Dimension({
   truth,
   label,
   opacity,
-  tone = color.redline,
+  tone = RISK.conflict,
 }: {
   ghost: Geometry;
   truth: Geometry;
@@ -310,7 +326,7 @@ function RoomLabel({ el, tasks, scene }: { el: Element; tasks: PlanTask[]; scene
   );
 }
 
-const TONE = { redline: color.redline, pending: color.pending, soft: color.inkSoft } as const;
+const TONE = { redline: RISK.conflict, pending: RISK.amber, soft: color.inkSoft } as const;
 
 /**
  * Lane B's measured geometry, in drafting conventions. Clearance: the work-zone strip (soft hatch),
@@ -369,9 +385,9 @@ function MeasureLayer({ f, scene, opacity, sent }: { f: Finding; scene: Scene; o
                 </g>
               );
             })())}
-            {shared && <polygon points={poly(shared)} fill="url(#hatch-clash)" stroke={color.redline} strokeWidth={drawing.outline} />}
+            {shared && <polygon points={poly(shared)} fill="url(#hatch-clash)" stroke={RISK.conflict} strokeWidth={drawing.outline} />}
             {shared && (
-              <text x={cx} y={cy} className="dim-label" fontSize={drawing.smallLabel} style={{ fill: color.redline, paintOrder: "stroke", stroke: color.paper, strokeWidth: 0.12 }}>
+              <text x={cx} y={cy} className="dim-label" fontSize={drawing.smallLabel} style={{ fill: RISK.conflict, paintOrder: "stroke", stroke: color.paper, strokeWidth: 0.12 }}>
                 {overlapLabel(o.areaM2)}
               </text>
             )}
@@ -450,10 +466,12 @@ export function FlatView(props: FlatViewProps) {
 
   const drawEl = (el: Element): ReactNode => {
     const l = look(stateOf(el), el.type);
-    const lk = !lens && clearIds.has(el.id) && !conflictIds.has(el.id) ? { ...l, stroke: color.clear, width: drawing.heavy } : l;
+    const lk = !lens && clearIds.has(el.id) && !conflictIds.has(el.id) ? { ...l, stroke: RISK.confirmed, width: drawing.heavy } : l;
     const g = geomOf(el);
+    const conflict = stateOf(el) === "conflict" && !lens;
     return (
-      <g key={el.id}>
+      <g key={el.id} className={conflict ? "risk-conflict" : undefined}>
+        {conflict && <RiskGlow g={g} width={drawing.heavy} />}
         <Shape g={g} l={lk} />
         {selectedId === el.id && <Shape g={g} l={{ stroke: color.ink, width: drawing.heavy, dash: "0.12 0.12", fill: "none", fillOpacity: 0 }} />}
       </g>
@@ -471,14 +489,17 @@ export function FlatView(props: FlatViewProps) {
         style={{ fontFamily: font.family }}
       >
         <defs>
+          <filter id="risk-glow" filterUnits="userSpaceOnUse" x={vb.x} y={vb.y} width={vb.w} height={vb.h}>
+            <feGaussianBlur stdDeviation={0.14} />
+          </filter>
           <pattern id="hatch-pending" width={0.3} height={0.3} patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-            <line x1={0} y1={0} x2={0} y2={0.3} stroke={color.pending} strokeWidth={0.06} />
+            <line x1={0} y1={0} x2={0} y2={0.3} stroke={RISK.amber} strokeWidth={0.06} />
           </pattern>
           <pattern id="hatch-zone" width={drawing.hatchStep} height={drawing.hatchStep} patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
             <line x1={0} y1={0} x2={0} y2={drawing.hatchStep} stroke={color.inkSoft} strokeWidth={drawing.hatchWidth} />
           </pattern>
           <pattern id="hatch-clash" width={drawing.hatchStep} height={drawing.hatchStep} patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">
-            <line x1={0} y1={0} x2={0} y2={drawing.hatchStep} stroke={color.redline} strokeWidth={drawing.hatchWidth * 1.5} />
+            <line x1={0} y1={0} x2={0} y2={drawing.hatchStep} stroke={RISK.conflict} strokeWidth={drawing.hatchWidth * 1.5} />
           </pattern>
         </defs>
         <Grid box={base} />
@@ -507,7 +528,7 @@ export function FlatView(props: FlatViewProps) {
         {lens && differs.map((el) => {
           const belief = beliefGeometry(el, lens);
           const exposed = exposedIds?.has(el.id) ?? false;
-          const tone = exposed ? color.redline : color.inkSoft;
+          const tone = exposed ? RISK.conflict : color.inkSoft;
           const opacity = easeOut(Math.max(0, (glide.t - 0.55) / 0.45));
           const last = unheardChanges(el, lens).filter((h) => h.geometry).at(-1);
           const m = midpoint(el.geometry);
@@ -543,14 +564,15 @@ export function FlatView(props: FlatViewProps) {
           const anchor = west ? "end" : "start";
           // Correction sent, crew has not confirmed: still open, but amber, not red.
           const sent = sentIds?.has(f.id) ?? false;
-          const tone = sent ? color.pending : color.redline;
+          const tone = sent ? RISK.amber : RISK.conflict;
           return (
             <g key={key}>
               {draw > 0 && comparison !== "earlier" && (
                 <Shape g={truth.geometry} l={{ stroke: color.ink, width: drawing.heavy, fill: "none", fillOpacity: 0 }} pathLength offset={1 - draw} />
               )}
               {grow > 0 && (
-                <g className="ghost">
+                <g className={`ghost${sent ? " risk-sent" : " risk-conflict"}`}>
+                  {!sent && <RiskGlow g={g} width={drawing.outline} />}
                   <Shape
                     g={g}
                     l={{ stroke: tone, width: drawing.outline, dash: "0.2 0.12", fill: tone, fillOpacity: drawing.ghostOpacity }}

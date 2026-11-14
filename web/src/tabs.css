@@ -1,0 +1,142 @@
+/* Desk tabs (On its own, Learning, Who knows, huddle, sheets, review memory): shared headings and
+   the "Who knows" matrix, restyled for the drafting-table-at-night look. Neutrals come only from
+   var(--…) tokens so the dark remap in tokens.ts carries through; meaning colours stay meaning.
+   Every selector is scoped to its section so it wins over the base rules in index.css. */
+
+/* ---------- Heading block: kicker (condensed caps), one display line, lede ---------- */
+:is(.autonomy, .lessons, .knowledge) .knowledge-kicker {
+  margin: 0;
+  font-size: 10.5px;
+  font-weight: 650;
+  font-stretch: var(--condensed);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--ink-soft);
+}
+:is(.autonomy, .lessons, .knowledge) .knowledge-headline {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 620;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  text-wrap: balance;
+}
+:is(.autonomy, .lessons, .knowledge) .knowledge-lede { margin: 0; font-size: 13px; line-height: 1.55; color: var(--ink-soft); max-width: 62ch; }
+.autonomy, .lessons, .knowledge { gap: 14px; }
+
+.tab-title { margin: 0; font-size: var(--heading); font-weight: 620; letter-spacing: -0.02em; line-height: 1.25; color: var(--ink); }
+.tab-lede { margin: 0; line-height: 1.5; }
+
+/* ---------- Who knows: the matrix, legible on dark ---------- */
+.knowledge .matrix { font-size: var(--small); }
+.knowledge .matrix thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--surface);
+  padding: 0 0 8px;
+  box-shadow: inset 0 -1px 0 var(--paper-rule);
+}
+.knowledge .matrix .matrix-change {
+  font-size: 10.5px;
+  font-weight: 650;
+  font-stretch: var(--condensed);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  vertical-align: bottom;
+}
+/* Crew letter badge: the letter carries it, the hue is a 2px base rule, not a fill. */
+.knowledge .matrix-crew {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: var(--radius);
+  display: grid;
+  place-items: center;
+  margin: 0 auto;
+  font-size: 13px;
+  font-weight: 700;
+  font-stretch: var(--condensed);
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--crew) 22%, var(--surface));
+  border: var(--rule) solid color-mix(in srgb, var(--crew) 70%, var(--surface));
+  box-shadow: inset 0 -2px 0 var(--crew);
+  transition: background-color var(--answer) var(--ease-out), color var(--answer) var(--ease-out);
+}
+.knowledge .matrix-crew:hover:not(:disabled) { background: color-mix(in srgb, var(--crew) 38%, var(--surface)); color: var(--ink); }
+.knowledge .matrix-crew[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); box-shadow: inset 0 -2px 0 var(--crew); }
+
+.knowledge .matrix tbody tr + tr > * { border-top: var(--rule) solid var(--paper-rule); }
+.knowledge .matrix tbody tr:hover > * { background: color-mix(in srgb, var(--ink) 4%, transparent); }
+.knowledge .matrix-row { padding: 9px 8px 9px 0; color: var(--ink); background: transparent; }
+.knowledge .matrix-name { font-weight: 600; font-size: 13px; line-height: 1.3; color: var(--ink); }
+.knowledge .matrix-what { color: var(--ink-soft); font-size: 11.5px; line-height: 1.35; font-variant-numeric: tabular-nums; }
+.knowledge .matrix td { text-align: center; width: 32px; }
+.knowledge .matrix td.in-lens { background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.knowledge .matrix tr.hot > th { box-shadow: inset 2px 0 0 var(--redline); }
+.knowledge .matrix tr.hot .matrix-row { padding-left: 8px; }
+.knowledge .matrix tr.selected > * { background: color-mix(in srgb, var(--redline) 8%, transparent); }
+
+/* Marks: shape as well as colour. Heard = solid ink square; not heard = hairline outline; exposed = redline. */
+.knowledge .mark { width: 10px; height: 10px; border-radius: 2px; }
+.knowledge .mark.heard { background: var(--ink); box-shadow: none; opacity: 0.9; }
+.knowledge .mark.unheard { background: transparent; box-shadow: inset 0 0 0 1.25px var(--ink-soft); opacity: 0.8; }
+.knowledge .mark.exposed { background: color-mix(in srgb, var(--redline) 22%, transparent); box-shadow: inset 0 0 0 1.5px var(--redline); }
+.knowledge .matrix-key { gap: 6px 16px; font-size: 11.5px; color: var(--ink-soft); padding-top: 4px; border-top: var(--rule) solid var(--paper-rule); }
+
+/* ---------- 06:30 huddle ---------- */
+.huddle-panel .huddle-list { gap: var(--gap); }
+.huddle-panel .huddle-list .fix { border-left-width: 2px; padding: 2px 0 2px 12px; gap: 6px; }
+.huddle-panel .huddle-list .fix.warn { border-left-color: var(--pending); }
+.huddle-panel .huddle-list .severity {
+  font-size: 10.5px;
+  font-weight: 650;
+  font-stretch: var(--condensed);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--pending);
+}
+.huddle-panel .huddle-list .fix.hold .severity { color: var(--redline); }
+.huddle-panel .huddle-list .fix > p { margin: 0; font-size: 13px; line-height: 1.55; color: var(--ink); }
+.huddle-panel .huddle-evidence summary { font-size: 11.5px; color: var(--ink-soft); }
+
+/* ---------- Which sheet is the crew using ---------- */
+.sheets-panel .sheet { display: flex; flex-direction: column; gap: 6px; padding: 10px 0; border-top: var(--rule) solid var(--paper-rule); }
+.sheets-panel .sheet-head { margin: 0; font-size: 13px; font-weight: 550; color: var(--ink-soft); }
+.sheets-panel .sheet-id,
+.sheets-panel .sheet-rev { color: var(--ink); font-weight: 650; font-variant-numeric: tabular-nums; }
+.sheets-panel .sheet-uncertain { margin: 0; font-size: var(--small); color: var(--pending); }
+.sheets-panel .sheet p { margin: 0; }
+.sheets-panel .sheet-claim { padding-left: 10px; border-left: 2px solid var(--paper-rule); display: flex; flex-direction: column; gap: 2px; font-size: 13px; line-height: 1.45; }
+.sheets-panel .sheet-claim.different_revision { border-left-color: var(--pending); }
+.sheets-panel .sheet-claim.matches_record { border-left-color: var(--clear); }
+.sheets-panel .sheet-sim { display: flex; flex-direction: column; gap: 8px; }
+.sheets-panel .sheet-sim[open] { padding-bottom: 4px; }
+.sheets-panel .sheet-sim summary { font-size: var(--small); color: var(--ink-soft); cursor: pointer; }
+.sheets-panel .sheet-sim[open] > :not(summary) { margin-top: 8px; }
+.sheets-panel .sheet-sim label { display: flex; flex-direction: column; gap: 4px; font-size: var(--small); color: var(--ink-soft); }
+
+/* ---------- Review memory ---------- */
+.dismissals-panel label { display: flex; flex-direction: column; gap: 4px; font-size: var(--small); color: var(--ink-soft); }
+.dismissals-panel .dismiss-save { align-self: flex-start; }
+.dismissals-panel .dismiss-rule {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 0 2px;
+  border-top: var(--rule) solid var(--paper-rule);
+}
+.dismissals-panel .dismiss-rule p { margin: 0; }
+.dismissals-panel .dismiss-summary { font-size: 13px; font-weight: 600; color: var(--ink); }
+.dismissals-panel .dismiss-reason { font-size: var(--small); color: var(--ink); padding-left: 8px; box-shadow: inset 1.5px 0 0 var(--ink-soft); }
+.dismissals-panel button.dismiss-undo { align-self: flex-start; padding-left: 0; color: var(--ink-soft); }
+
+@media (prefers-reduced-motion: reduce) {
+  .knowledge .matrix-crew,
+  .autonomy .auto-filter button,
+  .lessons button.lesson-undo { transition: none; }
+}

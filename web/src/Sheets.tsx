@@ -3,6 +3,7 @@ import { SheetRevisionResponse } from "@site/contracts";
 import type { SheetRevisionResponse as SheetResponse } from "@site/contracts";
 import { announceChange, api, onChange } from "./api";
 import { useSite } from "./store";
+import "./tabs.css";
 
 export function Sheets() {
   const messages = useSite((s) => s.messages);
@@ -44,22 +45,22 @@ export function Sheets() {
     } catch (e) { setError(e instanceof Error ? e.message : "Message not recorded."); }
     finally { setBusy(false); }
   }
-  return <section className="panel" aria-label="Sheet revision record">
-    <h2>Which sheet is the crew using?</h2>
-    <p className="meta">Explicit text only. Attachments are not read; matching the record is not permission to start work.</p>
-    {error && <p role="alert">{error}</p>}
-    {!error && record?.sheets.length === 0 && <p>No explicit sheet revision record found.</p>}
-    {!error && record?.sheets.map((sheet) => <div key={sheet.sheetId}>
-      <h3>{sheet.sheetId} · latest issued: {sheet.latest?.revision ?? "not found"}</h3>
-      {sheet.uncertainty && <p>{sheet.uncertainty}</p>}
+  return <section className="panel sheets-panel" aria-label="Sheet revision record">
+    <h2 className="tab-title">Which sheet is the crew using?</h2>
+    <p className="meta tab-lede">Explicit text only. Attachments are not read; matching the record is not permission to start work.</p>
+    {error && <p role="alert" className="error">{error}</p>}
+    {!error && record?.sheets.length === 0 && <p className="meta">No explicit sheet revision record found.</p>}
+    {!error && record?.sheets.map((sheet) => <div key={sheet.sheetId} className="sheet">
+      <h3 className="sheet-head"><span className="sheet-id">{sheet.sheetId}</span> · latest issued: <span className="sheet-rev">{sheet.latest?.revision ?? "not found"}</span></h3>
+      {sheet.uncertainty && <p className="sheet-uncertain">{sheet.uncertainty}</p>}
       {sheet.latest && <p className="meta">{source(sheet.latest.sourceMessageId)}</p>}
-      {sheet.claims.length === 0 && <p>No crew revision stated.</p>}
-      {sheet.claims.map((claim) => <div key={claim.crewId}>
+      {sheet.claims.length === 0 && <p className="meta">No crew revision stated.</p>}
+      {sheet.claims.map((claim) => <div key={claim.crewId} className={`sheet-claim ${claim.status}`}>
         <p><strong>{scene?.crews.find((c) => c.id === claim.crewId)?.name ?? "Crew not found"}</strong>: {claim.revision} — {claim.status === "different_revision" ? "Different from the issued record: confirm before using this sheet." : claim.status === "matches_record" ? "Matches the issued record." : "Cannot compare yet."}</p>
         <p className="meta">{source(claim.sourceMessageId)}</p>
       </div>)}
     </div>)}
-    <details><summary>Simulate a sheet conversation</summary>
+    <details className="sheet-sim"><summary>Simulate a sheet conversation</summary>
       <button type="button" disabled={busy} onClick={() => void send(true, "Issued A-201 rev C")}>Architect: issue A-201 rev C</button>
       <label>Crew <select value={crewId} onChange={(e) => setCrewId(e.target.value)}>{scene?.crews.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
       <label>Stated sheet <input value={text} onChange={(e) => setText(e.target.value)} /></label>
