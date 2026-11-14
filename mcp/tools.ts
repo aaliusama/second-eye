@@ -32,6 +32,17 @@ function openFindings(findings: Finding[], fixes: Fix[]): Finding[] {
   return findings.filter((f) => f.check === "latest_change" || !approved.has(f.id));
 }
 
+/**
+ * Ids of findings whose correction the superintendent sent but no crew reply has confirmed yet.
+ * Only latest-change findings stay open after a send (see openFindings), so only they can be in this set.
+ */
+function awaitingConfirmation(findings: Finding[], fixes: Fix[]): Set<string> {
+  const sent = new Set(fixes.filter((x) => x.status === "approved").map((x) => x.findingId));
+  return new Set(findings.filter((f) => f.check === "latest_change" && sent.has(f.id)).map((f) => f.id));
+}
+
+const AWAITING = "correction sent, awaiting crew confirmation";
+
 /** One finding per (id, trigger): live and rehearsal findings may share an id. */
 function uniqueFindings(findings: Finding[]): Finding[] {
   return [...new Map(findings.map((f) => [`${f.id}:${f.trigger}`, f])).values()];
@@ -55,6 +66,7 @@ export async function getSiteState(api: SiteApi, args: { t?: string }): Promise<
     const byState: Record<string, number> = {};
     for (const e of s.scene.elements) byState[e.state] = (byState[e.state] ?? 0) + 1;
     const open = openFindings(s.findings, s.fixes);
+    const waiting = awaitingConfirmation(open, s.fixes);
     const pending = s.fixes.filter((f) => f.status === "pending");
     const planned = s.scene.tasks.filter((t) => t.status === "planned");
     const data = {
@@ -66,7 +78,15 @@ export async function getSiteState(api: SiteApi, args: { t?: string }): Promise<
         .map((e) => ({ id: e.id, name: e.name, aliases: e.aliases, state: e.state })),
       crews: s.scene.crews.map((c) => ({ id: c.id, name: c.name, trade: c.trade })),
       plannedTasks: planned.map((t) => ({ ...t, crewName: crewName(s.scene, t.crewId), placeName: elementName(s.scene, t.placeId) })),
-      openFindings: open.map((f) => ({ id: f.id, check: f.check, severity: f.severity, trigger: f.trigger, summary: f.summary, sourceMessageId: f.sourceMessageId })),
+      openFindings: open.map((f) => ({
+        id: f.id,
+        check: f.check,
+        severity: f.severity,
+        trigger: f.trigger,
+        summary: f.summary,
+        sourceMessageId: f.sourceMessageId,
+        awaitingConfirmation: waiting.has(f.id),
+      })),
       pendingFixes: pending.map((f) => ({ id: f.id, kind: f.kind, description: f.description })),
     };
     const text = [
@@ -74,7 +94,7 @@ export async function getSiteState(api: SiteApi, args: { t?: string }): Promise<
       `Elements: ${Object.entries(byState).map(([k, v]) => `${v} ${k}`).join(", ") || "none"}.`,
       `Crews: ${s.scene.crews.map((c) => c.name).join(", ") || "none"}.`,
       `Planned tasks: ${planned.length}. Open findings: ${open.length}. Fixes waiting for the superintendent: ${pending.length}.`,
-      ...open.map((f) => `- ${f.severity.toUpperCase()} ${label(f.check)}: ${f.summary} (${f.sourceMessageId})`),
+      ...open.map((f) => `- ${f.severity.toUpperCase()} ${label(f.check)}: ${f.summary} (${f.sourceMessageId})${waiting.has(f.id) ? `; ${AWAITING}` : ""}`),
     ].join("\n");
     return { text, data };
   } catch (err) {
@@ -115,12 +135,16 @@ export async function getFindings(api: SiteApi, args: { check?: CheckName; crewI
     const open = openFindings(await allFindings(api, state), state.fixes).filter(
       (f) => (!args.check || f.check === args.check) && (!args.crewId || f.crewIds.includes(args.crewId)),
     );
+    const waiting = awaitingConfirmation(open, state.fixes);
     const text = open.length
       ? `Per the record, ${open.length} open finding(s):\n${open
-          .map((f) => `- ${f.severity.toUpperCase()} ${label(f.check)} [${f.trigger}]: ${f.summary} (source ${f.sourceMessageId}; evidence ${f.evidenceMessageIds.join(", ") || "none"})`)
+          .map(
+            (f) =>
+              `- ${f.severity.toUpperCase()} ${label(f.check)} [${f.trigger}]: ${f.summary} (source ${f.sourceMessageId}; evidence ${f.evidenceMessageIds.join(", ") || "none"})${waiting.has(f.id) ? `; ${AWAITING}` : ""}`,
+          )
           .join("\n")}`
       : "Per the record, no open findings for that filter.";
-    return { text, data: { filter: args, findings: open } };
+    return { text, data: { filter: args, findings: open, awaitingConfirmation: [...waiting] } };
   } catch (err) {
     return fail(errorText(err));
   }
@@ -225,9 +249,10 @@ export async function isPlaceClear(api: SiteApi, args: { placeId: string; day: s
       ? "occupied"
       : "clear";
   const crews = [...new Set(tasks.map((t) => crewName(scene, t.crewId)))];
+  const waiting = awaitingConfirmation(touching, state.fixes);
   // Holds first, so a one-line reader (a robot log) sees why it must stay out.
   const reasons = [
-    ...touching.map((f) => `${f.severity}: ${label(f.check)} - ${f.summary} (${f.sourceMessageId})`),
+    ...touching.map((f) => `${f.severity}: ${label(f.check)} - ${f.summary} (${f.sourceMessageId})${waiting.has(f.id) ? `; ${AWAITING}` : ""}`),
     ...tasks.map((t) => `planned: ${describeTask(scene, t)}`),
   ];
   const head =
@@ -244,7 +269,14 @@ export async function isPlaceClear(api: SiteApi, args: { placeId: string; day: s
       status,
       crews,
       tasks,
-      findings: touching.map((f) => ({ id: f.id, check: f.check, severity: f.severity, summary: f.summary, sourceMessageId: f.sourceMessageId })),
+      findings: touching.map((f) => ({
+        id: f.id,
+        check: f.check,
+        severity: f.severity,
+        summary: f.summary,
+        sourceMessageId: f.sourceMessageId,
+        awaitingConfirmation: waiting.has(f.id),
+      })),
       reasons,
     },
   };
@@ -280,10 +312,14 @@ export async function checkPlan(api: SiteApi, args: PlanQuestion): Promise<ToolO
   const question = `Can ${crewName(scene, args.crewId)} ${label(args.taskType)} in ${elementName(scene, args.placeId)} on ${args.day} ${label(args.slot)}${
     args.elementIds?.length ? ` touching ${args.elementIds.join(", ")}` : ""
   }?`;
+  let note = "the query endpoint is not available";
   try {
     const answer = await api.ask({ crewId: args.crewId, text: question });
     const verdict = /^\s*HOLD/i.test(answer.text) ? "HOLD" : /^\s*CLEAR/i.test(answer.text) ? "CLEAR" : "ANSWER";
-    return { text: answer.text, data: { basis: "ask", question, verdict, answer } };
+    if (verdict !== "ANSWER") return { text: answer.text, data: { basis: "ask", question, verdict, answer } };
+    // The endpoint answered without a verdict (e.g. it did not parse the question). Never pass that
+    // on as an answer to "can we start": fall back to the record, and say why.
+    note = `the query endpoint gave no verdict ("${answer.text}")`;
   } catch (err) {
     if (!(err instanceof NotFound)) return fail(`cannot check, treat as HOLD: ${errorText(err)}`);
   }
@@ -313,8 +349,8 @@ export async function checkPlan(api: SiteApi, args: PlanQuestion): Promise<ToolO
   const text =
     verdict === "HOLD"
       ? [`HOLD: ${question}`, ...reasons.map((r) => `- ${r}`)].join("\n")
-      : `CLEAR per the record: ${question} No booking or open finding conflicts. (Fallback: the query endpoint is not available, so new changes were not re-checked.)`;
-  return { text, data: { basis: "record", question, verdict, reasons } };
+      : `CLEAR per the record: ${question} No booking or open finding conflicts. (Fallback: ${note}, so new changes were not re-checked.)`;
+  return { text, data: { basis: "record", question, verdict, reasons, note } };
 }
 
 // ---------- ask_site ----------
