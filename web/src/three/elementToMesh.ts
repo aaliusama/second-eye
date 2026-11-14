@@ -1,5 +1,5 @@
 import type { MeshStandardMaterial } from "three";
-import type { Element } from "@site/contracts";
+import type { Element, Scene } from "@site/contracts";
 import { elementSolid, type Solid } from "./geometry";
 import { edgeByState, fillByState, slabByState, type EdgeStyle } from "./materials";
 
@@ -18,8 +18,8 @@ export interface MeshProps {
   isFloor: boolean;
 }
 
-export function elementToMesh(element: Element): MeshProps {
-  const solid = elementSolid(element);
+export function elementToMesh(element: Element, scene?: Scene): MeshProps {
+  const solid = elementSolid(element, scene);
   const isFloor = element.type === "room" || element.type === "zone";
   return {
     id: element.id,

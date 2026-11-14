@@ -1,4 +1,5 @@
 import type { Element, ElementType, Geometry, Point, Scene } from "@site/contracts";
+import { doorWidth, itemKind, wallFrame, type ItemRect, type V } from "../planSymbols";
 
 // Owner: H. Plan coordinates (x east, y north, metres) -> world solids.
 // World axes: x east, y up, z south. A plan point (x, y) sits at world (x, 0, -y).
@@ -43,8 +44,64 @@ export function solidFor(g: Geometry, type: ElementType, height?: number): Solid
   return { kind: "slab", points: g.points, height: h, center: [cx, h, -cy] };
 }
 
-export function elementSolid(e: Element): Solid {
-  return solidFor(e.geometry, e.type, e.height);
+/**
+ * The solid for an element. Doors and fixtures are not single solids: the model draws their shared shape
+ * (planSymbols.ts), the same one the flat plan draws. This box is their marker for bounds and framing.
+ */
+export function elementSolid(e: Element, _scene?: Scene): Solid {
+  const g = e.geometry;
+  if (itemKind(e) === "window" && g.kind === "segment") {
+    // Glazing band from the sill (0.9 m) to the cut, a little proud of the facade so it reads in the wall.
+    const dx = g.to[0] - g.from[0];
+    const dy = g.to[1] - g.from[1];
+    const h = WALL_HEIGHT - 0.9 + 0.02;
+    return { kind: "box", center: [(g.from[0] + g.to[0]) / 2, 0.9 + h / 2, -(g.from[1] + g.to[1]) / 2], size: [Math.hypot(dx, dy), h, g.thickness + 0.06], rotY: Math.atan2(dy, dx) };
+  }
+  return solidFor(g, e.type, e.height);
+}
+
+/** A part of an item's shared shape as a world box (or the box around an upright cylinder). */
+export function rectSolid(r: ItemRect): Solid & { kind: "box" } {
+  return { kind: "box", center: [r.c[0], r.y0 + r.h / 2, -r.c[1]], size: [r.along, r.h, r.depth], rotY: Math.atan2(r.dir[1], r.dir[0]) };
+}
+
+/** A plan polyline at height y, in world coordinates. */
+export const planLine = (pts: V[], y: number, closed = false): [number, number, number][] => {
+  const out = pts.map((p) => [p[0], y, -p[1]] as [number, number, number]);
+  return closed && out.length ? [...out, out[0]!] : out;
+};
+
+/**
+ * A wall as it stands with its door openings cut out: the same opening the flat plan cuts from the wall line.
+ * Returns the wall's geometry in pieces (one piece when no door stands in it).
+ */
+export function wallPieces(wall: Element, scene: Scene): Geometry[] {
+  const g = wall.geometry;
+  if (wall.type !== "wall" || g.kind !== "segment") return [g];
+  const len = Math.hypot(g.to[0] - g.from[0], g.to[1] - g.from[1]);
+  if (len < 0.01) return [g];
+  const u: V = [(g.to[0] - g.from[0]) / len, (g.to[1] - g.from[1]) / len];
+  const cuts = scene.elements
+    .filter((d) => d.type === "door" && d.geometry.kind === "point")
+    .map((d) => ({ d, at: (d.geometry as { at: V }).at }))
+    .filter(({ at }) => wallFrame(at, scene).wallId === wall.id)
+    .map(({ d, at }) => {
+      const t = (at[0] - g.from[0]) * u[0] + (at[1] - g.from[1]) * u[1];
+      return [Math.max(0, t - doorWidth(d) / 2), Math.min(len, t + doorWidth(d) / 2)] as [number, number];
+    })
+    .sort((a, b) => a[0] - b[0]);
+  if (cuts.length === 0) return [g];
+  const pieces: Geometry[] = [];
+  let from = 0;
+  const piece = (a: number, b: number) => {
+    if (b - a > 0.02) pieces.push({ ...g, from: [g.from[0] + u[0] * a, g.from[1] + u[1] * a], to: [g.from[0] + u[0] * b, g.from[1] + u[1] * b] });
+  };
+  for (const [a, b] of cuts) {
+    piece(from, a);
+    from = Math.max(from, b);
+  }
+  piece(from, len);
+  return pieces;
 }
 
 /** Axis-aligned world bounds of a solid: [minX, minY, minZ, maxX, maxY, maxZ]. */

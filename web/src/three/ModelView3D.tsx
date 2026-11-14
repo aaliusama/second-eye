@@ -5,11 +5,12 @@ import { Component, createContext, useContext, useEffect, useLayoutEffect, useMe
 import { Box3, ExtrudeGeometry, Shape, Sphere, Vector2, Vector3, type Group, type Mesh } from "three";
 import type { Line2, LineSegments2 } from "three-stdlib";
 import type { Crew, Element, Finding, Scene } from "@site/contracts";
-import { beliefGeometry, beliefState, easeInOut, offsetLabel, sameGeometry } from "../derive";
+import { beliefGeometry, beliefState, crewHue, easeInOut, offsetLabel, sameGeometry } from "../derive";
 import { font } from "../tokens";
 import { elementToMesh, type MeshProps } from "./elementToMesh";
-import { boxEdges, planBounds, slabOutline, solidBounds, solidFor, elementSolid, type Solid } from "./geometry";
-import { color, ghostFill, ghostRevealFill, groundShadow, unitBox } from "./materials";
+import { boxEdges, planBounds, planLine, rectSolid, slabOutline, solidBounds, solidFor, elementSolid, wallPieces, type Solid } from "./geometry";
+import { ghostItems, itemAt, itemFrame, itemShape, rectEllipse, shortName, type ItemShape, type V } from "../planSymbols";
+import { color, edgeByState, fillByState, ghostFill, ghostRevealFill, groundShadow, unitBox, unitCylinder, type EdgeStyle } from "./materials";
 
 // Owner: H. Second renderer of the same scene (web/AGENTS.md): a cut-away architectural model.
 // Reads only the scene and findings from contracts. Flat SVG stays the default and the fallback.
@@ -29,6 +30,8 @@ export interface ModelView3DProps {
   lens?: Crew;
   /** Elements this crew's planned work touches: an unheard change there is drawn in redline. */
   exposedIds?: Set<string>;
+  /** Earlier position / Compare / Latest record, the same setting as the flat plan. Ignored under a lens. */
+  comparison?: "compare" | "earlier" | "latest";
 }
 
 export const findingKey = (f: Finding) => `${f.id}:${f.trigger}`;
@@ -152,7 +155,14 @@ interface Glide {
 const asBelieved = (el: Element, lens: Crew | undefined): Element =>
   lens ? { ...el, geometry: beliefGeometry(el, lens), state: beliefState(el, lens) } : el;
 
-function Model({ scene, findings, selectedId, onSelect, revealFindingKey, lens, exposedIds }: ModelView3DProps) {
+function Model({ scene, findings, selectedId, onSelect, revealFindingKey, lens, exposedIds, comparison: asked = "compare" }: ModelView3DProps) {
+  const comparison = lens ? "compare" : asked;
+  // Earlier position: a wall with an open ghost stands on its earlier line (drawn by its ghost, as on the flat plan).
+  const earlierLine = useMemo(() => {
+    const out = new Map<string, Element["geometry"]>();
+    if (comparison === "earlier") for (const f of findings) if (f.ghost && !out.has(f.ghost.elementId)) out.set(f.ghost.elementId, f.ghost.geometry);
+    return out;
+  }, [findings, comparison]);
   const bounds = useMemo(() => planBounds(scene), [scene]);
   // Root offset snapped to the 5 m structural grid so the floor grid lines up with plan metres.
   const offset = useMemo<[number, number, number]>(() => {
@@ -160,7 +170,18 @@ function Model({ scene, findings, selectedId, onSelect, revealFindingKey, lens, 
     const cy = Math.round((bounds.minY + bounds.maxY) / 2 / 5) * 5;
     return [-cx, 0, cy];
   }, [bounds]);
-  const meshes = useMemo(() => scene.elements.map((el) => elementToMesh(asBelieved(el, lens))), [scene, lens]);
+  // Walls, rooms and windows are single solids (a wall with a door in it: one solid per side of the opening).
+  // Doors and fixtures are drawn from their shared shape below, the same one the flat plan draws.
+  const meshes = useMemo(
+    () =>
+      scene.elements
+        .filter((el) => el.geometry.kind !== "point" && !earlierLine.has(el.id))
+        .flatMap((el) => {
+          const believed = asBelieved(el, lens);
+          return wallPieces(believed, scene).map((geometry) => elementToMesh({ ...believed, geometry }, scene));
+        }),
+    [scene, lens, earlierLine],
+  );
   const invalidate = useThree((s) => s.invalidate);
 
   // On a lens change, remember where each wall was drawn so it can glide to the new belief.
@@ -203,6 +224,41 @@ function Model({ scene, findings, selectedId, onSelect, revealFindingKey, lens, 
     }
     return out;
   }, [findings, scene, revealFindingKey]);
+
+  // Items a crew would build against an earlier wall line: the same list the flat plan draws (planSymbols.ts).
+  const oldLine = useMemo(() => (comparison === "compare" && !lens ? ghostItems(scene, findings.filter((f) => f.ghost)) : []), [scene, findings, lens, comparison]);
+  // Every door and fixture, once: against the earlier line in red if a crew would build it there, else where
+  // its wall is drawn (the record, or this crew's belief).
+  const items = useMemo(() => {
+    const out: { el: Element; shape: ItemShape; crewId?: string }[] = [];
+    for (const el of scene.elements) {
+      if (el.geometry.kind !== "point") continue;
+      const old = oldLine.find((i) => i.el.id === el.id);
+      const at = old?.at ?? itemAt(el, scene, (w) => earlierLine.get(w.id) ?? beliefGeometry(w, lens)) ?? (el.geometry.at as V);
+      const shape = itemShape(el, at, old?.frame ?? itemFrame(el, scene));
+      if (shape) out.push({ el: asBelieved(el, lens), shape, crewId: old?.crewId });
+    }
+    return out;
+  }, [scene, lens, oldLine, earlierLine]);
+  // The strip between each earlier line and the recorded wall, where a crew's item sits on the earlier line.
+  const bands = useMemo(() => {
+    const out: { key: string; solid: Solid }[] = [];
+    for (const wallId of new Set(oldLine.map((i) => i.wallId))) {
+      const wall = scene.elements.find((e) => e.id === wallId);
+      const ghost = findings.find((f) => f.ghost?.elementId === wallId)?.ghost;
+      if (!wall || wall.geometry.kind !== "segment" || ghost?.geometry.kind !== "segment") continue;
+      const [a, b] = [wall.geometry, ghost.geometry];
+      const mid = (g: typeof a): V => [(g.from[0] + g.to[0]) / 2, (g.from[1] + g.to[1]) / 2];
+      const [ma, mb] = [mid(a), mid(b)];
+      const dx = a.to[0] - a.from[0];
+      const dy = a.to[1] - a.from[1];
+      out.push({
+        key: wallId,
+        solid: { kind: "box", center: [(ma[0] + mb[0]) / 2, 0.012, -(ma[1] + mb[1]) / 2], size: [Math.hypot(dx, dy), 0.012, Math.hypot(ma[0] - mb[0], ma[1] - mb[1])], rotY: Math.atan2(dy, dx) },
+      });
+    }
+    return out;
+  }, [oldLine, scene, findings]);
 
   const reveal = useRef<RevealState>({ phase: "idle", t0: 0 });
   const revealing = findings.find((f) => matchesKey(f, revealFindingKey));
@@ -249,15 +305,28 @@ function Model({ scene, findings, selectedId, onSelect, revealFindingKey, lens, 
 
       <group position={offset}>
         <GridBubbles bounds={bounds} />
-        {meshes.map((m) => (
-          <Element3D key={m.id} m={m} selected={selectedId === m.id} onSelect={onSelect} glide={glide} />
+        {meshes.map((m, i) => (
+          <Element3D key={`${m.id}-${i}`} m={m} selected={selectedId === m.id} onSelect={onSelect} glide={glide} />
         ))}
         {diffs.map((el) => (
           <LensDiff3D key={`lens-${el.id}`} element={el} lens={lens} exposed={exposedIds?.has(el.id) ?? false} />
         ))}
         {/* Through a crew's eyes the record's conflicts are not drawn as ghosts (same as the flat view). */}
+        {bands.map(({ key, solid }) => solid.kind === "box" && (
+          <mesh key={`band-${key}`} geometry={unitBox} material={ghostFill} position={solid.center} rotation-y={solid.rotY} scale={solid.size} renderOrder={1} />
+        ))}
+        {items.map(({ el, shape, crewId }) => (
+          <Item3D
+            key={el.id}
+            el={el}
+            shape={shape}
+            selected={selectedId === el.id}
+            onSelect={onSelect}
+            tag={crewId ? { letter: scene.crews.find((c) => c.id === crewId)?.letter ?? "?", hue: crewHue(scene, crewId), crew: scene.crews.find((c) => c.id === crewId)?.name ?? "" } : undefined}
+          />
+        ))}
         {ghosts.map((g) => (
-          <Ghost3D key={g.key} item={g} active={matchesKey(g.finding, revealFindingKey)} reveal={reveal} onSelect={onSelect} hidden={!!lens} />
+          <Ghost3D key={g.key} item={g} active={matchesKey(g.finding, revealFindingKey)} reveal={reveal} onSelect={onSelect} hidden={!!lens || comparison === "latest"} solo={comparison === "earlier"} />
         ))}
       </group>
     </>
@@ -306,7 +375,7 @@ function CameraRig({
   // Opening move: once per mount. Top-down plan, then settle into the three-quarter view.
   useEffect(() => {
     if (!controls || opening.current) return;
-    const all = worldSphere(scene.elements.map(elementSolid), offset, 0, 0.62);
+    const all = worldSphere(scene.elements.map((el) => elementSolid(el, scene)), offset, 0, 0.62);
     const reduced = prefersReducedMotion();
     controls.smoothTime = 0.5;
     opening.current = (async () => {
@@ -449,6 +518,70 @@ function Element3D({ m, selected, onSelect, glide }: { m: MeshProps; selected: b
   );
 }
 
+/**
+ * A door or a fixture: its shared shape (planSymbols.ts) standing on the floor. Each part is the plan
+ * footprint extruded; each plan line lies on the floor or on top of its part. With a crew tag it is where
+ * that crew would build it, against an earlier wall line: redline, dashed, translucent.
+ */
+function Item3D({ el, shape, selected, onSelect, tag }: { el: Element; shape: ItemShape; selected: boolean; onSelect?: ModelView3DProps["onSelect"]; tag?: { letter: string; hue: string; crew: string } }) {
+  const [hovered, setHovered] = useState(false);
+  useCursor(hovered);
+  const layer = useLabelLayer();
+  const ghost = !!tag;
+  const lit = hovered || selected;
+  const edge: EdgeStyle = edgeByState[el.state];
+  const tone = ghost ? color.redline : lit ? color.ink : edge.color;
+  const width = (ghost ? 1.5 : edge.width) + (selected ? 1.75 : hovered ? 1 : 0);
+  const dash = ghost ? { dashed: true, dashSize: 0.08, gapSize: 0.05 } : { dashed: edge.dashed, dashSize: 0.2, gapSize: 0.12 };
+  const fill = ghost ? ghostFill : fillByState[el.state];
+  const events = {
+    onPointerOver: (e: ThreeEvent<PointerEvent>) => {
+      e.stopPropagation();
+      setHovered(true);
+    },
+    onPointerOut: () => setHovered(false),
+    onClick: (e: ThreeEvent<MouseEvent>) => {
+      e.stopPropagation();
+      onSelect?.(el.id);
+    },
+  };
+  const first = shape.rects[0] ?? undefined;
+  const anchor = first ? first.c : shape.lines[0]?.pts[0];
+  return (
+    <group>
+      {shape.rects.map((r, i) => {
+        const s = rectSolid(r);
+        if (r.round) {
+          return (
+            <group key={`r${i}`}>
+              <mesh geometry={unitCylinder} material={fill} position={s.center} rotation-y={s.rotY} scale={s.size} castShadow={!ghost} renderOrder={ghost ? 2 : 0} {...events} />
+              <Line points={planLine(rectEllipse(r), r.y0 + r.h, true)} color={tone} lineWidth={width} {...dash} />
+              <Line points={planLine(rectEllipse(r), r.y0 + 0.004, true)} color={tone} lineWidth={width} {...dash} />
+            </group>
+          );
+        }
+        return (
+          <group key={`r${i}`} position={s.center} rotation-y={s.rotY}>
+            <mesh geometry={unitBox} material={fill} scale={s.size} castShadow={!ghost} renderOrder={ghost ? 2 : 0} {...events} />
+            <Line points={boxEdges(s.size)} segments color={tone} lineWidth={width} {...dash} />
+          </group>
+        );
+      })}
+      {shape.lines.map((ln, i) => (
+        <Line key={`l${i}`} points={planLine(ln.pts, ln.y, ln.closed)} color={tone} lineWidth={width} {...dash} />
+      ))}
+      {tag && anchor && (
+        <Html portal={layer} position={[anchor[0], shape.top + 0.12, -anchor[1]]} center zIndexRange={[20, 10]} style={{ pointerEvents: "none" }}>
+          <div title={`${tag.crew} would build this here, against the earlier line`} style={{ display: "flex", alignItems: "center", gap: 4, transform: "translateY(-12px)", whiteSpace: "nowrap", userSelect: "none", fontFamily: font.family, fontStretch: "80%" }}>
+            <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 16, height: 16, background: color.paper, border: `1.5px solid ${tag.hue}`, color: color.ink, fontWeight: 700, fontSize: 11, lineHeight: 1 }}>{tag.letter}</span>
+            <span style={{ background: color.paper, color: color.redline, fontWeight: 600, fontSize: 11, lineHeight: 1, padding: "2px 3px" }}>{shortName(el.name)}</span>
+          </div>
+        </Html>
+      )}
+    </group>
+  );
+}
+
 function labelStyle(strong: boolean): React.CSSProperties {
   return {
     fontFamily: font.family,
@@ -471,6 +604,7 @@ function Ghost3D({
   reveal,
   onSelect,
   hidden = false,
+  solo = false,
 }: {
   item: GhostItem;
   active: boolean;
@@ -478,6 +612,8 @@ function Ghost3D({
   onSelect?: ModelView3DProps["onSelect"];
   /** Toggled, not unmounted, so the reveal state survives a lens on and off. */
   hidden?: boolean;
+  /** Earlier position: the earlier line alone, without the recorded wall's outline or the dimension. */
+  solo?: boolean;
 }) {
   const { finding, element } = item;
   const ghost = finding.ghost!;
@@ -582,7 +718,7 @@ function Ghost3D({
   return (
     <group visible={!hidden}>
       {/* True element: drawn in ink as the reveal starts, then holds. */}
-      <group position={from} rotation-y={trueRot}>
+      <group position={from} rotation-y={trueRot} visible={!solo}>
         <Line ref={trueOutline} points={boxEdges(trueSize)} segments color={color.ink} lineWidth={2.5} transparent />
       </group>
 
@@ -601,6 +737,7 @@ function Ghost3D({
         />
       </group>
 
+      <group visible={!solo}>
       <group ref={dimension}>
         <Line points={dimPoints} color={color.redline} lineWidth={1.25} />
         <Line points={ticks} segments color={color.redline} lineWidth={1.25} />
@@ -624,12 +761,13 @@ function Ghost3D({
               transform: "translateY(-14px)",
               whiteSpace: "nowrap",
               userSelect: "none",
-              display: hidden ? "none" : undefined,
+              display: hidden || solo ? "none" : undefined,
             }}
           >
             {ghost.label}
           </div>
         </Html>
+      </group>
       </group>
     </group>
   );

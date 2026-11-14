@@ -1,5 +1,5 @@
 import { Component, lazy, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
-import type { Rehearsal, StateResponse } from "@site/contracts";
+import type { Finding, Rehearsal, StateResponse } from "@site/contracts";
 import { onChange } from "./api";
 import {
   elementById,
@@ -16,7 +16,7 @@ import {
   STORY_BEATS,
   STORY_ELEMENT,
 } from "./derive";
-import { FlatView } from "./FlatView";
+import { ComparisonTools, FlatView, type Comparison } from "./FlatView";
 import { Huddle } from "./Huddle";
 import { IncidentFocus, incidentLead, rankIncidents } from "./IncidentFocus";
 import { Knowledge } from "./Knowledge";
@@ -157,20 +157,33 @@ function Main() {
     // One ghost per finding id (live wins so the reveal key stays stable), then one per incident.
     const perId = [...new Map(visible.filter((f) => f.ghost).reverse().map((f) => [f.id, f])).values()];
     const incidents = oneGhostPerIncident(perId);
-    // Presenter story beats: one red thing on screen, the ghost wall the demo is about.
-    const ghosts = story ? incidents.filter((g) => g.ghost!.elementId === STORY_ELEMENT) : incidents;
-    const ghostEls = new Set(ghosts.map((g) => g.ghost!.elementId));
-    const conflictIds = story ? new Set<string>() : new Set(visible.flatMap((f) => f.elementIds).filter((id) => !ghostEls.has(id)));
     const sent = sentNotConfirmed(state.fixes, all);
+    // One red thing on the plan: the incident to settle first (the 204 wall while it is open, then the next in
+    // rank), anything whose correction is out and unconfirmed, and whatever is selected. Every other open
+    // finding stays listed under Priorities and is drawn when it is picked there or on the plan.
+    const onStory = (f: Finding) => f.ghost?.elementId === STORY_ELEMENT;
+    const lead = visible.some(onStory) ? undefined : rankIncidents(state.scene, visible, state.fixes).all[0]?.[0];
+    const picked = (f: Finding) =>
+      selection?.kind === "finding"
+        ? findingKey(f) === selection.key
+        : selection?.kind === "element" && (f.elementIds.includes(selection.id) || f.ghost?.elementId === selection.id);
+    const shown = (f: Finding) =>
+      onStory(f) || (!story && (picked(f) || sent.has(f.id) || (!!lead && (f.id === lead.id || (!!lead.ghost && f.ghost?.elementId === lead.ghost.elementId)))));
+    const ghosts = incidents.filter(shown);
+    const ghostEls = new Set(ghosts.map((g) => g.ghost!.elementId));
+    const conflictIds = story ? new Set<string>() : new Set(visible.filter((f) => shown(f) && !onStory(f)).flatMap((f) => f.elementIds).filter((id) => !ghostEls.has(id)));
     const clearIds = new Set(all.filter((f) => resolved.has(f.id)).flatMap((f) => f.elementIds));
     const active = new Set(frame?.activeTaskIds ?? []);
     const activeTasks = state.scene.tasks.filter((t) => active.has(t.id));
     // Lane B's measured geometry. In the story beats, only the story wall, so one red thing stays on screen.
-    const measured = [...new Map(visible.filter((f) => f.measure && (!story || f.ghost?.elementId === STORY_ELEMENT)).map((f) => [f.id, f])).values()];
+    const measured = [...new Map(visible.filter((f) => f.measure && (onStory(f) || (!story && (shown(f) || picked(f))))).map((f) => [f.id, f])).values()];
     return { all, visible, ghosts, conflictIds, clearIds, activeTasks, resolved, sent, measured };
-  }, [state, rehearsal, slider, asOf, story]);
+  }, [state, rehearsal, slider, asOf, story, selection]);
 
   const reveal = useReveal(d?.ghosts.map(findingKey) ?? [], run);
+  // Earlier position / Compare / Latest record: one setting for the flat plan and the 3D view.
+  const [comparison, setComparison] = useState<Comparison>("compare");
+  useEffect(() => setComparison("compare"), [reveal.key, story]);
   const msgMap = useMemo(() => messageMap(messages), [messages]);
   // Who knows what: the floor as one crew knows it, and where their unheard changes meet their work.
   const knowledge = useMemo(() => {
@@ -215,6 +228,8 @@ function Main() {
       lens={knowledge?.crew}
       exposedIds={knowledge?.exposedIds}
       measured={d.measured}
+      comparison={comparison}
+      onComparison={setComparison}
     />
   );
   const lensCrew = knowledge?.crew;
@@ -314,9 +329,11 @@ function Main() {
                   onUnavailable={backToFlat}
                   lens={lensCrew}
                   exposedIds={knowledge?.exposedIds}
+                  comparison={comparison}
                 />
               </Suspense>
             </Fallback>
+            {d.ghosts.length > 0 && !lensCrew && <ComparisonTools comparison={comparison} onComparison={setComparison} />}
           </div>
         ) : (
           flat
@@ -392,9 +409,12 @@ function Main() {
         </div>
       </aside>
 
-      <footer className="bottom">
-        <Slider scene={state.scene} rehearsal={asOf ? undefined : rehearsal} step={slider} onStep={setSlider} resolved={d.resolved} quiet={story} expandedByDefault={focus === "rehearse"} />
-      </footer>
+      {/* The time panel is off the everyday page; the presenter's Rehearse beat still opens it. */}
+      {focus === "rehearse" && (
+        <footer className="bottom">
+          <Slider scene={state.scene} rehearsal={asOf ? undefined : rehearsal} step={slider} onStep={setSlider} resolved={d.resolved} quiet={story} expandedByDefault />
+        </footer>
+      )}
     </div>
   );
 }

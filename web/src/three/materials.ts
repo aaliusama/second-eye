@@ -1,4 +1,4 @@
-import { BoxGeometry, Color, MeshBasicMaterial, MeshStandardMaterial, ShadowMaterial } from "three";
+import { BoxGeometry, Color, CylinderGeometry, MeshBasicMaterial, MeshStandardMaterial, ShadowMaterial } from "three";
 import type { ElementState } from "@site/contracts";
 import { color } from "../tokens";
 
@@ -7,6 +7,8 @@ import { color } from "../tokens";
 
 /** Unit box, scaled per wall or marker. Never disposed: it lives for the page. */
 export const unitBox = new BoxGeometry(1, 1, 1);
+/** Unit upright cylinder (diameter 1, height 1), scaled per round part (a WC bowl). */
+export const unitCylinder = new CylinderGeometry(0.5, 0.5, 1, 32);
 
 const matte = (hex: string, opacity = 1) =>
   new MeshStandardMaterial({

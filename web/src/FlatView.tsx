@@ -25,6 +25,7 @@ import {
   type Box,
 } from "./derive";
 import { clearanceTone, clearanceWords, faceGeometry, overlapLabel } from "./depth";
+import { add, doorWidth, ghostItems, itemAt, itemFrame, itemShape, rectCorners, rectEllipse, shortName, type V, type WallFrame } from "./planSymbols";
 import { phase, REVEAL } from "./reveal";
 import type { Selection } from "./store";
 import { color, drawing, font } from "./tokens";
@@ -59,6 +60,21 @@ export interface FlatViewProps {
   exposedIds?: Set<string>;
   /** Open findings with measured geometry (lane B): work-zone strip and faces, or the overlap of a clash. */
   measured?: Finding[];
+  /** Earlier position / Compare / Latest record. Owned by the app so the flat plan and the 3D view agree. */
+  comparison: Comparison;
+  onComparison: (c: Comparison) => void;
+}
+
+export type Comparison = "compare" | "earlier" | "latest";
+
+/** The Earlier position / Compare / Latest record switch, the same control over the flat plan and the 3D view. */
+export function ComparisonTools({ comparison, onComparison }: { comparison: Comparison; onComparison: (c: Comparison) => void }) {
+  return (
+    <div className="comparison-tools" role="group" aria-label="Compare recorded positions">
+      {([ ["earlier", "Earlier position"], ["compare", "Compare"], ["latest", "Latest record"] ] as const).map(([mode, label]) => <button type="button" key={mode} aria-pressed={comparison === mode} onClick={() => onComparison(mode)}>{label}</button>)}
+      <span>Display only · recorded geometry</span>
+    </div>
+  );
 }
 
 const LENS_MS = 520;
@@ -129,6 +145,36 @@ function Shape({ g, l, pathLength, offset }: { g: Geometry; l: Look; pathLength?
   // A point item (a fixture, a tile choice) is a small quiet marker, never a blot over labels.
   const [x, y] = P((g as { at: Point }).at);
   return <circle cx={x} cy={y} r={0.11} {...common} strokeWidth={drawing.hairline} fill={color.paper} fillOpacity={1} />;
+}
+
+// ---------- Plan symbols for doors, windows and fixtures ----------
+
+/**
+ * A point item as a drafting symbol: the shared shape (planSymbols.ts) seen from above. No permanent text:
+ * the symbol says what it is, the tooltip gives the recorded name.
+ */
+function PlanSymbol({ el, l, at, frame }: { el: Element; l: Look; at: V; frame: WallFrame }) {
+  const shape = itemShape(el, at, frame);
+  if (!shape) return null;
+  const s = { stroke: l.stroke, strokeWidth: drawing.hairline * 1.4, strokeDasharray: l.dash, strokeLinejoin: "round" as const };
+  const pts = (ps: V[]) => ps.map((p) => P(p).join(",")).join(" ");
+  const [gx1, gy1] = P(add(at, frame.dir, -doorWidth(el) / 2));
+  const [gx2, gy2] = P(add(at, frame.dir, doorWidth(el) / 2));
+  return (
+    <g>
+      <title>{shortName(el.name)}</title>
+      {/* A door in a wall: the opening is cut out of the wall line. */}
+      {shape.kind === "door" && frame.onWall && <line x1={gx1} y1={gy1} x2={gx2} y2={gy2} stroke={color.paper} strokeWidth={frame.thickness + 0.08} />}
+      {shape.rects.filter((r) => r.y0 === 0).map((r, i) => (
+        <polygon key={`r${i}`} points={pts(r.round ? rectEllipse(r) : rectCorners(r))} {...s} fill={color.paper} />
+      ))}
+      {shape.lines.map((ln, i) =>
+        ln.closed
+          ? <polygon key={`l${i}`} points={pts(ln.pts)} {...s} fill={ln.solid ? l.stroke : color.paper} />
+          : <polyline key={`l${i}`} points={pts(ln.pts)} {...s} strokeWidth={drawing.hairline} fill="none" />,
+      )}
+    </g>
+  );
 }
 
 const onKey = (fn: () => void) => (e: KeyboardEvent) => {
@@ -317,14 +363,14 @@ const TONE = { redline: color.redline, pending: color.pending, soft: color.inkSo
  * the recorded face (ink) and the face the crew believes in (redline, the conflict itself), with the
  * measured offset. Overlap: each crew's work zone dashed in its hue, the shared area hatched in redline.
  */
-function MeasureLayer({ f, scene, opacity, sent }: { f: Finding; scene: Scene; opacity: number; sent: boolean }) {
+function MeasureLayer({ f, scene, opacity, sent, quiet = false }: { f: Finding; scene: Scene; opacity: number; sent: boolean; quiet?: boolean }) {
   const c = f.measure?.clearance;
   const o = f.measure?.overlap;
   if (opacity <= 0 || (!c && !o)) return null;
   const s = drawing.smallLabel * 0.8;
   return (
     <g opacity={opacity} pointerEvents="none" className="measure">
-      {c && (() => {
+      {c && !quiet && (() => {
         const tone = TONE[clearanceTone(c, sent)];
         const zone = c.workZone.kind === "polygon" ? c.workZone.points : undefined;
         const zb = zone ? boxOf(zone) : undefined;
@@ -343,7 +389,7 @@ function MeasureLayer({ f, scene, opacity, sent }: { f: Finding; scene: Scene; o
             {line(c.recordedFace, color.ink, drawing.outline)}
             {line(c.believedFace, tone, drawing.outline, "0.16 0.1")}
             {!f.ghost && <Dimension ghost={faceGeometry(c.believedFace)} truth={faceGeometry(c.recordedFace)} label={`${c.offsetM.toFixed(2)} m ${c.direction}`} opacity={1} tone={tone} />}
-            {zb && (
+            {zb && !quiet && (
               <text x={tx} y={ty} className="ghost-note" fontSize={s} style={{ textAnchor: towardFace ? "end" : "start", fill: color.inkSoft, paintOrder: "stroke", stroke: color.paper, strokeWidth: 0.1 }}>
                 <tspan x={tx}>{l1}</tspan>
                 <tspan x={tx} dy="1.2em" style={{ fill: tone }}>{l2}</tspan>
@@ -385,11 +431,9 @@ function MeasureLayer({ f, scene, opacity, sent }: { f: Finding; scene: Scene; o
 }
 
 export function FlatView(props: FlatViewProps) {
-  const { scene, ghosts, conflictIds, clearIds, activeTasks, selection, onSelect, reveal, sentIds, tight = false, lens, exposedIds, measured = [] } = props;
+  const { scene, ghosts, conflictIds, clearIds, activeTasks, selection, onSelect, reveal, sentIds, tight = false, lens, exposedIds, measured = [], comparison, onComparison } = props;
   const glide = useLensGlide(lens);
   const [whole, setWhole] = useState<string | undefined>(undefined);
-  const [comparison, setComparison] = useState<"compare" | "earlier" | "latest">("compare");
-  useEffect(() => setComparison("compare"), [reveal.key, tight]);
 
   const base = useMemo(() => {
     const all = scene.elements.flatMap((e) => pointsOf(e.geometry));
@@ -450,13 +494,36 @@ export function FlatView(props: FlatViewProps) {
   // Where this crew's floor differs from the record: geometry they have not heard.
   const differs = lens ? solids.filter((el) => !sameGeometry(beliefGeometry(el, lens), el.geometry)) : [];
 
+  // Items a crew would build against an earlier wall line (compare mode only): drawn once, there, with the ghost.
+  const oldLineItems = !lens && comparison === "compare" ? ghostItems(scene, ghosts) : [];
+  const onOldLine = new Set(oldLineItems.map((i) => i.el.id));
+  // Names beside the crew tags only when the view is close enough to read them.
+  const detail = vb.w <= 19;
+
   const drawEl = (el: Element): ReactNode => {
     const l = look(stateOf(el), el.type);
     const lk = !lens && clearIds.has(el.id) && !conflictIds.has(el.id) ? { ...l, stroke: color.clear, width: drawing.heavy } : l;
     const g = geomOf(el);
+    if (g.kind === "point") {
+      if (onOldLine.has(el.id)) return null;
+      // Mounted items follow their wall as it is drawn here: the latest record, a crew's belief, or the earlier line.
+      const at = comparison === "earlier" && !lens ? g.at : (itemAt(el, scene, geomOf) ?? g.at);
+      return (
+        <g key={el.id}>
+          <PlanSymbol el={el} l={lk} at={at} frame={itemFrame(el, scene)} />
+          {selectedId === el.id && <Shape g={g} l={{ stroke: color.ink, width: drawing.heavy, dash: "0.12 0.12", fill: "none", fillOpacity: 0 }} />}
+        </g>
+      );
+    }
     return (
       <g key={el.id}>
-        <Shape g={g} l={lk} />
+        <Shape g={g} l={el.type === "window" ? { ...lk, fill: color.paper, fillOpacity: 1 } : lk} />
+        {el.type === "window" && g.kind === "segment" && (() => {
+          // Window in plan: the frame outline with the glass as a centre line.
+          const [x1, y1] = P(g.from);
+          const [x2, y2] = P(g.to);
+          return <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={lk.stroke} strokeWidth={drawing.hairline} />;
+        })()}
         {selectedId === el.id && <Shape g={g} l={{ stroke: color.ink, width: drawing.heavy, dash: "0.12 0.12", fill: "none", fillOpacity: 0 }} />}
       </g>
     );
@@ -500,7 +567,7 @@ export function FlatView(props: FlatViewProps) {
           const key = findingKey(f);
           const ghostKey = f.ghost ? ghosts.find((g) => g.id === f.id || g.ghost?.elementId === f.ghost?.elementId) : undefined;
           const playing = ghostKey ? findingKey(ghostKey) === reveal.key : key === reveal.key;
-          return <MeasureLayer key={`m-${key}`} f={f} scene={scene} opacity={playing ? phase(reveal.elapsed, REVEAL.growEnd, REVEAL.total) : 1} sent={sentIds?.has(f.id) ?? false} />;
+          return <MeasureLayer key={`m-${key}`} f={f} scene={scene} opacity={playing ? phase(reveal.elapsed, REVEAL.growEnd, REVEAL.total) : 1} sent={sentIds?.has(f.id) ?? false} quiet={!!f.ghost} />;
         })}
         {areas.map((el) => (
           <RoomLabel key={`l-${el.id}`} el={el} tasks={activeTasks} scene={scene} />
@@ -553,17 +620,49 @@ export function FlatView(props: FlatViewProps) {
           const labelled = rep.id === f.id;
           const crewIds = [...new Set(group.flatMap((g) => g.crewIds))];
           const crews = f.crewIds.map((id) => crewName(scene, id)).join(", ");
+          const sentCount = group.filter((g) => sentIds?.has(g.id)).length;
+          const mine = oldLineItems.filter((i) => i.wallId === f.ghost!.elementId);
           const noteCrews = crewIds.length === 1
             ? crewName(scene, crewIds[0]!)
             : `${crewIds.length} crews: ${crewIds.map((id) => crewById(scene, id)?.letter ?? "?").join(", ")}`;
-          const sentCount = group.filter((g) => sentIds?.has(g.id)).length;
           // Note sits beside the ghost, on the side away from the true element, so it never covers labels below.
+          const gs = f.ghost!.geometry.kind === "segment" ? f.ghost!.geometry : undefined;
+          const ts = truth.geometry.kind === "segment" ? truth.geometry : undefined;
           const gm = midpoint(f.ghost!.geometry);
           const west = midpoint(truth.geometry)[0] >= gm[0];
           const [lx, ly] = P([gm[0] + (west ? -0.35 : 0.35), gm[1]]);
           const anchor = west ? "end" : "start";
           // Correction sent to every crew on this ghost, none confirmed yet: still open, but amber, not red.
           const tone = sentCount === group.length ? color.pending : color.redline;
+          const ghostLook: Look = { stroke: tone, width: drawing.outline, dash: "0.1 0.06", fill: "none", fillOpacity: 0 };
+          // Tags in one column, clear of the largest item, each joined to its item by a leader.
+          const column = Math.max(0, ...mine.map((i) => itemShape(i.el, i.at, i.frame)?.reach ?? 0)) * 2 + 0.42;
+          const marks = mine.map((i) => {
+            const shape = itemShape(i.el, i.at, i.frame);
+            if (!shape) return null;
+            const face = add(i.at, i.frame.n, -shape.reach);
+            const tag = add(face, i.frame.n, column);
+            const [bx, by] = P(tag);
+            const [ex, ey] = P(add(i.at, i.frame.n, shape.reach + 0.04));
+            const [sx, sy] = P(add(tag, i.frame.n, -0.2));
+            const b = 0.2;
+            const towardWest = i.frame.n[0] < -0.5;
+            const [nx, ny] = P(add(tag, i.frame.n, 0.32));
+            return (
+              <g key={i.el.id}>
+                <title>{`${crewName(scene, i.crewId)} would build the ${shortName(i.el.name)} here, against the earlier line`}</title>
+                <PlanSymbol el={i.el} l={ghostLook} at={i.at} frame={i.frame} />
+                <line x1={ex} y1={ey} x2={sx} y2={sy} stroke={tone} strokeWidth={drawing.hairline * 0.8} />
+                <rect x={bx - b} y={by - b} width={b * 2} height={b * 2} fill={color.paper} stroke={crewHue(scene, i.crewId)} strokeWidth={drawing.outline} />
+                <text x={bx} y={by} className="badge-letter" fontSize={0.27}>{crewById(scene, i.crewId)?.letter ?? "?"}</text>
+                {detail && (
+                  <text x={nx} y={ny} className="ghost-note" fontSize={0.24} dominantBaseline="central" style={{ textAnchor: towardWest ? "end" : "start", fill: tone, paintOrder: "stroke", stroke: color.paper, strokeWidth: 0.08 }}>
+                    {shortName(i.el.name)}
+                  </text>
+                )}
+              </g>
+            );
+          });
           return (
             <g key={key}>
               {draw > 0 && comparison !== "earlier" && (
@@ -585,24 +684,30 @@ export function FlatView(props: FlatViewProps) {
               )}
               {dim > 0 && comparison === "compare" && labelled && (
                 <>
+                  {gs && ts && mine.length > 0 && (
+                    <polygon points={poly([gs.from, gs.to, ts.to, ts.from])} fill={tone} fillOpacity={0.14 * dim} stroke="none" pointerEvents="none" />
+                  )}
                   <Dimension ghost={f.ghost!.geometry} truth={truth.geometry} label={f.ghost!.label} opacity={dim} tone={tone} />
-                  <text
-                    x={lx}
-                    y={ly}
-                    className="ghost-note"
-                    fontSize={drawing.smallLabel * 0.8}
-                    opacity={dim}
-                    style={{ textAnchor: anchor, fill: tone }}
-                  >
-                    <tspan x={lx}>{noteCrews}</tspan>
-                    <tspan x={lx} dy="1.2em">
-                      {sentCount === group.length
-                        ? "sent, not confirmed"
-                        : sentCount > 0
-                          ? `earlier recorded position · ${sentCount} sent`
-                          : "earlier recorded position"}
-                    </tspan>
-                  </text>
+                  {mine.length === 0 && (
+                    <text
+                      x={lx}
+                      y={ly}
+                      className="ghost-note"
+                      fontSize={drawing.smallLabel * 0.8}
+                      opacity={dim}
+                      style={{ textAnchor: anchor, fill: tone }}
+                    >
+                      <tspan x={lx}>{noteCrews}</tspan>
+                      <tspan x={lx} dy="1.2em">
+                        {sentCount === group.length
+                          ? "sent, not confirmed"
+                          : sentCount > 0
+                            ? `earlier recorded position · ${sentCount} sent`
+                            : "earlier recorded position"}
+                      </tspan>
+                    </text>
+                  )}
+                  <g opacity={dim} pointerEvents="none">{marks}</g>
                 </>
               )}
             </g>
@@ -610,10 +715,7 @@ export function FlatView(props: FlatViewProps) {
         })}
 
       </svg>
-      {ghosts.length > 0 && !lens && <div className="comparison-tools" role="group" aria-label="Compare recorded positions">
-        {([ ["earlier", "Earlier position"], ["compare", "Compare"], ["latest", "Latest record"] ] as const).map(([mode, label]) => <button type="button" key={mode} aria-pressed={comparison === mode} onClick={() => setComparison(mode)}>{label}</button>)}
-        <span>Display only · recorded geometry</span>
-      </div>}
+      {ghosts.length > 0 && !lens && <ComparisonTools comparison={comparison} onComparison={onComparison} />}
       {framing && phase(reveal.elapsed, 0, REVEAL.total) === 1 && (
         <button type="button" className="quiet whole" onClick={() => setWhole(frameKey)}>
           Whole floor
