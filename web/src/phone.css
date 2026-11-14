@@ -5,9 +5,9 @@
 /* ---------- Device frame ---------- */
 
 section.phone.framed {
-  --phone-hold: #ef4444;
-  --phone-amber: #f59e0b;
-  --phone-ok: #10b981;
+  --phone-hold: var(--redline);
+  --phone-amber: var(--pending);
+  --phone-ok: var(--clear);
   --phone-bezel: color-mix(in srgb, var(--paper) 22%, black);
   position: relative;
   background: var(--paper);

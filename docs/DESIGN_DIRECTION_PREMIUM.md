@@ -1,5 +1,7 @@
 # Premium UI pass: design direction
 
+> **Update 14 Nov, afternoon: the dark theme was rejected.** It did not fit the superintendent we design for. The light construction-drawing palette in `web/AGENTS.md` and `web/src/tokens.ts` is the theme. The "Ground", "Ink" and HUD glass colour values below are retired; meaning colours use the light tokens (`redline`, `pending`, `clear`). Persona, typography, dimension-line signature, motion and anti-slop rules still apply.
+
 14 Nov 2026, branch `ui/premium-pass`. Every web agent on this pass follows this file. It refines `web/AGENTS.md` for a dark theme; drafting conventions there still hold.
 
 ## Who we design for
