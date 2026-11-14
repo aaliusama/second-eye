@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import "./risk.css";
 import type { ChatMessage, Finding, Fix, PlanTask, Rehearsal, Scene } from "@site/contracts";
 import { clock, resolvedFindingIds } from "./derive";
 import { describeSource, sourceLine } from "./sources";
@@ -115,6 +117,8 @@ export function IncidentFocus({ scene, findings, fixes, messages, onInspect, onT
   const { all, firstWork } = rankIncidents(scene, findings, fixes);
   const [showAll, setShowAll] = useState(false);
   const incidents = showAll ? all : all.slice(0, 3);
+  // Cards glide when a rehearsal step, a send or a confirmation reorders the list (off under reduced motion).
+  const [listRef] = useAutoAnimate<HTMLOListElement>({ duration: 240 });
 
   return <section className="incident-focus" aria-label="Priority site decisions">
     <header>
@@ -128,7 +132,7 @@ export function IncidentFocus({ scene, findings, fixes, messages, onInspect, onT
       <h3>Nothing flagged for this day</h3>
       <p className="meta">The record shows no clash here. That does not mean the work on site is checked.</p>
     </div>}
-    <ol className="incident-list">
+    <ol className="incident-list" ref={listRef}>
       {incidents.map((group) => {
         const finding = group[0]!;
         const ids = new Set(group.map((item) => item.id));
@@ -146,7 +150,7 @@ export function IncidentFocus({ scene, findings, fixes, messages, onInspect, onT
         const state = sent && !pending ? "awaiting" : finding.severity;
         const recipients = pending ? [...new Set(pending.messages.map((message) => crewName(message.crewId)))].join(" and ") : "";
         const work = [...new Set(tasks.map((t) => `${crewName(t.crewId)}: ${task(t.taskType)}, ${dayLabel(t.day)} ${slotWord[t.slot]}`))].slice(0, 2);
-        return <li className={`incident-item ${state}`} key={incidentKey(finding)}>
+        return <li className={`incident-item ${state}${finding.check === "open_decision" && state !== "awaiting" ? " open-decision" : ""}`} key={incidentKey(finding)}>
           <div className="incident-place"><span>{place}</span><span className="severity">{state === "awaiting" ? "Waiting for reply" : finding.severity === "hold" ? "Hold" : "Check"}</span></div>
           <h3 className="incident-title">{title[finding.check]}</h3>
           {work.length > 0 ? <ul className="incident-work">{work.map((line) => <li key={line}>{line}</li>)}</ul> : <p className="incident-crew">{crews}</p>}

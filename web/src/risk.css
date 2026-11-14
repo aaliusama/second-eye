@@ -1,0 +1,66 @@
+/* App (and so this file) loads before index.css, so rules carry an `html` prefix to win ties.
+   Lane W2: risk hierarchy. Red = active conflict only. Amber = sent, not confirmed, or still open.
+   Emerald = a crew confirmation is on record. Neutrals come from the tokens (var(--...)). */
+:root {
+  --risk-conflict: #EF4444;
+  --risk-amber: #F59E0B;
+  --risk-confirmed: #10B981;
+  --risk-shift: 420ms;
+}
+
+/* ---------- Plan: a pulsing glow under active conflict geometry ---------- */
+.risk-pulse { opacity: 0.55; }
+@media (prefers-reduced-motion: no-preference) {
+  .risk-pulse { animation: risk-pulse 1.8s ease-in-out infinite; }
+  @keyframes risk-pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.9; }
+  }
+}
+
+/* ---------- Amber to emerald: one smooth step when the crew confirms ---------- */
+html .incident-item .severity,
+html .incident-item .severity::before,
+html .incident-waiting,
+html .fix,
+html .fix .sent-mark {
+  transition:
+    border-color var(--risk-shift) var(--ease-out),
+    background-color var(--risk-shift) var(--ease-out),
+    box-shadow var(--risk-shift) var(--ease-out),
+    color var(--risk-shift) var(--ease-out);
+}
+
+/* Incident cards */
+html .incident-item.hold .severity::before { background: var(--risk-conflict); }
+html .incident-item.hold .severity { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--risk-conflict) 45%, transparent); }
+html .incident-item.warn .severity,
+html .incident-item.awaiting .severity { background: color-mix(in srgb, var(--risk-amber) 16%, var(--surface)); }
+html .incident-item.warn .severity::before,
+html .incident-item.awaiting .severity::before { background: var(--risk-amber); }
+html .incident-waiting {
+  box-shadow: inset 3px 0 0 var(--risk-amber);
+  background: color-mix(in srgb, var(--risk-amber) 10%, transparent);
+}
+html .incident-item.confirmed .severity { background: color-mix(in srgb, var(--risk-confirmed) 16%, var(--surface)); }
+html .incident-item.confirmed .severity::before { background: var(--risk-confirmed); }
+
+/* Approval queue and crew confirmation receipts */
+html .fix.hold { border-left-color: var(--risk-conflict); }
+html .fix.awaiting { border-left-color: var(--risk-amber); }
+html .fix.awaiting .sent-mark,
+html .fix.awaiting > strong { color: var(--risk-amber); }
+html .fix.done { border-left-color: var(--risk-confirmed); }
+html .fix.done .sent-mark,
+html .fix.done > strong { color: var(--risk-confirmed); }
+@media (prefers-reduced-motion: reduce) {
+  html .incident-item .severity,
+  html .incident-item .severity::before,
+  html .incident-waiting,
+  html .fix,
+  html .fix .sent-mark { transition: none; }
+}
+
+/* Open decisions read amber: not a clash, not settled. */
+html .incident-item.open-decision .severity { background: color-mix(in srgb, var(--risk-amber) 16%, var(--surface)); box-shadow: none; }
+html .incident-item.open-decision .severity::before { background: var(--risk-amber); }

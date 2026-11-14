@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import type { ChatMessage, ElementChange, Finding, Fix, Scene } from "@site/contracts";
 import type { UnresolvedItem } from "./api";
 import { crewName, elementById, findingKey, formatTime, sourceLabel } from "./derive";
@@ -133,18 +134,22 @@ export function Queue({ scene, fixes, findings, messages }: { scene: Scene; fixe
   const busy = useSite((s) => s.busy);
   const byId = new Map(findings.map((f) => [f.id, f]));
   const ordered = [...fixes].reverse().sort((a, b) => Number(a.status === "approved") - Number(b.status === "approved"));
+  // Rows glide when a send moves a fix down the queue (off under reduced motion).
+  const [listRef] = useAutoAnimate<HTMLOListElement>({ duration: 240 });
 
   if (ordered.length === 0) return <p className="meta">Nothing waiting to be sent.</p>;
   return (
-    <ol className="queue-list">
+    <ol className="queue-list" ref={listRef}>
       {ordered.map((fix) => {
         const f = byId.get(fix.findingId);
         const crews = [...new Set(fix.messages.map((m) => m.crewId))].map((id) => crewName(scene, id)).join(" and ");
         const sent = messages.filter((m) => m.id.startsWith(`sent-${fix.id}-`));
         const done = fix.status === "approved";
-          const awaiting = done && f?.check === "latest_change";
+        const awaiting = done && f?.check === "latest_change";
+        // Amber until the crew's confirmation is on record (the finding leaves the record on recheck); then emerald.
+        const tone = done ? (f ? "awaiting" : "done") : f?.severity === "hold" ? "hold" : f?.check === "open_decision" ? "awaiting" : "";
         return (
-            <li key={fix.id} className={`fix ${awaiting ? "awaiting" : done ? "done" : f?.severity === "hold" ? "hold" : ""}`}>
+            <li key={fix.id} className={`fix ${tone}`}>
             {f && <p className="problem">{f.summary}</p>}
             <p className="proposal">{fix.kind === "ask_crew" ? `Question for ${crews}: ` : ""}{fix.description}</p>
             {!done && (
