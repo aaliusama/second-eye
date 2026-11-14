@@ -36,7 +36,7 @@ export function toMessage(action: Extract<Action, { kind: "send_dm" | "follow_up
     id: `agent-${action.id}`,
     time,
     thread: `dm:${action.crewId}`,
-    senderName: "Site Rehearsal",
+    senderName: "Second Eye",
     senderRole: "system",
     crewId: action.crewId,
     text: action.text,

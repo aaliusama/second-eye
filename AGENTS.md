@@ -1,4 +1,4 @@
-# Site Rehearsal
+# Second Eye
 
 Hackathon project (Talona track, "Context for the Physical World"). Code freeze: **Sat 14 Nov 2026, 15:00 sharp**.
 This file is the single source of instructions for every AI coding tool on this repo. `CLAUDE.md` imports it.

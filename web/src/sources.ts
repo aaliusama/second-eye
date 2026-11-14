@@ -5,7 +5,7 @@ import type { ChatMessage } from "@site/contracts";
 
 export interface SourceView {
   id: string;
-  /** "Lena Hofer", "Site Rehearsal", "Drawing rev B". */
+  /** "Lena Hofer", "Second Eye", "Drawing rev B". */
   who: string;
   /** "office", "site group", "DM to Novak Plumbing", "drawing". */
   where: string;

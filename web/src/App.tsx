@@ -203,7 +203,7 @@ function Main() {
       <header className="top">
         <div className="title">
           <svg className="site-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M4 27V5h24v22H4Zm8 0V13h16M4 13h8M21 5v8" fill="none" stroke="currentColor" strokeWidth="2" /></svg>
-          <h1>Site Rehearsal</h1>
+          <h1>Second Eye</h1>
           <span className="title-rule" aria-hidden="true" />
           <span className="title-scene">{state.scene.name}</span>
         </div>

@@ -1,13 +1,13 @@
 <div align="center">
 
-<img src="docs/assets/readme/mark.svg" width="72" height="72" alt="Site Rehearsal mark: a floor plan with one wall drawn as a dashed red ghost">
+<img src="docs/assets/readme/mark.svg" width="72" height="72" alt="Second Eye mark: a floor plan with one wall drawn as a dashed red ghost">
 
-# Site Rehearsal
+# Second Eye
 
 **See tomorrow's mistake before it gets built.**
 
 A wall moves in the office chat. The plumber still plans from the old line.<br>
-Site Rehearsal turns crew messages into a sourced model of one floor, checks every stated plan against it,<br>
+Second Eye turns crew messages into a sourced model of one floor, checks every stated plan against it,<br>
 and shows the conflicting position as a red **ghost wall** before work starts.
 
 [![Talona track](https://img.shields.io/badge/Talona-Context%20for%20the%20Physical%20World-1C2B3A?style=flat-square)](docs/TALONA_ALIGNMENT.md)
@@ -17,11 +17,13 @@ and shows the conflicting position as a red **ghost wall** before work starts.
 [![Simulated data](https://img.shields.io/badge/site%20data-simulated-E0A100?style=flat-square)](#boundaries)
 [![MCP](https://img.shields.io/badge/agents-MCP-526575?style=flat-square)](mcp/README.md)
 
+**[Open the live demo](https://site-rehearsal.onrender.com)** · [Guided presenter](https://site-rehearsal.onrender.com/?present=1) · [Crew phone](https://site-rehearsal.onrender.com/phone)
+
 [Quick start](#quick-start) · [How it works](#how-it-works) · [Measured results](#measured-not-assumed) · [Architecture](docs/architecture.md) · [Demo script](docs/demo-script.md)
 
 <br>
 
-<img src="docs/assets/readme/workspace.png" alt="Site Rehearsal: floor plan beside the superintendent's site desk, with the recorded wall and its ghost position visible. All site data is simulated." width="100%">
+<img src="docs/assets/readme/workspace.png" alt="Second Eye: floor plan beside the superintendent's site desk, with the recorded wall and its ghost position visible. All site data is simulated." width="100%">
 
 </div>
 
@@ -32,7 +34,7 @@ and shows the conflicting position as a red **ghost wall** before work starts.
 
 ## What it is
 
-The superintendent needs to know, before 07:00, which crew is about to work from old information, and who to tell. Site Rehearsal answers with one shared record and one checking engine, run at two moments: the instant a crew states its plan, and again the evening before.
+The superintendent needs to know, before 07:00, which crew is about to work from old information, and who to tell. Second Eye answers with one shared record and one checking engine, run at two moments: the instant a crew states its plan, and again the evening before.
 
 | Step | What the product does |
 |---|---|
@@ -51,7 +53,7 @@ Text-only sheet comparisons also flag a difference between an issued revision an
 
 Most tools keep one model of the building. A site doesn't have one. Each crew works from **its own version**: the changes said in the threads it reads, and none of the ones it doesn't.
 
-Site Rehearsal models that directly. Every change to every element keeps the thread it was said in. From that history the engine derives, **per crew**, where that crew believes each wall is (`knownGeometry(element, crew)`). A ghost wall is the measured difference between one crew's belief and the record, at the place where its planned work meets it.
+Second Eye models that directly. Every change to every element keeps the thread it was said in. From that history the engine derives, **per crew**, where that crew believes each wall is (`knownGeometry(element, crew)`). A ghost wall is the measured difference between one crew's belief and the record, at the place where its planned work meets it.
 
 <div align="center">
 <img src="docs/assets/readme/who-knows.png" alt="The floor as Novak Plumbing knows it: their wall drawn where they believe it is, the record dashed red 0.4 m east. Beside it, the Who knows what matrix: every change since the drawing against every crew, with the Unit 204 wall row marked red for Novak Plumbing. Simulated site data." width="100%">
@@ -142,7 +144,7 @@ Methodology: [evaluation guide](eval/README.md) · [golden case details](eval/re
 | `npm run eval:paraphrase` | Run three development cases with uncached model calls |
 | `npm run build -w @site/web` | Build the web interface |
 
-**Hosted demo.** [`render.yaml`](render.yaml) deploys one Render web service that runs the API and serves the built web app (`server/static.ts`). Every push to `main` redeploys. It runs the offline replay only: no API key, live extraction off. All visitors share one in-memory record, so press **R** in the presenter to start clean.
+**Hosted demo** at [site-rehearsal.onrender.com](https://site-rehearsal.onrender.com) (the address keeps the project's earlier name). [`render.yaml`](render.yaml) deploys one Render web service that runs the API and serves the built web app (`server/static.ts`). Every push to `main` redeploys. It runs the offline replay only: no API key, live extraction off. All visitors share one in-memory record, so press **R** in the presenter to start clean.
 
 On Windows, use `npm.cmd` if PowerShell blocks `npm.ps1`. Evaluating outputs that aren't cached needs a Groq key; a call that can't run doesn't count as a successful negative. Recording instructions are in [`video/README.md`](video/README.md).
 

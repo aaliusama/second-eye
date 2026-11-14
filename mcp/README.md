@@ -57,7 +57,7 @@ Input schemas reuse the zod schemas from `contracts/` (`Day`, `Slot`, `TaskType`
 Claude Code, from the repo root:
 
 ```
-claude mcp add site-rehearsal --env SITE_API=http://127.0.0.1:8787 -- npx tsx mcp/server.ts
+claude mcp add second-eye --env SITE_API=http://127.0.0.1:8787 -- npx tsx mcp/server.ts
 ```
 
 Claude Desktop (`claude_desktop_config.json`), with an absolute path to this repo:
@@ -65,7 +65,7 @@ Claude Desktop (`claude_desktop_config.json`), with an absolute path to this rep
 ```json
 {
   "mcpServers": {
-    "site-rehearsal": {
+    "second-eye": {
       "command": "npx",
       "args": ["tsx", "C:/path/to/Proximata-Hackathon/mcp/server.ts"],
       "env": { "SITE_API": "http://127.0.0.1:8787" }

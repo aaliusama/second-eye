@@ -14,7 +14,7 @@ The published categories are technical implementation (35), autonomous operation
 
 ## Product position
 
-**Site Rehearsal checks tomorrow's intended work against today's recorded site context, and shows the mistake before it gets built.**
+**Second Eye checks tomorrow's intended work against today's recorded site context, and shows the mistake before it gets built.**
 
 The useful distinction is the combination of intended work, latest recorded geometry, crew-accessible information, spatial mismatch and a sourced correction/confirmation loop. Talona already describes site information aggregation, change detection and sourced answers. Rehearsal plus confirmation is our positioning hypothesis, not proof of uniqueness.
 

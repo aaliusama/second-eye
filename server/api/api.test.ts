@@ -134,7 +134,7 @@ describe("api", () => {
       id: "sent-fix-001-crew-plumbing",
       thread: "dm:crew-plumbing",
       senderRole: "system",
-      senderName: "Site Rehearsal",
+      senderName: "Second Eye",
     });
     expect(learning.all().filter((c) => c.kind === "fix_decision")).toHaveLength(1);
 
