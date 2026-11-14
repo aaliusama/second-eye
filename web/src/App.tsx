@@ -20,6 +20,7 @@ import { Huddle } from "./Huddle";
 import { IncidentFocus, incidentLead, rankIncidents } from "./IncidentFocus";
 import { Knowledge } from "./Knowledge";
 import { Autonomy } from "./Autonomy";
+import { Lessons } from "./Lessons";
 import { Acknowledgements } from "./Acknowledgements";
 import { Sheets } from "./Sheets";
 import { Dismissals } from "./Dismissals";
@@ -117,7 +118,7 @@ function Main() {
   const focus = useSite((s) => s.focus);
   const story = focus !== undefined && STORY_BEATS.has(focus);
   useEffect(() => {
-    setWorkspace(focus === "learn" ? "learning" : focus === "why" ? "knows" : focus === "ask" || focus === "run2" || focus === "ghost" ? "crew" : focus === "numbers" ? "record" : "today");
+    setWorkspace(focus === "learn" || focus === "run2" ? "learning" : focus === "why" ? "knows" : focus === "ask" || focus === "ghost" ? "crew" : focus === "numbers" ? "record" : "today");
   }, [focus]);
   useEffect(() => { if (phoneOpen) setWorkspace("crew"); }, [phoneOpen]);
 
@@ -348,6 +349,7 @@ function Main() {
         <Measured />
         </div>
         <div id="desk-learning" hidden={workspace !== "learning"}>
+        <Lessons scene={state.scene} messages={messages} />
         <Learning scene={state.scene} items={unresolved} />
         {!asOf && <Dismissals />}
         </div>

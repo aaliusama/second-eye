@@ -8,6 +8,7 @@ import {
   PostMessageRequest,
   ReplayTime,
   type AgentLogResponse,
+  type CorrectionsResponse,
   type FixesResponse,
   type HealthResponse,
   type RehearsalResponse,
@@ -165,6 +166,12 @@ export async function handle(req: IncomingMessage, res: ServerResponse): Promise
       const body: RehearsalResponse = rehearse(s.scene, getPlan(s.scene, day));
       const findings = body.frames.reduce((n, f) => n + f.findings.length, 0);
       if (findings > 0) logLine({ kind: "api.rehearsal", day, findings });
+      return send(res, 200, body);
+    }
+
+    if (route === "GET /api/corrections") {
+      // What the system has learned, so the screen can show each lesson beside its evidence.
+      const body: CorrectionsResponse = { corrections: learning.all() };
       return send(res, 200, body);
     }
 

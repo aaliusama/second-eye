@@ -1279,3 +1279,19 @@ select:focus-visible, input:not([type="range"]):focus-visible, textarea:focus-vi
 .opening-show { min-height: 30px; padding: 0 12px; border-radius: 999px; font-size: var(--small); }
 @media (max-width: 760px) { .opening-lead { display: none; } }
 .banner { top: calc(var(--caption-height) + 8px); }
+
+/* ---------- What it has learned: each lesson beside its evidence ---------- */
+.lessons { gap: 14px; }
+.lesson-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.lesson { border-radius: var(--radius-large); box-shadow: var(--depth-lift); background: var(--surface); padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+.lesson-kind { font-size: 11.5px; font-weight: 650; color: var(--ink-soft); }
+.lesson-title { margin: 0; font-size: 18px; font-weight: 650; letter-spacing: -0.02em; }
+.lesson-title span[aria-hidden] { color: var(--ink-soft); font-weight: 400; margin: 0 4px; }
+.lesson-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--paper-rule); border-radius: 8px; overflow: hidden; }
+.lesson-side { background: var(--surface); padding: 10px; display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; line-height: 1.45; min-width: 0; }
+.lesson-side.before { background: var(--paper); }
+.lesson-side blockquote { margin: 0; padding-left: 8px; box-shadow: inset 2px 0 0 var(--paper-rule); color: var(--ink); }
+.lesson-label { font-size: 11px; font-weight: 700; color: var(--ink-soft); }
+.lesson-side.after .lesson-label { color: var(--clear); }
+.lesson-foot { font-size: 11.5px; color: var(--ink-soft); }
+@media (max-width: 420px) { .lesson-pair { grid-template-columns: 1fr; } }

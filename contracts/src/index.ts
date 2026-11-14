@@ -524,6 +524,8 @@ export const Unresolved = z.object({
 
 /** GET /api/unresolved */
 export const UnresolvedResponse = z.object({ items: z.array(Unresolved) });
+/** GET /api/corrections: what the system has learned, oldest first. Read only. */
+export const CorrectionsResponse = z.object({ corrections: z.array(Correction) });
 /** GET /api/agent/log */
 export const AgentLogResponse = z.object({ timeline: z.array(TimelineStep), escalations: z.array(EscalateAction) });
 /** POST /api/ask body. */
@@ -602,6 +604,7 @@ export type CrewProfile = z.infer<typeof CrewProfile>;
 export type TimelineStep = z.infer<typeof TimelineStep>;
 export type Unresolved = z.infer<typeof Unresolved>;
 export type UnresolvedResponse = z.infer<typeof UnresolvedResponse>;
+export type CorrectionsResponse = z.infer<typeof CorrectionsResponse>;
 export type AgentLogResponse = z.infer<typeof AgentLogResponse>;
 export type AskRequest = z.infer<typeof AskRequest>;
 export type AskResponse = z.infer<typeof AskResponse>;

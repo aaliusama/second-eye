@@ -8,6 +8,7 @@ import {
   PostMessageResponse,
   RehearsalResponse,
   StateResponse,
+  CorrectionsResponse,
   type ChatMessage as ChatMessageT,
 } from "@site/contracts";
 import { fixtureExtractResults, fixtureFinding, fixtureFix, fixtureMessages } from "@site/contracts/fixtures";
@@ -185,6 +186,17 @@ describe("api", () => {
 
     await call("POST", "/api/reset", { keepLearning: false });
     expect(await aliasesOf("room-203")).not.toContain("the blue room");
+  });
+
+  it("GET /api/corrections lists what was learned, and is empty after a clean start", async () => {
+    await call("POST", "/api/reset", { keepLearning: false });
+    expect(CorrectionsResponse.parse((await call("GET", "/api/corrections")).body).corrections).toEqual([]);
+    await call("POST", "/api/corrections", {
+      kind: "location_alias", id: "c-3", time: "2026-11-13T18:00:00", sourceMessageId: "live-1", alias: "the blue room", elementId: "room-204",
+    });
+    const listed = CorrectionsResponse.parse((await call("GET", "/api/corrections")).body).corrections;
+    expect(listed).toEqual([expect.objectContaining({ id: "c-3", kind: "location_alias", alias: "the blue room", elementId: "room-204" })]);
+    await call("POST", "/api/reset", { keepLearning: false });
   });
 
   it("invalid correction is 400", async () => {

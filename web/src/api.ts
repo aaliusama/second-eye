@@ -109,6 +109,8 @@ export const api = {
   eval: () => optional<EvalResults>("/api/eval"),
   /** Lane A route; undefined until the server has it. */
   unresolved: () => optional<{ items: UnresolvedItem[] }>("/api/unresolved").then((r) => r?.items),
+  /** GET /api/corrections: what the system has learned. Undefined when the server has no such route. */
+  corrections: () => optional<{ corrections: Correction[] }>("/api/corrections").then((r) => r?.corrections),
 };
 
 /** Tabs (main screen, /phone) tell each other to refetch after a write. */

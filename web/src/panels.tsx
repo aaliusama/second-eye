@@ -204,7 +204,7 @@ export function Learning({ scene, items }: { scene: Scene; items: UnresolvedItem
   const runAgain = useSite((s) => s.runAgain);
   const busy = useSite((s) => s.busy);
   return (
-    <section className="panel" id="learning">
+    <section className="panel" id="learning-teach">
       <h2>Learning</h2>
       <p className="meta">Places crews named that the record could not place, and runs that reuse what was confirmed.</p>
       {items && items.length === 0 && <p className="meta">Every place in the record is resolved.</p>}
