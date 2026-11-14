@@ -5,16 +5,25 @@
   --risk-conflict: #EF4444;
   --risk-amber: #F59E0B;
   --risk-confirmed: #10B981;
-  --risk-shift: 420ms;
+  --risk-shift: 250ms;
 }
 
-/* ---------- Plan: a pulsing glow under active conflict geometry ---------- */
-.risk-pulse { opacity: 0.55; }
+/* ---------- Plan: the ghost pulses to draw the eye, then settles to a very subtle glow ---------- */
+/* Settled state (and the only state under reduced motion): a faint, still glow while unresolved. */
+.risk-pulse { opacity: 0.22; }
 @media (prefers-reduced-motion: no-preference) {
-  .risk-pulse { animation: risk-pulse 1.8s ease-in-out infinite; }
+  .risk-pulse {
+    animation:
+      risk-pulse 1.1s ease-in-out 3,
+      risk-breathe 5s ease-in-out 3.3s infinite;
+  }
   @keyframes risk-pulse {
-    0%, 100% { opacity: 0.3; }
+    0%, 100% { opacity: 0.22; }
     50% { opacity: 0.9; }
+  }
+  @keyframes risk-breathe {
+    0%, 100% { opacity: 0.22; }
+    50% { opacity: 0.32; }
   }
 }
 
