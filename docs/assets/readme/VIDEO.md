@@ -1,6 +1,20 @@
 # README product film
 
-The README uses a static preview linked to a repository-hosted MP4. The image remains readable without motion, and the video opens only when the viewer chooses it. This is a linked video, not a claim of inline playback in every Markdown renderer.
+## Current inline film
+
+The README now embeds `second-eye-film.webp` directly, following the animated-WebP approach used by the reference repository [omarjku/Mixymatchy](https://github.com/omarjku/Mixymatchy). It animates in the page without an MP4 link or a separate video player. This is a recorded product film, not a live application session. Animated images do not provide video playback controls.
+
+Source: the newer `video/film/out/final-product-demo-1080p.mp4`, modified 14 November at 14:09, measured at 158.3 seconds. Export: 1000 px wide, 8 fps, animated WebP, quality 60, looping, silent. On-screen captions remain in the frames. A `picture` source selects the existing still for reduced-motion preferences, and a visible still-image link is provided.
+
+```sh
+ffmpeg -i video/film/out/final-product-demo-1080p.mp4 -vf "fps=8,scale=1000:-2:flags=lanczos" -c:v libwebp_anim -quality 60 -compression_level 4 -loop 0 -an docs/assets/readme/second-eye-film.webp
+```
+
+The film retains its own cited industry-survey slide; that figure is not a Second Eye evaluation result or a measured saving. Product evaluation remains the synthetic 15-case scenario shown in the film. Captures predate some current technical views and do not include the unmerged Unit 204 PR.
+
+## Earlier MP4 export (retained, no longer linked from README)
+
+The previous README used a static preview linked to a repository-hosted MP4. The original export and its provenance below are retained; the current README has no MP4 call to action.
 
 - **Published asset:** `second-eye-demo-silent.mp4`
 - **Preview:** `product-film-poster.jpg`, extracted at 00:18 from the existing film
