@@ -1,6 +1,6 @@
 # Talona alignment and next evidence
 
-Updated 14 November 2026. Documentation review against the original case book, public challenge, and current branch through `a26c680`. This is a requirements interpretation and work plan, not a new test run or a predicted score.
+Updated 14 November 2026. Documentation review against the original case book, public challenge, and current branch through `a26c680`; status addendum through `7e9f2ef` below. This is a requirements interpretation and work plan, not a new test run or a predicted score.
 
 ## What the challenge asks
 
@@ -35,7 +35,16 @@ Long-term direction (our interpretation): site evidence -> shared evolving recor
 | Evidence | Last recorded implementation checks: 310 root, 24 HTTP and 30 MCP tests; golden eval 15/0/0 | These results predate the three later commits; rerun appropriate checks for the release. Golden data is development/regression evidence, not a blind test or field performance |
 | Delivery | Updated eleven-beat pitch/submission and presenter-driven recorder in `02bb5f9`/`a26c680` | Recorder implementation is not a reviewed video. Submission destination, eligibility and final recording still need verification |
 
-## Next coordinated work
+## Status after `7e9f2ef` (14 November, morning)
+
+The table above was written at `a26c680`. The commits that followed changed it as follows (taken from commit messages and the code, not from a new full test run):
+
+- **Visual/demo:** one red item during the ghost-wall beats, one ghost per incident, an amber ghost while a sent correction awaits confirmation, an as-of agent log, and the eleven beats written as rehearsed in `docs/demo-script.md`. A Codex design pass on `web/` and `README.md` is in progress. Screenshot-verified rehearsal and a reviewed video are still not claimed here.
+- **Extraction/evidence:** a challenge set written before any run (64 messages, 14 labelled cases, 7 non-cases). Live Groq run 1 caught 6 of 14 with 5 false alarms. Run 2, after the seven-day calendar fix, caught 8 of 14 with 4 false alarms. Run 2 is not unseen data. Paraphrase set: 2 of 3 passed.
+- **Context consumer:** done in `mcp/`. `mcp/shared-record.test.ts` follows the W-12 incident before send, after send and after the simulated crew reply against the real HTTP API. The MCP findings (id, source, evidence, ghost) must equal what the web reads. `is_place_clear` stays HOLD after send and marks the finding `awaitingConfirmation`. After confirmation the incident is gone, and Unit 204 is still not called clear because plumbing is booked there. This test found that `check_plan` had passed "could not tell what you asked" from `/api/ask` on as its answer in demo mode. It now falls back to the record and says why.
+- **Delivery:** the pitch and submission carry the measured golden and challenge results (`3107fc6`). The submission destination, eligibility and final recording are still unverified.
+
+## Next coordinated work (historical plan; see status above)
 
 1. **Visual/demo lane (`web/`, `docs/demo-script.md`):** capture the eleven beats, verify initial reveal and Send/Confirm, then make only screenshot-supported layout improvements. Preserve existing N/O/P worktrees.
 2. **Extraction/evidence lane (`server/extract/`, `eval/`, separate challenge fixtures):** establish service availability, test paraphrases, ambiguity and negatives, retain failed/unavailable results, and score independently from golden replay. Known failed examples are development cases, not unseen holdouts.

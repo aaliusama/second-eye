@@ -5,8 +5,9 @@ export const color = {
   paper: "#EEF1F2",
   /** A shade of paper for the drafting grid and quiet panel rules. */
   paperRule: "#D9DFE2",
+  surface: "#FFFFFF",
   ink: "#1C2B3A",
-  inkSoft: "#6B7A88",
+  inkSoft: "#526575",
   /** Ghost and conflict ONLY. Never for buttons, badges or branding. */
   redline: "#D4281C",
   /** A check that passed, a clash that was fixed. */
@@ -28,13 +29,16 @@ export const font = {
 export const size = {
   text: "14px",
   small: "12px",
-  heading: "15px",
-  title: "18px",
+  heading: "17px",
+  title: "20px",
   rule: "1px",
-  radius: "2px",
+  radius: "5px",
   gap: "12px",
-  pad: "16px",
-  queueWidth: "340px",
+  pad: "20px",
+  queueWidth: "380px",
+  display: "28px",
+  captionHeight: "88px",
+  controlHeight: "36px",
 } as const;
 
 /** Drawing units are metres. Line weights in metres at plan scale. */

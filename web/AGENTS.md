@@ -109,7 +109,7 @@ Before finishing a UI task, ask: if this screenshot had no logo, would it look l
 
 ## Feature notes
 - **Element inspector:** clicking an element shows its history as a short list (who, what, when) with the source message quoted. No source, no row.
-- **Approval queue:** each item states the problem in one sentence, the proposed fix, and one button named for what it does ("Send fix to Walsh Drywall"). After the click the item reads "Fix sent" and the element turns `clear`.
+- **Approval queue:** each item states the problem, proposed fix and an action named for what it does. Sending a latest-change correction leaves the risk open and amber; only an explicit reply for the current revision triggers the confirmation/recheck flow. Never turn a geometry risk green just because a message was sent.
 - **Time slider:** crew lanes below it show who is where; a clash marks the slider track in `redline` at that time, so the problem is visible before scrubbing.
 - **Phone:** a plain message thread. Replies from the system lead with HOLD or CLEAR, then one reason, then the source.
 - **Label:** "Simulated site data" stays visible on every view.

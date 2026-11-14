@@ -84,6 +84,14 @@ describe("get_site_state", () => {
     s.fixes = [{ ...fixtureFix, status: "approved" } satisfies Fix];
     const out = await getSiteState(standard({ "GET /api/state": [200, s] }).api, {});
     expect(out.data.openFindings).toHaveLength(1);
+    expect((out.data.openFindings as { awaitingConfirmation: boolean }[])[0]!.awaitingConfirmation).toBe(true);
+    expect(out.text).toMatch(/correction sent, awaiting crew confirmation/);
+  });
+
+  it("a pending correction is not reported as sent", async () => {
+    const out = await getSiteState(standard().api, {});
+    expect((out.data.openFindings as { awaitingConfirmation: boolean }[])[0]!.awaitingConfirmation).toBe(false);
+    expect(out.text).not.toMatch(/awaiting crew confirmation/);
   });
 });
 
@@ -207,6 +215,16 @@ describe("check_plan", () => {
     expect(out.data.basis).toBe("record");
     expect(out.data.verdict).toBe("HOLD");
     expect(out.text).toMatch(/space: Novak Plumbing/);
+  });
+
+  it("an answer without a verdict falls back to the record instead of being passed on", async () => {
+    const { api } = standard({ "POST /api/ask": [200, { text: "I could not tell what you asked; forwarded to the superintendent." }] });
+    const out = await checkPlan(api, plan);
+    expect(out.data.basis).toBe("record");
+    expect(out.data.verdict).toBe("HOLD");
+    const clear = await checkPlan(api, { ...plan, placeId: "room-203" });
+    expect(clear.data.verdict).toBe("CLEAR");
+    expect(clear.text).toMatch(/gave no verdict .*not re-checked/);
   });
 
   it("fallback flags the crew's own open finding", async () => {

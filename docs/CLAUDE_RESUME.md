@@ -1,5 +1,17 @@
 # Resume after Codex parallel implementation
 
+## Deeper product-design pass: finished by Claude
+
+Codex hit its usage limit mid-pass, and Claude finished and committed the work. The design persona is the superintendent *who lives this pain* (`docs/SITE_MANAGER_PAIN.md`), not a Spain-based user; that was a mishearing. The Spain research file was removed. The current state, verification and remaining items are at the top of `docs/PARALLEL_STATUS.md` and in `docs/CLAUDE_LANE.md`. Nothing here claims user interviews, deployment, unique market invention or a judging score.
+
+## Completed README and interface design pass
+
+The design pass is complete; README/web ownership is released after this handoff. Read `docs/DESIGN_REVIEW.md` for sources, design decisions, screenshot evidence and limitations. README now has an actual app screenshot, concise run paths, a correction loop, architecture diagram and honest golden/challenge results. Site desk sections are Today, Record and Learning; source metadata and confirmations use progressive disclosure. Presenter focus opens the relevant section. Ordinary startup shows the whole floor; ghost/why focus removes unrelated sidebar risks. Sending remains amber and separate from explicit confirmation.
+
+Verification on this pass: 311 root tests, 24 HTTP demo tests, typecheck and web build passed. Headless Edge completed all eleven beats without page errors; screenshots cover flat/3D, pending/confirmed, phone, 390px mobile and reduced motion. Fixed an alert-dropdown overflow. This is a visual smoke run, not a human-paced final video review or real-device touch test. The preview uses API 8795 / web 5178, live calls off. No dependency was added; external skill guidance was read, not installed.
+
+Other agents continued backend work during this pass. Their `server/agent/` edits and current `mcp/tools.ts` work are outside this design commit. Preserve them. The README reflects the newer challenge reports (6/14 then 8/14 caught, with false alarms), so older unverified-live wording below is historical. Next: address those measured failures, validate the MCP consumer, and record/review the final video. Do not rebuild the existing desk navigation or replace honest challenge results with the golden score.
+
 ## Latest documentation update: challenge alignment
 
 Read `docs/TALONA_ALIGNMENT.md` before choosing further work. It records the actual problem, optional versus required integration, weaknesses, acceptance criteria and proposed non-overlapping lanes. This update changes documentation only; it starts no implementation agents.

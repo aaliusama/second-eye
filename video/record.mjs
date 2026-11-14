@@ -52,7 +52,8 @@ async function api(path, body) {
 }
 
 async function phoneSend(page, crewName, text) {
-  const toggle = page.getByRole("button", { name: /^Crew phone$/ });
+  // The crew chat lives in the desk's Crew tab.
+  const toggle = page.getByRole("navigation", { name: "Site desk sections" }).getByRole("button", { name: /^Crew$/ });
   if (await toggle.count()) await toggle.click();
   const phone = page.getByRole("region", { name: "Crew phone" });
   const select = phone.locator("select").first();
@@ -123,7 +124,9 @@ async function main() {
 
   // 2:00-2:20 Fix: one tap.
   await step("approve the fix", async () => {
-    await page.getByRole("button", { name: new RegExp(`^Send fix to ${config.crews.plumbing}`) }).first().click();
+    // The priority card's primary action; the full approval list is folded under "All proposed actions".
+    await page.getByRole("navigation", { name: "Site desk sections" }).getByRole("button", { name: /^Priorities$/ }).click();
+    await page.getByRole("button", { name: new RegExp(`^Send correction to ${config.crews.plumbing}`) }).first().click();
   });
   await until(140);
 

@@ -21,7 +21,7 @@ Anchor sentence: the site checks every crew's stated plan against a live model o
 - `npm run demo`, then open http://localhost:5173/?present=1 on the laptop (1440x900 or larger; the page is light on purpose, it survives a projector).
 - A small step bar sits bottom-left of the plan. It is the only thing presenter mode adds to the screen.
 - Press **R** once: the run starts clean (nothing learned) and the bar shows beat 1.
-- Optional: open http://localhost:5173/phone on a real phone on the same network to hold up. The presenter beats post from the **Crew phone** inset on the laptop; the real phone refreshes with them.
+- Optional: open http://localhost:5173/phone on a real phone on the same network to hold up. The presenter beats post from the desk's **Crew** tab on the laptop; the real phone refreshes with them.
 - Phone texts live in one place: `web/src/present/beats.ts` (`PHONE`). Each must have a cache entry (`npm run cache-id -- "<text>" <crewId>` prints its id); without one the phone answers "Not found" honestly. A text still in `[[...]]` is not sent and the bar says so.
 
 ## Keys (presenter mode)
@@ -44,10 +44,10 @@ Visually rehearsed from a clean start on Sat 14 Nov (screenshots of every beat, 
 |---|---|---|---|---|
 | 0:00 | 1 Problem | The record as of Thu 13:01: whole floor, no ghost, agent log "Nothing yet". | Pitch "Problem". State that it is simulated site data. | **Start clean** in Learning. |
 | 0:20 | 2 Build | The record as of the architect's Rev C (Thu 14:02); inspector on the 204 east wall, every history row quoting its message. | "Every message becomes a change to one record, and keeps its source." | **Model after this message** on m-001, click the 204 east wall. |
-| 0:40 | 3 Ghost wall | Back to now. The phone (Novak Plumbing) sends the scripted intent and answers HOLD with the source. The plan frames the 204 bathroom wall: black true wall, one red dashed ghost, "0.4 m east" large. Nothing else is red. | "Red is where plumbing will measure from. Black is the wall per the record. Forty centimetres." Hold still. | **Crew phone**, Novak Plumbing, type the text, Send. |
+| 0:40 | 3 Ghost wall | Back to now. The phone (Novak Plumbing) sends the scripted intent and answers HOLD with the source. The plan frames the 204 bathroom wall: black true wall, one red dashed ghost, "0.4 m east" large. Nothing else is red. | "Red is where plumbing will measure from. Black is the wall per the record. Forty centimetres." Hold still. | Desk **Crew** tab, Novak Plumbing, type the text, Send. |
 | 1:10 | 4 Why | Inspector on the ghost: what plumbing said, and "What Novak Plumbing did not hear" quoting the office-thread change. | "The change was said in the office thread. Plumbing doesn't read it." | Click the ghost. |
 | 1:25 | 5 Rehearse | Whole floor, Saturday played forward; clash rooms outlined, redline on the timeline; 06:30 huddle shows the top three. | "Every evening, tomorrow is played forward. What can't be undone comes first." | Drag the slider. |
-| 1:45 | 6 Send | The W-12 fix is sent. Ghost and dimension turn **amber**: "sent, not confirmed". Crew confirmation panel: "Sent · awaiting crew confirmation". | "One tap sends it. Sent isn't heard. It stays amber." | **Send fix to Novak Plumbing** on the W-12 card. |
+| 1:45 | 6 Send | The W-12 fix is sent. Ghost and dimension turn **amber**: "sent, not confirmed". Crew confirmation panel: "Sent · awaiting crew confirmation". | "One tap sends it. Sent isn't heard. It stays amber." | **Send correction to Novak Plumbing** on the Unit 204 card under Priorities. |
 | 2:00 | 7 Confirm | Simulated crew reply confirms revision 2 of the wall; record rechecked; ghost gone; panel "Crew confirmed · record rechecked". | "The crew confirms this exact revision. That proves the information arrived, not the work." | **Simulate Novak Plumbing confirming receipt**. |
 | 2:15 | 8 Ask | Phone asks "can we start the 204 bath tomorrow morning?": "CLEAR: no conflict found in the record…", citing the confirmation. | "Answers come from the record, with sources. Decisions go to the superintendent." | Type the question. |
 | 2:25 | 9 Learn | Walsh Drywall sends the blue-room text; run 1 cannot place it; it appears under **Learning**. | "The record doesn't guess." | Type the text. |
@@ -58,7 +58,7 @@ Recording: `cd video && node record-present.mjs --captions` with the demo runnin
 
 ## Fallbacks
 
-- Phone not on the network: the laptop's **Crew phone** inset does everything; presenter beats use it anyway.
+- Phone not on the network: the desk's **Crew** tab on the laptop does everything; presenter beats use it anyway.
 - A text has no cache entry: the phone answers "Not found: no plan for tomorrow recognised in this message" and cites the crew's own message. Keep going; the ghost from the golden replay is already on the plan and beat 3 replays its reveal. Say "the plan was already checked the evening before".
 - Server down: the plan draws the contract fixtures (the same ghost-wall case) with a banner saying so. Restart with `npm run demo`; do not present from the fixtures.
 

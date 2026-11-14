@@ -52,7 +52,7 @@ export function Huddle({ day, messages, revision }: { day?: string; messages: Ch
 
   const lines = digest ? huddleLines(digest.text) : [];
   return (
-    <section className="panel" aria-label="06:30 superintendent huddle">
+    <section className="panel huddle-panel" aria-label="06:30 superintendent huddle">
       <h2>06:30 huddle</h2>
       <p className="meta">First three recorded risks to review · per the record</p>
       {!day && <p className="meta">Tomorrow's plan not found.</p>}
@@ -68,8 +68,9 @@ export function Huddle({ day, messages, revision }: { day?: string; messages: Ch
             const body = match ? line.slice(0, match.index) : line;
             return (
               <li key={`${index}-${body}`} className={`fix ${body.startsWith("HOLD:") ? "hold" : "warn"}`}>
-                <p>{body}</p>
-                {ids.length > 0 && <p className="meta">Source: {ids.map((id) => sourceLabel(id, messages)).join("; ")}</p>}
+                <span className="severity">{body.startsWith("HOLD:") ? "Hold before work" : "Confirm before work"}</span>
+                <p>{body.replace(/^(HOLD|WARN): (Per the record, )?/, "")}</p>
+                {ids.length > 0 && <details className="huddle-evidence"><summary>View source record</summary><p className="meta">{ids.map((id) => sourceLabel(id, messages)).join("; ")}</p></details>}
               </li>
             );
           })}

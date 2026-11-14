@@ -1,144 +1,144 @@
 # Site Rehearsal
 
-Talona track, proximata hackathon '26. On a building site, crews plan tomorrow's work in chat, and a change made in one thread often never reaches the crew it affects. Site Rehearsal turns the site chat into a live model of one floor, checks every crew's stated plan against it the moment they say it and again the evening before, and shows the mistake as a red ghost wall before the work starts. The superintendent approves the fix with one tap and the crew gets the message.
+### See tomorrow's mistake before it gets built.
 
-All site data is simulated. Every screen says so.
+A wall moves in the office chat. The plumber still plans from the old line. **Site Rehearsal makes that mismatch visible before work starts.** It turns crew messages into a sourced model of one floor, checks intended work, and shows the conflicting position as a red ghost wall.
 
-## Run
+[Run the demo](#run-the-demo) · [How it works](#one-record-from-intent-to-confirmation) · [Evidence](#measured-not-assumed) · [Architecture](docs/architecture.md)
 
-Needs Node 22.12 or newer.
+Built for the **Talona · Context for the Physical World** track at proximata Hackathon '26. All site data is simulated. The model represents the record, not verified construction.
 
-```
+![Site Rehearsal: floor plan beside the superintendent's three-item huddle, with the recorded wall and ghost position visible. All site data is simulated.](docs/assets/readme/workspace.png)
+
+The floor stays in view. **Today** holds the next decisions; **Record** holds sources and revisions; **Learning** holds corrections you can inspect and undo.
+
+## Run the demo
+
+Requires **Node.js 22.12+** and npm. From the repository root:
+
+```sh
 npm install
 npm run demo
 ```
 
-Open http://localhost:5173. The demo plays `data/replay.golden.json` with cached LLM output from `data/llm-cache/`, so it needs no API key and no network.
+Open **[localhost:5173](http://localhost:5173)**. After installation, the prepared replay runs offline with cached model outputs—no API key required. The API uses port `8787`; stop an existing demo before starting another on the same ports.
 
-For unscripted crew messages, set `GROQ_API_KEY` in `.env`, then run `npm run demo:live`. Prepared messages still read the golden cache; any other wording is read live by Groq (about 0.5-4 s per message in our runs), checked, and stored in the gitignored `data/llm-cache-live/`, never in the golden cache. A live call gives up after a 15 s timeout or two attempts, and the phone then says so: "Live reading failed ... Nothing was guessed." In plain `npm run demo` (offline), an unknown wording is answered "Not checked: Live reading is off", never cleared. Groq's free tier rate-limits bursts; one of eight rapid test messages failed this way and succeeded when resent 20 s later. Stop your existing demo process before starting another on the same ports.
+| Explore | Open | What to do |
+|---|---|---|
+| Guided demonstration | [Presenter](http://localhost:5173/?present=1) | Press **R** to start clean, **→** to advance, **←** to revisit, **H** to hide controls |
+| Superintendent workspace | [Floor plan](http://localhost:5173) | Inspect a risk, read its sources, send a correction and track confirmation |
+| Crew view | [Phone](http://localhost:5173/phone) | Send a prepared message or ask a question about the record |
 
-`npm run eval:paraphrase` runs the 3-case paraphrase set through uncached model calls (`eval/paraphrase-results.json`). `npm run eval:challenge` runs the separate challenge set in `data/challenge/` (see below). Neither touches the golden labels or cache. An unavailable model is reported as unavailable, not as a successful negative.
+**Want to type something new?** Copy [`.env.example`](.env.example) to `.env`, set `GROQ_API_KEY`, then start:
 
-- Presenter mode: http://localhost:5173/?present=1 (or press P). One key per demo beat: → next beat, ← back, R reset, H hide the bar.
-- Crew phone: http://localhost:5173/phone, sized for a real phone. Send a message as a crew and it is checked live.
+```sh
+npm run demo:live
+```
 
-## Environment
+Prepared messages still use their cache; unfamiliar wording uses live extraction. Offline cache misses and failed live calls are reported as **not checked**, never clearance. Live mode requires network access and is subject to model errors and rate limits. Keep `.env` private.
 
-The demo needs none of this. Copy `.env.example` to `.env` to use the LLM; never commit `.env` (it is gitignored).
+## One record, from intent to confirmation
 
-| Variable | What |
+The superintendent needs to know what matters, why it matters, and which action comes next.
+
+| Step | What the product does |
 |---|---|
-| `GROQ_API_KEY` | Groq key (https://console.groq.com/keys). Needed only to build caches or run live. |
-| `GROQ_MODEL` | model for extraction and question parsing; default `openai/gpt-oss-120b` |
-| `LIVE_LLM` | `0` (default): read the caches only. `1`: call Groq for any message or question with no cache entry, and write the result to the cache |
-| `PORT` | site server port, default 8787 |
-| `SITE_API` | where the MCP server finds the site API, default `http://127.0.0.1:8787` |
-| `LEARNING_FILE` | optional, e.g. `.learning/store.json`: learning is saved there and survives a server restart. Unset (default): in memory, every `npm run demo` starts clean |
+| **Understand the plan** | Extract crew intent and scene changes from messages, retaining source and confidence. |
+| **Expose the mismatch** | Check latest changes, shared space, work order and open decisions. Show the ghost beside the recorded wall. |
+| **Rehearse tomorrow** | Play the planned work forward and surface the top three huddle items. |
+| **Send the correction** | Let the superintendent approve a sourced crew message. The risk remains open while confirmation is pending. |
+| **Confirm and recheck** | Record an explicit simulated crew reply for that revision, reject stale replies, and retain the incident receipt. |
+| **Remember the lesson** | Reuse a corrected location nickname; remember an exact incident review with a reason and Undo. |
 
-## Commands
+Text-only sheet comparisons also flag a difference between an explicitly issued revision and the revision a crew says it holds. No drawing attachment is read. An acknowledgement records receipt in the simulation; it does not establish inspection, completed work or physical safety.
 
-| Command | What |
-|---|---|
-| `npm run demo` | server (port 8787) + web (port 5173) from the golden replay |
-| `npm run dev` | same, with hot reload |
-| `npm test` | unit tests; `npm test -- server/checks` for one folder |
-| `npm run e2e` | the demo story over HTTP against a spawned server on port 8790 (`E2E_PORT` to change) |
-| `npm run eval` | golden replay vs `data/labels.json`: caught / missed / false alarms per check, written to `eval/results.json` |
-| `npm run typecheck` | all workspaces and `e2e/` |
-| `npm run cache-id -- "<text>" <crewId>` | the cache id a live phone message gets |
-| `node --import tsx server/extract/build-cache.ts [--force] [--only=id,other-id]` | extract replay messages and scripted phone texts with Groq into `data/llm-cache/`; optionally refresh only the named messages |
-| `node --import tsx server/query/build-cache.ts [--force]` | parse the demo crew questions with Groq into `server/query/cache/` |
-| `npm run start -w @site/mcp` | MCP server on stdio for agents and robots (see `mcp/README.md`) |
-| `npm run robot -w @site/mcp` | demo robot planner that knows the site only through MCP |
+## Measured, not assumed
 
-Both cache builders need `GROQ_API_KEY` and keep existing entries unless `--force`. On Windows `npx` is slow (30-45 s per call); `node --import tsx` starts at once.
+The recorded evaluations include both the prepared demonstration and a separate challenge. All data is synthetic; these results are **not field performance**.
 
-The demo video recorder lives in `video/` (standalone, see `video/README.md`).
+| Evaluation | Caught | Missed | False alarms | Interpretation |
+|---|---:|---:|---:|---|
+| [Golden replay](eval/results.json) | 15 / 15 | 0 | 0 | Development/regression set; 190 messages |
+| [Challenge, first run](eval/results.challenge.json) | 6 / 14 | 8 | 5 | Separate set committed before its first run; 64 messages |
+| [Challenge, second run](eval/results.challenge.run2.json) | 8 / 14 | 6 | 4 | After a calendar-prompt fix motivated by run 1; no longer unseen |
 
-## Measured results
+Golden results combine live and evening checks. Live checks alone catch 14 of 15; rehearsal catches the remaining case. Challenge failures expose extraction gaps and limitations around cancellations, future plans and uncertain work prerequisites. The reports preserve those failures instead of presenting the prepared demo as general accuracy.
 
-`npm run eval` on the simulated `golden` replay: 190 messages and 15 independent labelled cases.
+See [evaluation methodology](eval/README.md), [golden case details](eval/results.detail.json) and [challenge data](data/challenge/) for sources, matching rules and per-case results.
 
-| Check | Caught | Missed | False alarms |
-|---|---:|---:|---:|
-| Latest change | 4 | 0 | 0 |
-| Space clash | 4 | 0 | 0 |
-| Order of work | 3 | 0 | 0 |
-| Open decision | 4 | 0 | 0 |
-| Total | 15 | 0 | 0 |
-
-These are synthetic-set results, not field performance or extraction accuracy. The results pool live and evening checks and retain alerts resolved later. See `eval/results.json`, `eval/results.detail.json` and `eval/README.md` for matching rules and limitations. The golden set was used during development, so it is a regression set, not a holdout. Live checks alone catch 14 of 15; case OW3 is caught only by the evening rehearsal.
-
-### Challenge set (written before any run)
-
-`data/challenge/` is a second run on the same floor: 64 messages over three new days, 14 labelled cases and 7 planted non-cases (an already informed crew, a cancellation, an ambiguous nickname, harmless look-alikes), committed before the system ever read it. It was extracted once with live Groq (outputs stored with provenance in `data/challenge/llm-cache/`) and scored with the same rules: `npm run eval:challenge`.
-
-| Run | Caught | Missed | False alarms | Messages read exactly |
-|---|---:|---:|---:|---:|
-| Run 1, unseen | 6 of 14 | 8 (all extraction failures) | 5 | 50 of 64 |
-| Run 2, after the calendar fix (not unseen) | 8 of 14 | 6 (5 extraction, 1 check) | 4 | 52 of 64 |
-
-Run 1 showed the model resolving weekday names to the wrong date ("wednesday" sent on a Tuesday read as Thursday), so plans for named days were dropped. The fix gives every message a computed seven-day calendar. Run 2 is reported separately because that fix was motivated by run 1. Remaining weaknesses seen in run 2: no way to express a cancellation (the schema has no cancel fact, so a withdrawn plan still clashes); an owner approval ("signed off ..., approved") and two wall moves were not read at all, so a settled decision still raised an alert; plans more than one day ahead are not kept; and a wall correctly recorded as unconfirmed did not stop drywall closing it (a check miss, not an extraction failure). Details per case: `eval/results.challenge.json`, `eval/results.challenge.run2.json`.
-
-## How the LLM is used
+## Inside the system
 
 **The LLM extracts facts. Rules decide.**
 
-The LLM (Groq, JSON mode, temperature 0) does exactly two jobs:
+```mermaid
+flowchart LR
+    A[Site messages] --> B[Validated facts and intent]
+    B --> C[Sourced scene and plan]
+    C --> D[Four deterministic checks]
+    D --> E[Ghost and proposed correction]
+    E --> F[Approval and crew confirmation]
+    F --> C
+    C --> G[Web, HTTP and MCP]
+```
 
-1. Extraction (`server/extract/`): one chat message becomes operations on the scene and crew intents, validated with zod against `contracts/`. Ids come from the message, not the model; anything naming an unknown element or crew is dropped, never guessed.
-2. Question parsing (`server/query/`): a crew's question becomes a structured query. The answer is computed by rules from the record.
+TypeScript throughout: Node HTTP server, zod contracts, React/Vite interface, SVG floor plan and an optional three.js renderer of the same scene. Groq handles extraction and question parsing; check logic contains no LLM calls. Replay logic uses recorded time for repeatable results. Agents and the [demo robot planner](mcp/README.md) query the same record through MCP.
 
-The four checks (`server/checks/`), rehearsal, fixes and the site agent contain no LLM call. They are pure functions of scene, plan and messages on the replay clock: same input, same output. A finding that rests on something unsure (low confidence, or a place still `unconfirmed`) is a warning to confirm, never a hold.
+This is a standalone prototype, not a deployed Talona integration. It supports one floor and text input. Thread membership is a proxy for information availability, not proof of what a person read. Learning stores explicit corrections and review decisions; it does not retrain a model.
 
-## API
+## Develop and verify
 
-The latest geometry-correction flow separates dispatch from acknowledgement. Sending a fix leaves the risk open; the **Crew confirmation** panel offers an explicitly labelled simulated crew reply and a sourced incident receipt. A reply for an older revision is rejected. This records information received, not physical completion.
-
-The side panel also compares explicitly stated sheet revisions and offers reversible review memory for an exact alert. Sheet comparisons do not read attachments. Review memory does not suppress safety checks or grant clearance. With `LEARNING_FILE` configured, review preferences persist in a companion `.dismissals.json` file; receipts remain session-local.
-
-Additional routes: `GET /api/acknowledgements`, `POST /api/fixes/:id/acknowledge {crewId}`, `GET /api/sheets`, `GET/POST /api/dismissals` (POST body `{findingId, reason}`), and `POST /api/dismissals/:id/undo`.
-
-The server listens on port 8787. The web app reaches it through the Vite proxy at `/api`.
-
-| Route | What |
+| Command | Purpose |
 |---|---|
-| `GET /api/health` | liveness check, and whether `LIVE_LLM` is on |
-| `GET /api/state[?t=]` | scene, findings and fixes; with `t` a fresh replay up to that replay time |
-| `POST /api/message` | post a crew message; runs extract, model and checks |
-| `GET /api/messages` | all messages in the session |
-| `GET /api/rehearsal[?day=]` | rehearsal of one day's plan; defaults to the latest planned day |
-| `GET /api/fixes` | proposed and approved fixes |
-| `POST /api/fixes/:id/approve` | approve a fix, send its DMs, store the decision |
-| `GET /api/unresolved` | messages whose place nobody could tell yet |
-| `POST /api/corrections` | store a correction (nickname, crew misread, fix decision) for the next run |
-| `POST /api/reset` `{keepLearning}` | start a new run; `keepLearning` defaults to `true` |
-| `GET /api/eval` | `eval/results.json`, or 404 until `npm run eval` has run |
-| `POST /api/ask` `{crewId?, text}` | a crew asks; the answer comes from the record with sources; design decisions go to the superintendent |
-| `GET /api/briefing?crew=[&day=]` | a crew's morning briefing: tasks in order, holds, changes since they last posted |
-| `GET /api/digest[?day=]` | the superintendent's evening digest: holds by check, open decisions, silent crews, pending fixes |
-| `GET /api/agent/log` | what the site agent did on its own: escalations, DMs, follow-ups, auto-resolves, held until 06:00 |
+| `npm run dev` | Server and web with hot reload |
+| `npm run typecheck` | Check all workspaces and HTTP tests |
+| `npm test` | Unit tests; add `-- server/checks` to target checks |
+| `npm run e2e` | HTTP demo story against a spawned server on port `8790` |
+| `npm run eval` | Score the golden replay and write evaluation reports |
+| `npm run eval:challenge` | Score the separate challenge; `-- --run=2` selects run 2 |
+| `npm run eval:paraphrase` | Run three development cases with uncached model calls |
+| `npm run build -w @site/web` | Build the web interface |
 
-## Live phone messages and the cache
+On Windows, use `npm.cmd` if PowerShell blocks `npm.ps1`. Evaluation with missing live outputs requires a Groq key; unavailable calls are not successful negative cases. Recording instructions live in [`video/README.md`](video/README.md).
 
-A message posted live gets an id from its words: `live-<10 hex of sha256(normalised text + crewId)>`, ignoring case, extra spaces and trailing punctuation (`server/api/live-id.ts`). Extraction reads `data/llm-cache/<id>.json`, then `data/llm-cache-live/<id>.json`, so a scripted phone message works offline once its cache entry exists. The same words twice in one session are stored as `<id>-2` but read the same entry. A message with no entry extracts nothing in demo mode (logged as `extract.cache_miss`). The reply to `POST /api/message` carries `extraction`: `cached`, `live`, `cache_miss_offline` or `live_failed`, and the phone words its answer from it. Every post logs `{"kind":"api.message","messageId":...,"cacheId":...}`.
+<details>
+<summary><strong>Configuration and advanced commands</strong></summary>
 
-To get the file name for a scripted message:
+The prepared offline replay needs no environment configuration. Defaults and comments are in [`.env.example`](.env.example).
 
-```
+| Variable | Purpose |
+|---|---|
+| `GROQ_API_KEY` | Required for live calls and cache building |
+| `GROQ_MODEL` | Default: `openai/gpt-oss-120b` |
+| `LIVE_LLM` | Defaults to `0`; `demo:live` enables live extraction |
+| `PORT` | API port; default `8787` |
+| `API_PORT`, `WEB_PORT` | Optional Vite proxy target and web port for an isolated demo |
+| `SITE_API` | MCP API address; default `http://127.0.0.1:8787` |
+| `LEARNING_FILE` | Optional persisted corrections, e.g. `.learning/store.json` |
+| `E2E_PORT` | Optional HTTP test server port |
+
+Without `LEARNING_FILE`, learning lives in memory. With it, review preferences use a companion `.dismissals.json` file. Receipts remain session-local. `POST /api/reset {"keepLearning":true}` retains learning; `false` starts clean and clears persisted learning.
+
+```sh
+# Inspect a prepared phone message's cache key
 npm run cache-id -- "tomorrow morning we close up the blue room" crew-drywall
+
+# Build extraction or question caches (requires GROQ_API_KEY)
+node --import tsx server/extract/build-cache.ts
+node --import tsx server/query/build-cache.ts
+
+# Expose the record to agents, or run the sample consumer
+npm run start -w @site/mcp
+npm run robot -w @site/mcp
 ```
 
-## Limitations
+Cache builders preserve existing entries unless `--force` is supplied. Extraction also supports `--only=id,other-id`. Interactive live outputs go to the gitignored `data/llm-cache-live/`; do not replace golden evidence to hide failures.
 
-- One floor, one building. Input is chat text only (no photos, voice, drawings or BIM files).
-- All site data is simulated. The model reflects what was said in the record, not what was built.
-- The full simulated chat, independent labels and real Groq caches are included. Cache provenance and raw facts are retained; `data/extraction-report.json` records extraction mismatches separately from check results.
-- Open-decision inference uses conservative material/fixture words in recorded element names because the contract has no decision category. Unknown categories are not inferred; explicit dependencies remain supported.
-- Learning is kept in server memory unless `LEARNING_FILE` is set; without it a server restart forgets it. Use `POST /api/reset {keepLearning:true}` for run 2, `{keepLearning:false}` to start clean (also clears the file).
+For integration work, see [architecture](docs/architecture.md), [HTTP route definitions](server/api/index.ts), [request/response contracts](contracts/src/) and the [MCP guide](mcp/README.md).
 
-## More
+</details>
 
-- `docs/architecture.md`: how the pieces fit, folder by folder.
-- `docs/decisions.md`: every design decision and assumption.
-- `TEAM.md`: who owns which folder. `AGENTS.md`: rules for AI coding tools.
+## Project guide
+
+[Demo script](docs/demo-script.md) · [Architecture and dependencies](docs/architecture.md) · [Talona alignment](docs/TALONA_ALIGNMENT.md) · [Design decisions](docs/decisions.md)
+
+Maintained by the team listed in [TEAM.md](TEAM.md). AI coding tools should begin with [AGENTS.md](AGENTS.md), then check [current ownership](docs/PARALLEL_STATUS.md) and the [continuation handoff](docs/CLAUDE_RESUME.md) before editing.
