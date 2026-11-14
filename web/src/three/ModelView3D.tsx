@@ -1,10 +1,11 @@
 import "@fontsource-variable/archivo/wdth.css";
 import { CameraControls, ContactShadows, Grid, Html, Line, useCursor } from "@react-three/drei";
 import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
-import { Component, createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
+import { Component, createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
 import { Box3, ExtrudeGeometry, Shape, Sphere, Vector2, Vector3, type Group, type Mesh } from "three";
 import type { Line2, LineSegments2 } from "three-stdlib";
-import type { Element, Finding, Scene } from "@site/contracts";
+import type { Crew, Element, Finding, Scene } from "@site/contracts";
+import { beliefGeometry, beliefState, easeInOut, offsetLabel, sameGeometry } from "../derive";
 import { font } from "../tokens";
 import { elementToMesh, type MeshProps } from "./elementToMesh";
 import { boxEdges, planBounds, slabOutline, solidBounds, solidFor, elementSolid, type Solid } from "./geometry";
@@ -24,6 +25,10 @@ export interface ModelView3DProps {
   revealFindingKey?: string;
   /** WebGL missing or lost: the view renders nothing; show the flat view instead. */
   onUnavailable?: () => void;
+  /** "See the floor as": draw the floor as this crew believes it (same derive.ts rule as the flat view). */
+  lens?: Crew;
+  /** Elements this crew's planned work touches: an unheard change there is drawn in redline. */
+  exposedIds?: Set<string>;
 }
 
 export const findingKey = (f: Finding) => `${f.id}:${f.trigger}`;
@@ -123,7 +128,22 @@ interface GhostItem {
   element: Element;
 }
 
-function Model({ scene, findings, selectedId, onSelect, revealFindingKey }: ModelView3DProps) {
+// ---------- Lens glide: walls move to the crew's belief (answers a user action) ----------
+
+const LENS_MS = 520;
+
+interface Glide {
+  /** Solid of each element under the previous lens, where it differs from the new one. */
+  from: Map<string, Solid>;
+  /** Clock seconds when the glide started; -1 = start on the next frame. */
+  t0: number;
+}
+
+/** The element as the crew believes it: geometry and state from what they heard. */
+const asBelieved = (el: Element, lens: Crew | undefined): Element =>
+  lens ? { ...el, geometry: beliefGeometry(el, lens), state: beliefState(el, lens) } : el;
+
+function Model({ scene, findings, selectedId, onSelect, revealFindingKey, lens, exposedIds }: ModelView3DProps) {
   const bounds = useMemo(() => planBounds(scene), [scene]);
   // Root offset snapped to the 5 m structural grid so the floor grid lines up with plan metres.
   const offset = useMemo<[number, number, number]>(() => {
@@ -131,7 +151,33 @@ function Model({ scene, findings, selectedId, onSelect, revealFindingKey }: Mode
     const cy = Math.round((bounds.minY + bounds.maxY) / 2 / 5) * 5;
     return [-cx, 0, cy];
   }, [bounds]);
-  const meshes = useMemo(() => scene.elements.map(elementToMesh), [scene]);
+  const meshes = useMemo(() => scene.elements.map((el) => elementToMesh(asBelieved(el, lens))), [scene, lens]);
+  const invalidate = useThree((s) => s.invalidate);
+
+  // On a lens change, remember where each wall was drawn so it can glide to the new belief.
+  const glide = useRef<Glide>({ from: new Map(), t0: -1 });
+  const shown = useRef<{ lens?: string; meshes: MeshProps[] }>({ lens: lens?.id, meshes });
+  useLayoutEffect(() => {
+    const before = shown.current;
+    shown.current = { lens: lens?.id, meshes };
+    if (before.lens === lens?.id) return;
+    const from = new Map<string, Solid>();
+    if (!prefersReducedMotion()) {
+      for (const m of before.meshes) {
+        const now = meshes.find((x) => x.id === m.id);
+        if (now && m.solid.kind === "box" && now.solid.kind === "box" && (m.solid.center[0] !== now.solid.center[0] || m.solid.center[2] !== now.solid.center[2] || m.solid.rotY !== now.solid.rotY)) from.set(m.id, m.solid);
+      }
+    }
+    glide.current = { from, t0: -1 };
+    invalidate();
+  }, [lens?.id, meshes, invalidate]);
+
+  // Elements whose belief differs from the record for some crew: their recorded outline is mounted once
+  // and toggled visible per lens (web/AGENTS.md: toggle, do not mount and unmount).
+  const diffs = useMemo(
+    () => scene.elements.filter((el) => el.type !== "room" && el.type !== "zone" && scene.crews.some((c) => !sameGeometry(beliefGeometry(el, c), el.geometry))),
+    [scene],
+  );
 
   const ghosts = useMemo<GhostItem[]>(() => {
     const seen = new Set<string>();
@@ -195,10 +241,14 @@ function Model({ scene, findings, selectedId, onSelect, revealFindingKey }: Mode
       <group position={offset}>
         <GridBubbles bounds={bounds} />
         {meshes.map((m) => (
-          <Element3D key={m.id} m={m} selected={selectedId === m.id} onSelect={onSelect} />
+          <Element3D key={m.id} m={m} selected={selectedId === m.id} onSelect={onSelect} glide={glide} />
         ))}
+        {diffs.map((el) => (
+          <LensDiff3D key={`lens-${el.id}`} element={el} lens={lens} exposed={exposedIds?.has(el.id) ?? false} />
+        ))}
+        {/* Through a crew's eyes the record's conflicts are not drawn as ghosts (same as the flat view). */}
         {ghosts.map((g) => (
-          <Ghost3D key={g.key} item={g} active={matchesKey(g.finding, revealFindingKey)} reveal={reveal} onSelect={onSelect} />
+          <Ghost3D key={g.key} item={g} active={matchesKey(g.finding, revealFindingKey)} reveal={reveal} onSelect={onSelect} hidden={!!lens} />
         ))}
       </group>
     </>
@@ -323,8 +373,22 @@ function useSlabGeometry(solid: Solid) {
   return geo;
 }
 
-function Element3D({ m, selected, onSelect }: { m: MeshProps; selected: boolean; onSelect?: ModelView3DProps["onSelect"] }) {
+function Element3D({ m, selected, onSelect, glide }: { m: MeshProps; selected: boolean; onSelect?: ModelView3DProps["onSelect"]; glide: RefObject<Glide> }) {
   const [hovered, setHovered] = useState(false);
+  const box = useRef<Group>(null);
+  // Lens glide: mutate the group, never React state, inside the frame loop (web/AGENTS.md 3D rules).
+  useFrame((state) => {
+    const g = glide.current;
+    const from = g?.from.get(m.id);
+    const to = m.solid;
+    if (!g || !from || from.kind !== "box" || to.kind !== "box" || !box.current) return;
+    const now = state.clock.getElapsedTime();
+    if (g.t0 < 0) g.t0 = now;
+    const p = easeInOut(((now - g.t0) * 1000) / LENS_MS);
+    box.current.position.set(from.center[0] + (to.center[0] - from.center[0]) * p, to.center[1], from.center[2] + (to.center[2] - from.center[2]) * p);
+    box.current.rotation.y = from.rotY + (to.rotY - from.rotY) * p;
+    if (p < 1) state.invalidate();
+  });
   useCursor(hovered);
   const layer = useLabelLayer();
   const slab = useSlabGeometry(m.solid);
@@ -369,7 +433,7 @@ function Element3D({ m, selected, onSelect }: { m: MeshProps; selected: boolean;
   if (m.solid.kind !== "box") return null;
   const s = m.solid;
   return (
-    <group position={s.center} rotation-y={s.rotY}>
+    <group ref={box} position={s.center} rotation-y={s.rotY}>
       <mesh geometry={unitBox} material={m.fill} scale={s.size} castShadow={m.castShadow} receiveShadow {...events} />
       <Line points={boxEdges(s.size)} segments color={edgeColor} lineWidth={edgeWidth} dashed={m.edge.dashed} dashSize={0.2} gapSize={0.12} />
     </group>
@@ -397,11 +461,14 @@ function Ghost3D({
   active,
   reveal,
   onSelect,
+  hidden = false,
 }: {
   item: GhostItem;
   active: boolean;
   reveal: React.RefObject<RevealState>;
   onSelect?: ModelView3DProps["onSelect"];
+  /** Toggled, not unmounted, so the reveal state survives a lens on and off. */
+  hidden?: boolean;
 }) {
   const { finding, element } = item;
   const ghost = finding.ghost!;
@@ -504,7 +571,7 @@ function Ghost3D({
   };
 
   return (
-    <group>
+    <group visible={!hidden}>
       {/* True element: drawn in ink as the reveal starts, then holds. */}
       <group position={from} rotation-y={trueRot}>
         <Line ref={trueOutline} points={boxEdges(trueSize)} segments color={color.ink} lineWidth={2.5} transparent />
@@ -548,12 +615,62 @@ function Ghost3D({
               transform: "translateY(-14px)",
               whiteSpace: "nowrap",
               userSelect: "none",
+              display: hidden ? "none" : undefined,
             }}
           >
             {ghost.label}
           </div>
         </Html>
       </group>
+    </group>
+  );
+}
+
+// ---------- Lens: the record where this crew has not heard it ----------
+
+/**
+ * The recorded element, dashed, where the crew believes otherwise: ink-soft when it does not meet
+ * their work, redline (with the ghost fill) when the checks found their planned work meets it.
+ */
+function LensDiff3D({ element, lens, exposed }: { element: Element; lens?: Crew; exposed: boolean }) {
+  const layer = useLabelLayer();
+  const belief = lens ? beliefGeometry(element, lens) : element.geometry;
+  const on = !!lens && !sameGeometry(belief, element.geometry);
+  const truth = useMemo(() => elementSolid(element), [element]);
+  const believed = useMemo(() => solidFor(belief, element.type, element.height), [belief, element]);
+  const invalidate = useThree((s) => s.invalidate);
+  useEffect(() => invalidate(), [on, exposed, invalidate]);
+  if (truth.kind !== "box" || believed.kind !== "box") return null;
+  const tone = exposed ? color.redline : color.inkSoft;
+  const top = truth.size[1] + 0.45;
+  const a: [number, number, number] = [believed.center[0], top, believed.center[2]];
+  const b: [number, number, number] = [truth.center[0], top, truth.center[2]];
+  return (
+    <group visible={on}>
+      <group position={truth.center} rotation-y={truth.rotY}>
+        <mesh geometry={unitBox} material={ghostFill} scale={truth.size} renderOrder={2} visible={on && exposed} />
+        <Line points={boxEdges(truth.size)} segments color={tone} lineWidth={1.75} dashed dashSize={0.16} gapSize={0.1} />
+      </group>
+      <Line points={[a, b]} color={tone} lineWidth={1.25} />
+      <Html portal={layer} position={[(a[0] + b[0]) / 2, top + 0.05, (a[2] + b[2]) / 2]} center zIndexRange={[20, 10]} style={{ pointerEvents: "none" }}>
+        <div
+          style={{
+            display: on ? undefined : "none",
+            fontFamily: font.family,
+            fontStretch: "80%",
+            fontWeight: 600,
+            fontSize: 13,
+            color: tone,
+            background: color.paper,
+            padding: "2px 5px",
+            transform: "translateY(-14px)",
+            whiteSpace: "nowrap",
+            userSelect: "none",
+          }}
+        >
+          {on ? `${offsetLabel(belief, element.geometry)}${exposed ? " · not heard, meets their work" : " · not heard"}` : ""}
+        </div>
+      </Html>
     </group>
   );
 }
