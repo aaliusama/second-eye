@@ -8,7 +8,7 @@ Completed Codex implementation and exact continuation tasks: `docs/CLAUDE_RESUME
 
 ## Objective
 
-The user wants Site Rehearsal to win the Talona track through a memorable working demonstration, defensible differentiation, and strong evidence across the actual rubric. They welcome improvements to the product and documentation. They do not want a generic chatbot, a collection of unfinished features, or unsupported claims of a perfect score.
+The user wants Second Eye to win the Talona track through a memorable working demonstration, defensible differentiation, and strong evidence across the actual rubric. They welcome improvements to the product and documentation. They do not want a generic chatbot, a collection of unfinished features, or unsupported claims of a perfect score.
 
 Keep the core product. **See tomorrow's mistake before it gets built.** The judge should remember the red ghost wall, the 40 cm mismatch, and the messages that explain why the crew might use the wrong line.
 

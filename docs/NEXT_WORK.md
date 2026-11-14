@@ -1,11 +1,11 @@
-# Next work: making Site Rehearsal technically extraordinary
+# Next work: making Second Eye technically extraordinary
 
 Written 14 Nov 2026 for a fresh Claude Code session that will run parallel agents. Read this whole file before planning.
 The team does not care about the time limit for this work. Quality, visible depth and honesty matter most.
 
 ## 1. What the product is (one paragraph)
 
-Site Rehearsal reads a construction site's chat messages, keeps a sourced model of one floor, and works out **what each crew knows**: every change keeps the thread it was said in, and each crew only reads some threads. Four deterministic checks (latest change, space clash, order of work, open decision) compare each crew's stated plan with the record. A mismatch is drawn as a red **ghost wall**: where the crew believes the wall is versus where the record says it is. The superintendent sends a correction in one tap; it stays amber until the crew confirms that exact revision. **The LLM extracts facts; rules decide.** Start with `README.md`, then `docs/architecture.md` and `docs/demo-script.md`.
+Second Eye reads a construction site's chat messages, keeps a sourced model of one floor, and works out **what each crew knows**: every change keeps the thread it was said in, and each crew only reads some threads. Four deterministic checks (latest change, space clash, order of work, open decision) compare each crew's stated plan with the record. A mismatch is drawn as a red **ghost wall**: where the crew believes the wall is versus where the record says it is. The superintendent sends a correction in one tap; it stays amber until the crew confirms that exact revision. **The LLM extracts facts; rules decide.** Start with `README.md`, then `docs/architecture.md` and `docs/demo-script.md`.
 
 ## 2. Current state (verified on `main` at commit de42516)
 
@@ -27,6 +27,7 @@ Site Rehearsal reads a construction site's chat messages, keeps a sourced model 
 7. Before saying a lane is done: `npm run typecheck`, `npm test`, `npm run eval` (must stay 15/15), and look at a screenshot of anything visible. Windows: use `npm.cmd` if PowerShell blocks `npm`.
 8. Commit messages are plain. Work on branches/worktrees; merge to `main` only when all checks pass.
 9. Contracts in `contracts/` may be extended when a lane needs it, but say so in the commit and keep old data valid.
+10. When you add or change an HTTP route or a response shape, bump `API_VERSION` in `contracts/src/index.ts`. The web app then tells anyone running an older server to restart it, instead of showing empty panels.
 
 ## 4. Work lanes (run in parallel; each lane owns its files)
 

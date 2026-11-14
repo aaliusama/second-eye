@@ -378,7 +378,14 @@ export const EvalResults = z.object({
 
 // ---------- HTTP API ----------
 
-export const HealthResponse = z.object({ ok: z.literal(true), liveLlm: z.boolean() });
+/**
+ * Bump when a route or a response shape changes. The server reports the value it started with
+ * (GET /api/health); the web app compares it with its own copy and says so when the server is older,
+ * instead of failing route by route.
+ */
+export const API_VERSION = 2;
+
+export const HealthResponse = z.object({ ok: z.literal(true), liveLlm: z.boolean(), apiVersion: z.number().int().optional() });
 
 /** GET /api/state?t=<ReplayTime> */
 export const StateResponse = z.object({
@@ -600,6 +607,8 @@ export const Unresolved = z.object({
 
 /** GET /api/unresolved */
 export const UnresolvedResponse = z.object({ items: z.array(Unresolved) });
+/** GET /api/corrections: what the system has learned, oldest first. Read only. */
+export const CorrectionsResponse = z.object({ corrections: z.array(Correction) });
 /** GET /api/agent/log */
 export const AgentLogResponse = z.object({ timeline: z.array(TimelineStep), escalations: z.array(EscalateAction) });
 /** POST /api/ask body. */
@@ -685,6 +694,7 @@ export type CrewProfile = z.infer<typeof CrewProfile>;
 export type TimelineStep = z.infer<typeof TimelineStep>;
 export type Unresolved = z.infer<typeof Unresolved>;
 export type UnresolvedResponse = z.infer<typeof UnresolvedResponse>;
+export type CorrectionsResponse = z.infer<typeof CorrectionsResponse>;
 export type AgentLogResponse = z.infer<typeof AgentLogResponse>;
 export type AskRequest = z.infer<typeof AskRequest>;
 export type AskResponse = z.infer<typeof AskResponse>;

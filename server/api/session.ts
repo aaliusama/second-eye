@@ -248,7 +248,7 @@ export function approveFix(id: string): Promise<ApproveFixResponse> {
       id: `sent-${fix.id}-${m.crewId}`,
       time,
       thread: `dm:${m.crewId}`,
-      senderName: "Site Rehearsal",
+      senderName: "Second Eye",
       senderRole: "system",
       crewId: m.crewId,
       text: m.text,

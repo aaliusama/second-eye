@@ -34,7 +34,7 @@ function json(uri: string, data: unknown) {
 }
 
 export function createSiteMcpServer(api: SiteApi = createSiteApi()): McpServer {
-  const server = new McpServer({ name: "site-rehearsal", version: "0.1.0" });
+  const server = new McpServer({ name: "second-eye", version: "0.1.0" });
 
   server.registerTool(
     "get_site_state",
@@ -170,7 +170,7 @@ async function main(): Promise<void> {
   const server = createSiteMcpServer();
   await server.connect(new StdioServerTransport());
   // stdout carries the protocol; anything else goes to stderr.
-  process.stderr.write(`site-rehearsal MCP server on stdio, SITE_API=${process.env.SITE_API ?? "http://127.0.0.1:8787"}\n`);
+  process.stderr.write(`second-eye MCP server on stdio, SITE_API=${process.env.SITE_API ?? "http://127.0.0.1:8787"}\n`);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

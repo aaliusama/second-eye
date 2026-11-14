@@ -90,6 +90,8 @@ async function optionalPost<T>(path: string, body: unknown): Promise<T | undefin
 }
 
 export const api = {
+  /** GET /api/health: apiVersion is the API_VERSION the server process started with. */
+  health: () => optional<{ ok: true; liveLlm: boolean; apiVersion?: number }>("/api/health"),
   acknowledgements: () => call<AcknowledgementsResponse>("/api/acknowledgements"),
   acknowledge: (fixId: string, crewId: string) => call<AcknowledgeFixResponse>(`/api/fixes/${encodeURIComponent(fixId)}/acknowledge`, post({ crewId })),
   ask: (crewId: string, text: string) => optionalPost<Answer>("/api/ask", { crewId, text }),
@@ -109,6 +111,8 @@ export const api = {
   eval: () => optional<EvalResults>("/api/eval"),
   /** Lane A route; undefined until the server has it. */
   unresolved: () => optional<{ items: UnresolvedItem[] }>("/api/unresolved").then((r) => r?.items),
+  /** GET /api/corrections: what the system has learned. Undefined when the server has no such route. */
+  corrections: () => optional<{ corrections: Correction[] }>("/api/corrections").then((r) => r?.corrections),
 };
 
 /** Tabs (main screen, /phone) tell each other to refetch after a write. */

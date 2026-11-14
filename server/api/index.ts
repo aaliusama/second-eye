@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import {
+  API_VERSION,
   Correction,
   AcknowledgeFixRequest,
   Day,
@@ -8,6 +9,7 @@ import {
   PostMessageRequest,
   ReplayTime,
   type AgentLogResponse,
+  type CorrectionsResponse,
   type FixesResponse,
   type HealthResponse,
   type RehearsalResponse,
@@ -115,7 +117,7 @@ export async function handle(req: IncomingMessage, res: ServerResponse): Promise
       return send(res, 200, await acknowledgeFix(decodeURIComponent(ack[1]!), body.crewId));
     }
     if (route === "GET /api/health") {
-      const body: HealthResponse = { ok: true, liveLlm: process.env.LIVE_LLM === "1" };
+      const body: HealthResponse = { ok: true, liveLlm: process.env.LIVE_LLM === "1", apiVersion: API_VERSION };
       return send(res, 200, body);
     }
 
@@ -165,6 +167,12 @@ export async function handle(req: IncomingMessage, res: ServerResponse): Promise
       const body: RehearsalResponse = rehearse(s.scene, getPlan(s.scene, day));
       const findings = body.frames.reduce((n, f) => n + f.findings.length, 0);
       if (findings > 0) logLine({ kind: "api.rehearsal", day, findings });
+      return send(res, 200, body);
+    }
+
+    if (route === "GET /api/corrections") {
+      // What the system has learned, so the screen can show each lesson beside its evidence.
+      const body: CorrectionsResponse = { corrections: learning.all() };
       return send(res, 200, body);
     }
 

@@ -18,12 +18,14 @@ import {
 } from "./derive";
 import { FlatView } from "./FlatView";
 import { Huddle } from "./Huddle";
-import { IncidentFocus } from "./IncidentFocus";
+import { IncidentFocus, incidentLead, rankIncidents } from "./IncidentFocus";
 import { Knowledge } from "./Knowledge";
+import { Autonomy } from "./Autonomy";
+import { Lessons } from "./Lessons";
 import { Acknowledgements } from "./Acknowledgements";
 import { Sheets } from "./Sheets";
 import { Dismissals } from "./Dismissals";
-import { AgentLog, Inspector, Learning, Measured, MeasuredLarge, Queue, Record } from "./panels";
+import { Inspector, Learning, Measured, MeasuredLarge, Queue, Record } from "./panels";
 import { Phone } from "./Phone";
 import { Presenter } from "./present/Presenter";
 import { useReveal } from "./reveal";
@@ -126,9 +128,10 @@ function Main() {
   const refresh = useSite((s) => s.refresh);
   const [view, setView] = useState<"flat" | "3d">("flat");
   const [no3D, setNo3D] = useState(false);
-  const [workspace, setWorkspace] = useState<"today" | "knows" | "record" | "learning" | "crew">("today");
+  const [workspace, setWorkspace] = useState<"today" | "knows" | "auto" | "record" | "learning" | "crew">("today");
   const lens = useSite((s) => s.lens);
   const setLens = useSite((s) => s.setLens);
+  const serverStale = useSite((s) => s.serverStale);
   const phoneOpen = useSite((s) => s.phoneOpen);
   const setPhoneOpen = useSite((s) => s.setPhoneOpen);
   const focus = useSite((s) => s.focus);
@@ -136,7 +139,7 @@ function Main() {
   const setTrace = useSite((s) => s.setTrace);
   const story = focus !== undefined && STORY_BEATS.has(focus);
   useEffect(() => {
-    setWorkspace(focus === "learn" ? "learning" : focus === "why" ? "knows" : focus === "ask" || focus === "run2" || focus === "ghost" ? "crew" : focus === "numbers" ? "record" : "today");
+    setWorkspace(focus === "learn" || focus === "run2" ? "learning" : focus === "why" ? "knows" : focus === "ask" || focus === "ghost" ? "crew" : focus === "numbers" ? "record" : "today");
   }, [focus]);
   useEffect(() => { if (phoneOpen) setWorkspace("crew"); }, [phoneOpen]);
 
@@ -215,6 +218,11 @@ function Main() {
     />
   );
   const lensCrew = knowledge?.crew;
+  // The first thing anyone sees: how much to settle before work starts, and the worst one in one line.
+  const opening = !asOf && !story && !lensCrew && !selection ? (() => {
+    const { all, when } = rankIncidents(state.scene, d.visible, state.fixes);
+    return { count: all.length, when, first: all[0]?.[0] };
+  })() : undefined;
   const backToFlat = () => {
     setNo3D(true);
     setView("flat");
@@ -226,7 +234,7 @@ function Main() {
       <header className="top">
         <div className="title">
           <svg className="site-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M4 27V5h24v22H4Zm8 0V13h16M4 13h8M21 5v8" fill="none" stroke="currentColor" strokeWidth="2" /></svg>
-          <h1>Site Rehearsal</h1>
+          <h1>Second Eye</h1>
           <span className="title-rule" aria-hidden="true" />
           <span className="title-scene">{state.scene.name}</span>
         </div>
@@ -247,12 +255,25 @@ function Main() {
 
       <main className="model" id="site-workspace" tabIndex={-1}>
         <div className="model-caption">
-          <div><p className="meta">{asOf ? "Site history" : "Work preparation"}</p>
-          <h2>{lensCrew ? <>The floor as <em className="lens-name">{lensCrew.name}</em> knows it</> : story ? "The 204 bathroom wall" : state.scene.name}</h2></div>
+          {opening ? (
+            <div className="opening">
+              <p className="meta">{state.scene.name} · per the record</p>
+              <h2>{opening.count === 0 ? "Nothing to settle before work starts" : <><span className="opening-count">{opening.count}</span> to settle before {opening.when ?? "work starts"}</>}</h2>
+              {opening.first && (
+                <p className="opening-lead">
+                  <span>First: {incidentLead(state.scene, opening.first)}{d.sent.has(opening.first.id) ? " Correction sent, waiting for a reply." : ""}</span>
+                  <button type="button" className="opening-show" onClick={() => { select({ kind: "finding", key: findingKey(opening.first!) }); setWorkspace("today"); }}>Show me</button>
+                </p>
+              )}
+            </div>
+          ) : (
+            <div><p className="meta">{asOf ? "Site history" : "Work preparation"}</p>
+            <h2>{lensCrew ? <>The floor as <em className="lens-name">{lensCrew.name}</em> knows it</> : story ? "The 204 bathroom wall" : state.scene.name}</h2></div>
+          )}
           <div className="lens-control">
               <span className="lens-label" id="lens-label">See the floor as</span>
               <div className="lens-switch" role="group" aria-labelledby="lens-label">
-                <button type="button" aria-pressed={!lens} onClick={() => setLens(undefined)}>Record</button>
+                <button type="button" aria-pressed={!lens} onClick={() => setLens(undefined)}>As recorded</button>
                 {state.scene.crews.map((c) => (
                   <button key={c.id} type="button" className="lens-crew" aria-pressed={lens === c.id} title={`${c.name} knows it`} onClick={() => setLens(lens === c.id ? undefined : c.id)}>
                     {c.letter}<span className="visually-hidden"> {c.name}</span>
@@ -261,6 +282,11 @@ function Main() {
               </div>
           </div>
         </div>
+        {serverStale && !error && (
+          <div className="banner stale" role="alert">
+            <span><b>The server is older than this page.</b> Some panels will be empty until you restart it: stop it, then run <code>npm run demo</code>.</span>
+          </div>
+        )}
         {(asOf || error || sampled) && (
           <div className="banner">
             {sampled && <span>Sample lane data for drawing checks (dev only), not measured</span>}
@@ -316,7 +342,7 @@ function Main() {
       <aside className="side">
         <div className="workspace-heading"><h2>Before work starts</h2><p className="meta">Which crew is about to work from old information, and who to tell.</p></div>
         <nav className="workspace-nav" aria-label="Site desk sections">
-          {([ ["today", "Priorities"], ["knows", "Who knows"], ["crew", "Crew"], ["record", "Record"], ["learning", "Learning"] ] as const).map(([id, label]) =>
+          {([ ["today", "Priorities"], ["knows", "Who knows"], ["auto", "On its own"], ["crew", "Crew"], ["record", "Record"], ["learning", "Learning"] ] as const).map(([id, label]) =>
             <button key={id} type="button" aria-pressed={workspace === id} aria-controls={`desk-${id}`} onClick={() => { setWorkspace(id); if (id === "crew") setPhoneOpen(true); }}>{label}</button>
           )}
         </nav>
@@ -333,7 +359,7 @@ function Main() {
           <dl><dt>Solid line</dt><dd>The wall in the latest site record.</dd><dt>Dashed red line</dt><dd>The earlier position available to the crew.</dd></dl>
           <p className="meta">Select the wall or ghost to inspect the messages behind this mismatch.</p>
         </section>}
-        {!asOf && <details className="desk-disclosure" open={focus === "fix" || focus === "confirm"}><summary>Crew confirmations<span>Sent is not confirmed</span></summary><Acknowledgements /></details>}
+        {!asOf && <details className="desk-disclosure" open={focus === "fix" || focus === "confirm"}><summary>Crew replies<span>A sent correction is not a confirmation</span></summary><Acknowledgements /></details>}
         {asOf && <section className="panel"><h2>A moment in the record</h2><p className="meta">Select a wall to see what changed and who said it. Return to now to review today's actions.</p></section>}
         <details className="desk-disclosure" open={focus === "fix"} hidden={focus === "ghost" || focus === "why" || focus === "confirm"}><summary>All proposed actions<span>Review before sending</span></summary><section className="panel">
           <h2>Needs approval</h2>
@@ -345,14 +371,17 @@ function Main() {
         <div id="desk-knows" hidden={workspace !== "knows"}>
           <Knowledge scene={state.scene} flagged={knowledge?.flagged} lens={lens} selectedElementId={selectedId} onLens={setLens} onSelectElement={(id) => select({ kind: "element", id })} />
         </div>
+        <div id="desk-auto" hidden={workspace !== "auto"}>
+          <Autonomy scene={state.scene} messages={messages} asOf={asOf} />
+        </div>
         <div id="desk-record" hidden={workspace !== "record"}>
         {!asOf && <Huddle day={rehearsal?.day} messages={messages} revision={`${state.t}:${messages.length}:${state.fixes.map((f) => `${f.id}-${f.status}`).join(",")}`} />}
         {!asOf && <Sheets />}
-        <AgentLog scene={state.scene} messages={messages} asOf={asOf} />
         <Record scene={state.scene} messages={messages} />
         <Measured />
         </div>
         <div id="desk-learning" hidden={workspace !== "learning"}>
+        <Lessons scene={state.scene} messages={messages} />
         <Learning scene={state.scene} items={unresolved} />
         {!asOf && <Dismissals />}
         </div>

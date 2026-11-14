@@ -1,4 +1,4 @@
-import type { ChatMessage, EvalResults, Rehearsal, StateResponse } from "@site/contracts";
+import { API_VERSION, type ChatMessage, type Correction, type EvalResults, type Rehearsal, type StateResponse } from "@site/contracts";
 import { fixtureFinding, fixtureFix, fixtureMessages, fixtureScene } from "@site/contracts/fixtures";
 import { create } from "zustand";
 import { announceChange, api, type AgentLogEntry, type UnresolvedItem } from "./api";
@@ -17,6 +17,12 @@ interface SiteStore {
   /** null = the server has no such route yet (hide the panel). */
   unresolved?: UnresolvedItem[] | null;
   agentLog?: AgentLogEntry[] | null;
+  /** What the system has learned (GET /api/corrections). null = the server has no such route. */
+  corrections?: Correction[] | null;
+  /** The server process is older than this page (its API_VERSION differs): restart it. */
+  serverStale?: boolean;
+  /** Live extraction is on in the server (LIVE_LLM=1). */
+  liveLlm?: boolean;
   /** Show the model as it stood at this replay time (from the record list). Undefined = now. */
   asOf?: string;
   slider: number;
@@ -70,16 +76,18 @@ export const useSite = create<SiteStore>((set, get) => ({
   refresh: async () => {
     const version = ++refreshVersion;
     try {
-      const [state, messages, rehearsal, evalResults, unresolved, agentLog] = await Promise.all([
+      const [state, messages, rehearsal, evalResults, unresolved, agentLog, corrections, health] = await Promise.all([
         api.state(get().asOf),
         api.messages(),
         api.rehearsal().catch(() => undefined),
         settle(api.eval()),
         settle(api.unresolved()),
         settle(api.agentLog()),
+        settle(api.corrections()),
+        settle(api.health()),
       ]);
       if (version !== refreshVersion) return;
-      set({ status: "ok", error: undefined, state, messages, rehearsal, evalResults, unresolved, agentLog });
+      set({ status: "ok", error: undefined, state, messages, rehearsal, evalResults, unresolved, agentLog, corrections, serverStale: health?.apiVersion !== API_VERSION, liveLlm: health?.liveLlm });
     } catch (err) {
       if (version !== refreshVersion) return;
       // No server yet: draw the contract fixtures (the ghost-wall case) so the plan still works, and say so.
@@ -90,6 +98,7 @@ export const useSite = create<SiteStore>((set, get) => ({
           evalResults: null,
           unresolved: null,
           agentLog: null,
+          corrections: null,
         });
       }
       set({ status: "ok", error: `Server not reachable (${String(err)}). Showing the contract fixtures. Start the server with npm run demo.` });

@@ -9,7 +9,7 @@ Numbers: say only what `npm run eval` (and, if used, the challenge report) print
 "Thursday 14:02 the architect moves a bathroom wall 40 centimetres. Rev C goes into the office thread. The plumbers aren't in that thread. Friday evening the plumbing lead writes in the site group: tomorrow morning we rough in the 204 bath along the east wall. Saturday they run pipe to a line that isn't there any more. Nobody did anything wrong, and on Monday someone pays for it. Everything you'll see is simulated site data, and it says so on every screen."
 
 **0:20 Build (20 s)** *(the record as of Thursday 14:02, inspector on the wall)*
-"Site Rehearsal reads the chats the site already uses. Every message becomes a change to one live record of the floor, and every change keeps the message it came from. This is the wall the architect moved, quoting him."
+"Second Eye reads the chats the site already uses. Every message becomes a change to one live record of the floor, and every change keeps the message it came from. This is the wall the architect moved, quoting him."
 
 **0:40 Ghost wall (30 s)** *(phone sends the plumber's text)*
 "Now the plumber sends his plan for tomorrow." *(Pause on the reveal.)*
@@ -40,7 +40,7 @@ Numbers: say only what `npm run eval` (and, if used, the challenge report) print
 
 "A building site runs on group chats. A decision made in one thread doesn't reach the crew in another. A 2018 PlanGrid and FMI survey of about 600 construction leaders attributed 48 percent of rework to poor communication and poor project information.
 
-Site Rehearsal reads the chats the site already uses and keeps one record of the building: who said what, which revision, who has it. Every time a crew says what it will do tomorrow, we check it against that record. *(Ghost wall on screen.)* This red line is where the plumbers will measure from. The wall moved 40 centimetres on Thursday, in a thread they don't read. We show it the evening before.
+Second Eye reads the chats the site already uses and keeps one record of the building: who said what, which revision, who has it. Every time a crew says what it will do tomorrow, we check it against that record. *(Ghost wall on screen.)* This red line is where the plumbers will measure from. The wall moved 40 centimetres on Thursday, in a thread they don't read. We show it the evening before.
 
 The superintendent sends the correction with one tap, and it stays open until the crew confirms the exact revision. Every decision cites its message, so when the argument starts about who told whom, there's a receipt.
 

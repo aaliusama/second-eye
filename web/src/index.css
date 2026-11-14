@@ -1294,3 +1294,70 @@ select:focus-visible, input:not([type="range"]):focus-visible, textarea:focus-vi
 .trace-status.ink { box-shadow: inset 3px 0 0 var(--ink); }
 .trace > .sim { display: none; } /* The page header carries the label. */
 .trace-open { padding: 6px 0; min-height: 32px; align-self: flex-start; }
+
+/* ---------- On its own: what the agent did before anyone asked ---------- */
+.workspace-nav { overflow-x: auto; scrollbar-width: none; gap: 18px; justify-content: flex-start; }
+.workspace-nav::-webkit-scrollbar { display: none; }
+.workspace-nav button { flex: none; white-space: nowrap; }
+.autonomy { gap: 14px; }
+.auto-stats { display: grid; gap: 1px; margin: 0; background: var(--paper-rule); border-radius: var(--radius-large); overflow: hidden; box-shadow: var(--depth-ring); }
+.auto-stats > div { background: var(--surface); padding: 10px 12px; display: flex; flex-direction: column-reverse; gap: 2px; }
+.auto-stats dt { font-size: 11.5px; color: var(--ink-soft); }
+.auto-stats dd { margin: 0; font-size: 24px; font-weight: 650; letter-spacing: -0.03em; line-height: 1.1; }
+.auto-stats dd span { font-size: 11.5px; font-weight: 400; letter-spacing: 0; color: var(--ink-soft); margin-left: 4px; }
+.auto-filter { display: flex; flex-wrap: wrap; gap: 6px; }
+.auto-filter button { background: var(--surface); color: var(--ink-soft); border: none; box-shadow: inset 0 0 0 1px var(--paper-rule); border-radius: 999px; min-height: 30px; padding: 0 12px; font-size: var(--small); font-weight: 550; }
+.auto-filter button:hover:not(:disabled) { background: var(--paper); color: var(--ink); }
+.auto-filter button[aria-pressed="true"] { background: var(--ink); color: var(--surface); box-shadow: var(--depth-ink-highlight); }
+.auto-day { display: flex; flex-direction: column; gap: 6px; }
+.auto-date { margin: 6px 0 0; font-size: var(--small); font-weight: 650; color: var(--ink-soft); }
+.auto-list { list-style: none; margin: 0; padding: 0; position: relative; }
+.auto-list::before { content: ""; position: absolute; left: 5px; top: 8px; bottom: 8px; width: 1px; background: var(--paper-rule); }
+.auto-item { position: relative; display: grid; grid-template-columns: 11px minmax(0, 1fr); gap: 12px; padding: 8px 0; }
+.auto-mark { width: 11px; height: 11px; margin-top: 4px; border-radius: 50%; background: var(--surface); box-shadow: inset 0 0 0 2px var(--ink-soft); position: relative; z-index: 1; }
+.auto-item.told .auto-mark { box-shadow: inset 0 0 0 2px var(--ink); }
+.auto-item.brought .auto-mark { background: var(--redline); box-shadow: 0 0 0 3px var(--surface); }
+.auto-item.asked .auto-mark { box-shadow: inset 0 0 0 2px var(--pending); }
+.auto-item.settled .auto-mark { background: var(--clear); box-shadow: 0 0 0 3px var(--surface); }
+.auto-item.held .auto-mark { background: repeating-linear-gradient(45deg, var(--pending) 0 2px, var(--surface) 2px 4px); }
+.auto-body { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.auto-head { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.auto-head strong { font-weight: 650; font-size: 13.5px; }
+.auto-time { font-size: 11.5px; color: var(--ink-soft); }
+.auto-text { font-size: 13px; line-height: 1.5; }
+.auto-why { font-size: 12px; color: var(--ink); background: var(--paper); border-radius: 6px; padding: 4px 8px; align-self: flex-start; }
+.auto-held { font-size: 12px; color: var(--ink); font-weight: 550; }
+.auto-source { font-size: 11.5px; color: var(--ink-soft); line-height: 1.45; }
+
+/* ---------- Opening: the first ten seconds ---------- */
+.opening { display: flex; flex-direction: column; gap: 4px; min-width: 0; pointer-events: auto; }
+.opening h2 { font-size: var(--display); }
+.opening-count { color: var(--redline); }
+.opening-lead { display: flex; align-items: center; gap: 12px; font-size: var(--text); color: var(--ink); }
+.opening-lead > span { min-width: 0; max-width: 72ch; line-height: 1.4; }
+.opening-show { flex: none; }
+
+.opening-show { min-height: 30px; padding: 0 12px; border-radius: 999px; font-size: var(--small); }
+@media (max-width: 760px) { .opening-lead { display: none; } }
+.banner { top: calc(var(--caption-height) + 8px); }
+
+/* ---------- What it has learned: each lesson beside its evidence ---------- */
+.lessons { gap: 14px; }
+.lesson-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.lesson { border-radius: var(--radius-large); box-shadow: var(--depth-lift); background: var(--surface); padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+.lesson-kind { font-size: 11.5px; font-weight: 650; color: var(--ink-soft); }
+.lesson-title { margin: 0; font-size: 18px; font-weight: 650; letter-spacing: -0.02em; }
+.lesson-title span[aria-hidden] { color: var(--ink-soft); font-weight: 400; margin: 0 4px; }
+.lesson-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--paper-rule); border-radius: 8px; overflow: hidden; }
+.lesson-side { background: var(--surface); padding: 10px; display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; line-height: 1.45; min-width: 0; }
+.lesson-side.before { background: var(--paper); }
+.lesson-side blockquote { margin: 0; padding-left: 8px; box-shadow: inset 2px 0 0 var(--paper-rule); color: var(--ink); }
+.lesson-label { font-size: 11px; font-weight: 700; color: var(--ink-soft); }
+.lesson-side.after .lesson-label { color: var(--clear); }
+.lesson-foot { font-size: 11.5px; color: var(--ink-soft); }
+@media (max-width: 420px) { .lesson-pair { grid-template-columns: 1fr; } }
+.banner.stale { max-width: min(720px, calc(100% - 2 * var(--pad))); box-shadow: var(--depth-float), inset 3px 0 0 var(--pending); padding: 10px 14px; line-height: 1.45; }
+.banner.stale code { font: inherit; font-weight: 650; background: var(--paper); padding: 1px 6px; border-radius: 4px; }
+.banner.stale { top: auto; bottom: calc(var(--pad) + 52px); }
+.record-toggle { align-self: flex-start; padding: 0; min-height: 32px; }
+.incident-more { margin-top: var(--gap); padding: 0; min-height: 36px; font-size: var(--text); }

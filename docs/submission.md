@@ -4,11 +4,11 @@ Draft prepared from the full synthetic replay and the generated evaluation resul
 
 ## Project title
 
-Site Rehearsal
+Second Eye
 
 ## One-line pitch
 
-Site Rehearsal checks every crew's stated plan against a live model of the building, the moment they say it and the evening before, and shows the mistake as a red ghost wall before the work starts.
+Second Eye checks every crew's stated plan against a live model of the building, the moment they say it and the evening before, and shows the mistake as a red ghost wall before the work starts.
 
 ## Team and members
 
@@ -20,7 +20,7 @@ A building site's plans and decisions arrive in separate message threads. A chan
 
 ## Solution overview
 
-Site Rehearsal runs one loop over the chats the site already uses:
+Second Eye runs one loop over the chats the site already uses:
 
 1. **Build.** Each chat message becomes operations on a JSON model of one floor (move a wall, add a fixture, plan a task). Every operation keeps the message it came from and a confidence.
 2. **Plan.** It derives tomorrow's plan (crew, place, task, slot) from what crews said.

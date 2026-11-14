@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { ChatMessage, Finding, Fix, PlanTask, Scene } from "@site/contracts";
 import { resolvedFindingIds } from "./derive";
 import { describeSource, sourceLine } from "./sources";
@@ -27,6 +28,41 @@ const dayLabel = (day: string) => {
   return Number.isNaN(d.getTime()) ? day : d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
 };
 
+/**
+ * Open incidents in the order the superintendent settles them, and the first planned work they touch.
+ * Shared by the desk list and the page heading so both always agree on what comes first.
+ */
+export function rankIncidents(scene: Scene, findings: Finding[], fixes: Fix[]) {
+  const resolved = resolvedFindingIds(fixes, findings);
+  const active = findings.filter((finding) => !resolved.has(finding.id)).sort((a, b) =>
+    Number(a.severity !== "hold") - Number(b.severity !== "hold") ||
+    checkPriority[a.check] - checkPriority[b.check] ||
+    a.time.localeCompare(b.time) || a.id.localeCompare(b.id) || a.trigger.localeCompare(b.trigger),
+  );
+  const groups = new Map<string, Finding[]>();
+  for (const finding of active) {
+    const key = incidentKey(finding);
+    groups.set(key, [...(groups.get(key) ?? []), finding]);
+  }
+  const all = [...groups.values()];
+  const firstWork = scene.tasks
+    .filter((t) => t.status === "planned" && all.some((g) => g.some((f) => f.taskIds.includes(t.id))))
+    .sort((a, b) => a.day.localeCompare(b.day) || (a.slot === "afternoon" ? 1 : 0) - (b.slot === "afternoon" ? 1 : 0))[0];
+  return { all, firstWork, when: firstWork ? `${dayLabel(firstWork.day)} ${slotWord[firstWork.slot]}` : undefined };
+}
+
+/** The top incident in one sentence, from the finding itself. */
+export function incidentLead(scene: Scene, finding: Finding): string {
+  const name = (id: string) => scene.elements.find((e) => e.id === id)?.name;
+  const crews = finding.crewIds.map((id) => scene.crews.find((c) => c.id === id)?.name ?? id).join(" and ");
+  if (finding.check === "latest_change" && finding.ghost) {
+    const el = name(finding.ghost.elementId) ?? "a wall";
+    return `${el} moved ${finding.ghost.label}, and ${crews} may not have heard.`;
+  }
+  const place = finding.elementIds.map(name).find(Boolean);
+  return `${title[finding.check]}${place ? `: ${place}` : ""}, ${crews}.`;
+}
+
 /** A short decision list over the existing record, not another checking engine. */
 export function IncidentFocus({ scene, findings, fixes, messages, onInspect, onTrace }: {
   scene: Scene;
@@ -41,22 +77,9 @@ export function IncidentFocus({ scene, findings, fixes, messages, onInspect, onT
   const busy = useSite((s) => s.busy);
   const error = useSite((s) => s.error);
   const crewName = (id: string) => scene.crews.find((crew) => crew.id === id)?.name ?? "Crew not found";
-  const resolved = resolvedFindingIds(fixes, findings);
-  const active = findings.filter((finding) => !resolved.has(finding.id)).sort((a, b) =>
-    Number(a.severity !== "hold") - Number(b.severity !== "hold") ||
-    checkPriority[a.check] - checkPriority[b.check] ||
-    a.time.localeCompare(b.time) || a.id.localeCompare(b.id) || a.trigger.localeCompare(b.trigger),
-  );
-  const groups = new Map<string, Finding[]>();
-  for (const finding of active) {
-    const key = incidentKey(finding);
-    groups.set(key, [...(groups.get(key) ?? []), finding]);
-  }
-  const all = [...groups.values()];
-  const incidents = all.slice(0, 3);
-  const firstWork = scene.tasks
-    .filter((t) => t.status === "planned" && all.some((g) => g.some((f) => f.taskIds.includes(t.id))))
-    .sort((a, b) => a.day.localeCompare(b.day) || (a.slot === "afternoon" ? 1 : 0) - (b.slot === "afternoon" ? 1 : 0))[0];
+  const { all, firstWork } = rankIncidents(scene, findings, fixes);
+  const [showAll, setShowAll] = useState(false);
+  const incidents = showAll ? all : all.slice(0, 3);
 
   return <section className="incident-focus" aria-label="Priority site decisions">
     <header>
@@ -64,7 +87,7 @@ export function IncidentFocus({ scene, findings, fixes, messages, onInspect, onT
         {all.length === 0 ? "Nothing flagged" : `${all.length} to settle`}
         {firstWork && <span> before {dayLabel(firstWork.day)} {slotWord[firstWork.slot]}</span>}
       </p>
-      {all.length > incidents.length && <p className="meta">Showing the first {incidents.length}. The rest are under Record and in the approval list below.</p>}
+      {all.length > 3 && <p className="meta">{showAll ? `All ${all.length}, most urgent first.` : `The 3 most urgent of ${all.length}.`}</p>}
     </header>
     {incidents.length === 0 && <div className="incident-empty">
       <h3>No open findings in this view</h3>
@@ -83,16 +106,16 @@ export function IncidentFocus({ scene, findings, fixes, messages, onInspect, onT
           ...finding.elementIds.filter((id) => scene.elements.some((element) => element.id === id && (element.type === "room" || element.type === "zone"))),
         ])].map((id) => scene.elements.find((element) => element.id === id)?.name).filter(Boolean);
         const place = places.join(" / ") || scene.elements.find((element) => finding.elementIds.includes(element.id))?.name || "Place not found";
-        const crews = finding.crewIds.map(crewName).join(" + ");
+        const crews = finding.crewIds.map(crewName).join(" and ");
         const sources = [...new Set(group.flatMap((item) => [item.sourceMessageId, ...item.evidenceMessageIds]))];
         const state = sent && !pending ? "awaiting" : finding.severity;
-        const recipients = pending ? [...new Set(pending.messages.map((message) => crewName(message.crewId)))].join(" + ") : "";
+        const recipients = pending ? [...new Set(pending.messages.map((message) => crewName(message.crewId)))].join(" and ") : "";
         const work = [...new Set(tasks.map((t) => `${crewName(t.crewId)}: ${task(t.taskType)}, ${dayLabel(t.day)} ${slotWord[t.slot]}`))].slice(0, 2);
         return <li className={`incident-item ${state}`} key={incidentKey(finding)}>
           <div className="incident-place"><span>{place}</span><span className="severity">{state === "awaiting" ? "Waiting for reply" : finding.severity === "hold" ? "Hold" : "Confirm"}</span></div>
           <h3 className="incident-title">{title[finding.check]}</h3>
           {work.length > 0 ? <ul className="incident-work">{work.map((line) => <li key={line}>{line}</li>)}</ul> : <p className="incident-crew">{crews}</p>}
-          {finding.ghost && <p className="incident-offset">{finding.ghost.label} <span className="meta">between the line the crew last heard and the latest recorded line</span></p>}
+          {finding.ghost && <p className="incident-offset">{finding.ghost.label} <span className="meta">between the line they last heard and the latest line on record</span></p>}
           {pending && <button className="incident-action primary" type="button" disabled={!!busy} onClick={() => void approve(pending.id)}>
             {busy === pending.id ? "Sending…" : pending.kind === "ask_crew" ? `Ask ${recipients}` : `Send correction to ${recipients}`}
           </button>}
@@ -117,6 +140,7 @@ export function IncidentFocus({ scene, findings, fixes, messages, onInspect, onT
         </li>;
       })}
     </ol>
+    {all.length > 3 && <button type="button" className="quiet incident-more" onClick={() => setShowAll(!showAll)}>{showAll ? "Show only the 3 most urgent" : `Show the other ${all.length - 3}`}</button>}
     {error && <p className="error" role="alert">{error}</p>}
     <span className="sim">Simulated site data</span>
   </section>;

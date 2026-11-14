@@ -1,4 +1,4 @@
-# Site Rehearsal - Claude Code
+# Second Eye - Claude Code
 
 All project instructions live in AGENTS.md so every AI coding tool on the team reads the same rules.
 

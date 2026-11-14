@@ -1,4 +1,4 @@
-# Team plan - Site Rehearsal
+# Team plan - Second Eye
 
 Who owns what, what each person delivers, and when we sync.
 Project rules: `AGENTS.md`. Rules for each person's AI agent: `AGENT_BRIEF.md`.

@@ -1,0 +1,18 @@
+# Render blueprint: one web service runs the API and serves the built web app.
+# Every push to main redeploys. Offline replay only: no API key, LIVE_LLM stays off.
+# Setup: Render dashboard -> New -> Blueprint -> pick this repository.
+services:
+  - type: web
+    name: site-rehearsal
+    runtime: node
+    plan: free
+    branch: main
+    autoDeploy: true
+    buildCommand: npm ci --include=dev && npm run build -w @site/web
+    startCommand: npm run start -w @site/server
+    healthCheckPath: /api/state
+    envVars:
+      - key: NODE_VERSION
+        value: "22.12.0"
+      - key: LIVE_LLM
+        value: "0"
