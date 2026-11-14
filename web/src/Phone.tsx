@@ -1,7 +1,10 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { BatteryFull, CircleCheck, Signal, Wifi } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
 import type { ChatMessage, IncidentReceipt, PostMessageResponse, Scene } from "@site/contracts";
 import { announceChange, api, isQuestion, onChange, type Answer, type Briefing } from "./api";
-import { crewName, formatTime } from "./derive";
+import { clock, crewName, formatTime } from "./derive";
 import { describeSource, sourceLine } from "./sources";
 import { useSite } from "./store";
 import "./phone.css";
@@ -271,7 +274,19 @@ export function Phone({
   }, [script]);
 
   // Keep the newest message in view, so an answer is never below the fold of the thread.
-  const listRef = useRef<HTMLOListElement>(null);
+  const listRef = useRef<HTMLOListElement | null>(null);
+  // Subtle enter/leave for bubbles; auto-animate already skips motion under prefers-reduced-motion.
+  const [animateRef] = useAutoAnimate<HTMLOListElement>({ duration: 180, easing: "ease-out" });
+  const bindList = useCallback(
+    (el: HTMLOListElement | null) => {
+      listRef.current = el;
+      animateRef(el);
+    },
+    [animateRef],
+  );
+  const reduceMotion = useReducedMotion();
+  // The replay clock: the time of the newest message in the record, never the wall clock.
+  const replayTime = messages.reduce((t, m) => (m.time > t ? m.time : t), "");
   const lineCount = lines.length;
   useEffect(() => {
     const el = listRef.current;
@@ -296,7 +311,18 @@ export function Phone({
         {receipt && mine && receipt.status !== "superseded" && (
           <div className="confirm">
             {mine.acknowledgedAt ? (
-              <p className="done">Confirmed {formatTime(mine.acknowledgedAt)}</p>
+              <motion.p
+                className="done receipt-badge"
+                role="status"
+                initial={reduceMotion ? false : { opacity: 0, scale: 0.92 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+              >
+                <CircleCheck className="receipt-icon" size={18} strokeWidth={2.4} aria-hidden="true" />
+                <span>
+                  Confirmed <time dateTime={mine.acknowledgedAt}>{formatTime(mine.acknowledgedAt)}</time>
+                </span>
+              </motion.p>
             ) : (
               <>
                 <button type="button" disabled={confirming === receipt.fixId} onClick={() => void confirm(receipt.fixId)}>
@@ -318,7 +344,16 @@ export function Phone({
   }
 
   return (
-    <section className={`phone${compact ? " compact" : ""}`} aria-label="Crew phone">
+    <section className={`phone framed${compact ? " compact" : ""}`} aria-label="Crew phone">
+      <div className="phone-status" aria-hidden="true">
+        <span className="phone-clock">{replayTime ? clock(replayTime) : "--:--"}</span>
+        <span className="phone-notch" />
+        <span className="phone-icons">
+          <Signal size={14} strokeWidth={2.4} />
+          <Wifi size={14} strokeWidth={2.4} />
+          <BatteryFull size={18} strokeWidth={2} />
+        </span>
+      </div>
       <header>
         <label>
           <span className="meta">Texting as</span>
@@ -342,7 +377,7 @@ export function Phone({
           {briefing.length === 0 ? <p className="meta">Nothing on record for this crew.</p> : briefing.map((l, i) => <p key={i}>{l}</p>)}
         </div>
       )}
-      <ol className="bubbles" aria-live="polite" ref={listRef}>
+      <ol className="bubbles" aria-live="polite" ref={bindList}>
         {lines.length === 0 && !sending && <li className="meta">No messages from this crew yet.</li>}
         {lines.map((l) => {
           const v = l.from === "system" ? readVerdict(l.text) : undefined;
@@ -385,6 +420,7 @@ export function Phone({
         </button>
       </form>
       <p className="meta sim">Simulated site data</p>
+      <span className="phone-home" aria-hidden="true" />
     </section>
   );
 }
