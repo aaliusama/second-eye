@@ -354,12 +354,14 @@ function MeasureLayer({ f, scene, opacity, sent }: { f: Finding; scene: Scene; o
       })()}
       {o && (() => {
         const shared = o.zone.kind === "polygon" ? o.zone.points : undefined;
-        const [cx, cy] = shared ? P(midpoint(o.zone)) : [0, 0];
+        const sb = shared ? boxOf(shared) : undefined;
+        const [cx, cy] = sb ? P([(sb.minX + sb.maxX) / 2, sb.minY + 0.3]) : [0, 0];
         return (
           <g>
             {o.zones.map((z) => z.zone.kind === "polygon" && (() => {
               const b = boxOf(z.zone.points);
-              const [lx, ly] = P([b.minX + 0.3, b.minY + 0.35]);
+              // Letter at the top-left of the zone; the shared-area label sits at the bottom, clear of ghost notes.
+              const [lx, ly] = P([b.minX + 0.3, b.maxY - 0.5]);
               return (
                 <g key={`${z.crewId}-${z.taskId}`}>
                   <polygon points={poly(z.zone.points)} fill="none" stroke={crewHue(scene, z.crewId)} strokeWidth={drawing.outline} strokeDasharray="0.2 0.12" />
@@ -484,7 +486,12 @@ export function FlatView(props: FlatViewProps) {
         <Grid box={base} />
         {areas.map(drawEl)}
         {solids.filter((el) => !(comparison === "earlier" && ghosts.some((f) => f.ghost?.elementId === el.id))).map(drawEl)}
-        {!lens && comparison === "compare" && measured.map((f) => {
+        {!lens && comparison === "compare" && measured.map((f, i) => {
+          // Several crews on the same old face measure the same strip: draw it once.
+          const c = f.measure?.clearance;
+          const same = (g: Finding) => g.measure?.clearance && c &&
+            JSON.stringify([g.measure.clearance.believedFace, g.measure.clearance.workZone]) === JSON.stringify([c.believedFace, c.workZone]);
+          if (c && !f.measure?.overlap && measured.slice(0, i).some((g) => !g.measure?.overlap && same(g))) return null;
           // The revealed ghost's numbers arrive with its dimension line, not before.
           const key = findingKey(f);
           const ghostKey = f.ghost ? ghosts.find((g) => g.id === f.id || g.ghost?.elementId === f.ghost?.elementId) : undefined;
@@ -535,15 +542,24 @@ export function FlatView(props: FlatViewProps) {
           const dim = phase(e, REVEAL.growEnd, REVEAL.total);
           const g = blendGeometry(truth.geometry, f.ghost!.geometry, grow);
           const selected = selection?.kind === "finding" && selection.key === key;
+          // Several crews can hold the same old position of one element: one dimension and one note for all of them,
+          // drawn by the ghost being revealed if it is one of them, else the first.
+          const group = ghosts.filter((g) => g.ghost?.elementId === f.ghost!.elementId);
+          const rep = group.find((g) => findingKey(g) === reveal.key) ?? group[0]!;
+          const labelled = rep.id === f.id;
+          const crewIds = [...new Set(group.flatMap((g) => g.crewIds))];
           const crews = f.crewIds.map((id) => crewName(scene, id)).join(", ");
+          const noteCrews = crewIds.length === 1
+            ? crewName(scene, crewIds[0]!)
+            : `${crewIds.length} crews: ${crewIds.map((id) => crewById(scene, id)?.letter ?? "?").join(", ")}`;
+          const sentCount = group.filter((g) => sentIds?.has(g.id)).length;
           // Note sits beside the ghost, on the side away from the true element, so it never covers labels below.
           const gm = midpoint(f.ghost!.geometry);
           const west = midpoint(truth.geometry)[0] >= gm[0];
           const [lx, ly] = P([gm[0] + (west ? -0.35 : 0.35), gm[1]]);
           const anchor = west ? "end" : "start";
-          // Correction sent, crew has not confirmed: still open, but amber, not red.
-          const sent = sentIds?.has(f.id) ?? false;
-          const tone = sent ? color.pending : color.redline;
+          // Correction sent to every crew on this ghost, none confirmed yet: still open, but amber, not red.
+          const tone = sentCount === group.length ? color.pending : color.redline;
           return (
             <g key={key}>
               {draw > 0 && comparison !== "earlier" && (
@@ -551,10 +567,10 @@ export function FlatView(props: FlatViewProps) {
               )}
               {grow > 0 && (
                 <g className="ghost">
-                  <Shape
+                  {labelled && <Shape
                     g={g}
                     l={{ stroke: tone, width: drawing.outline, dash: "0.2 0.12", fill: tone, fillOpacity: drawing.ghostOpacity }}
-                  />
+                  />}
                   <Hit
                     g={g}
                     label={`Earlier recorded position for ${crews}: ${truth.name}. ${f.summary}`}
@@ -563,7 +579,7 @@ export function FlatView(props: FlatViewProps) {
                   />
                 </g>
               )}
-              {dim > 0 && comparison === "compare" && (
+              {dim > 0 && comparison === "compare" && labelled && (
                 <>
                   <Dimension ghost={f.ghost!.geometry} truth={truth.geometry} label={f.ghost!.label} opacity={dim} tone={tone} />
                   <text
@@ -574,9 +590,13 @@ export function FlatView(props: FlatViewProps) {
                     opacity={dim}
                     style={{ textAnchor: anchor, fill: tone }}
                   >
-                    <tspan x={lx}>{crews}</tspan>
+                    <tspan x={lx}>{noteCrews}</tspan>
                     <tspan x={lx} dy="1.2em">
-                      {sent ? "sent, not confirmed" : "earlier recorded position"}
+                      {sentCount === group.length
+                        ? "sent, not confirmed"
+                        : sentCount > 0
+                          ? `earlier recorded position · ${sentCount} sent`
+                          : "earlier recorded position"}
                     </tspan>
                   </text>
                 </>
