@@ -17,7 +17,8 @@ import {
 } from "./derive";
 import { FlatView } from "./FlatView";
 import { Huddle } from "./Huddle";
-import { IncidentFocus, incidentLead, rankIncidents } from "./IncidentFocus";
+import { IncidentFocus, rankIncidents, worstLine } from "./IncidentFocus";
+import "./desk.css";
 import { Knowledge } from "./Knowledge";
 import { Autonomy } from "./Autonomy";
 import { Lessons } from "./Lessons";
@@ -110,7 +111,7 @@ function Main() {
   const refresh = useSite((s) => s.refresh);
   const [view, setView] = useState<"flat" | "3d">("flat");
   const [no3D, setNo3D] = useState(false);
-  const [workspace, setWorkspace] = useState<"today" | "knows" | "auto" | "record" | "learning" | "crew">("today");
+  const [workspace, setWorkspace] = useState<"today" | "knows" | "auto" | "learning" | "crew">("today");
   const lens = useSite((s) => s.lens);
   const setLens = useSite((s) => s.setLens);
   const serverStale = useSite((s) => s.serverStale);
@@ -119,7 +120,7 @@ function Main() {
   const focus = useSite((s) => s.focus);
   const story = focus !== undefined && STORY_BEATS.has(focus);
   useEffect(() => {
-    setWorkspace(focus === "learn" || focus === "run2" ? "learning" : focus === "why" ? "knows" : focus === "ask" || focus === "ghost" ? "crew" : focus === "numbers" ? "record" : "today");
+    setWorkspace(focus === "learn" || focus === "run2" ? "learning" : focus === "why" ? "knows" : focus === "ask" || focus === "ghost" ? "crew" : "today");
   }, [focus]);
   useEffect(() => { if (phoneOpen) setWorkspace("crew"); }, [phoneOpen]);
 
@@ -195,10 +196,14 @@ function Main() {
     />
   );
   const lensCrew = knowledge?.crew;
-  // The first thing anyone sees: how much to settle before work starts, and the worst one in one line.
-  const opening = !asOf && !story && !lensCrew && !selection ? (() => {
-    const { all, when } = rankIncidents(state.scene, d.visible, state.fixes);
-    return { count: all.length, when, first: all[0]?.[0] };
+  // The first thing anyone sees at the desk: when work starts, how much to settle, and the worst one in one line.
+  // Same ranking as the list below it, so "the worst one" is always the first item of the plan.
+  // Presenter mode keeps its own beats and headings: no opening there.
+  const presenting = focus !== undefined || new URLSearchParams(window.location.search).get("present") === "1";
+  const opening = !asOf && !presenting ? (() => {
+    const { all, start } = rankIncidents(state.scene, d.visible, state.fixes, rehearsal, state.t);
+    const first = all[0]?.[0];
+    return { count: all.length, start, first, key: first ? findingKey(first) : undefined };
   })() : undefined;
   const backToFlat = () => {
     setNo3D(true);
@@ -232,21 +237,8 @@ function Main() {
 
       <main className="model" id="site-workspace" tabIndex={-1}>
         <div className="model-caption">
-          {opening ? (
-            <div className="opening">
-              <p className="meta">{state.scene.name} · per the record</p>
-              <h2>{opening.count === 0 ? "Nothing to settle before work starts" : <><span className="opening-count">{opening.count}</span> to settle before {opening.when ?? "work starts"}</>}</h2>
-              {opening.first && (
-                <p className="opening-lead">
-                  <span>First: {incidentLead(state.scene, opening.first)}{d.sent.has(opening.first.id) ? " Correction sent, waiting for a reply." : ""}</span>
-                  <button type="button" className="opening-show" onClick={() => { select({ kind: "finding", key: findingKey(opening.first!) }); setWorkspace("today"); }}>Show me</button>
-                </p>
-              )}
-            </div>
-          ) : (
-            <div><p className="meta">{asOf ? "Site history" : "Work preparation"}</p>
-            <h2>{lensCrew ? <>The floor as <em className="lens-name">{lensCrew.name}</em> knows it</> : story ? "The 204 bathroom wall" : state.scene.name}</h2></div>
-          )}
+          <div><p className="meta">{asOf ? "Site history" : "Work preparation"}</p>
+          <h2>{lensCrew ? <>The floor as <em className="lens-name">{lensCrew.name}</em> knows it</> : story ? "The 204 bathroom wall" : state.scene.name}</h2></div>
           {view === "flat" || no3D ? (
             <div className="lens-control">
               <span className="lens-label" id="lens-label">See the floor as</span>
@@ -318,9 +310,31 @@ function Main() {
       </main>
 
       <aside className="side">
-        <div className="workspace-heading"><h2>Before work starts</h2><p className="meta">Which crew is about to work from old information, and who to tell.</p></div>
+        {opening ? (
+          <section className="desk-opening" aria-label="Before work starts">
+            <h2>
+              {opening.count === 0
+                ? `Nothing to settle before ${opening.start ?? "work starts"}.`
+                : <>{opening.start && <span className="desk-opening-when">{opening.start}: </span>}<span className="desk-opening-count">{opening.count} {opening.count === 1 ? "thing" : "things"}</span> to settle{opening.start ? "" : " before work starts"}.</>}
+            </h2>
+            {opening.first && (
+              <button
+                type="button"
+                className="desk-opening-worst"
+                aria-pressed={selection?.kind === "finding" && selection.key === opening.key}
+                onClick={() => { select({ kind: "finding", key: opening.key! }); setWorkspace("today"); }}
+              >
+                <span className="desk-opening-label">The worst one</span>
+                <span className="desk-opening-line">{worstLine(state.scene, opening.first)}{d.sent.has(opening.first.id) ? " Correction sent, waiting for their reply." : ""}</span>
+                <span className="desk-opening-show">Show it on the plan</span>
+              </button>
+            )}
+          </section>
+        ) : (
+          <div className="workspace-heading"><h2>Before work starts</h2><p className="meta">Which crew is about to work from old information, and who to tell.</p></div>
+        )}
         <nav className="workspace-nav" aria-label="Site desk sections">
-          {([ ["today", "Priorities"], ["knows", "Who knows"], ["auto", "On its own"], ["crew", "Crew"], ["record", "Record"], ["learning", "Learning"] ] as const).map(([id, label]) =>
+          {([ ["today", "To settle"], ["knows", "Who knows"], ["auto", "On its own"], ["learning", "Learning"], ["crew", "Crew"] ] as const).map(([id, label]) =>
             <button key={id} type="button" aria-pressed={workspace === id} aria-controls={`desk-${id}`} onClick={() => { setWorkspace(id); if (id === "crew") setPhoneOpen(true); }}>{label}</button>
           )}
         </nav>
@@ -335,11 +349,18 @@ function Main() {
         </section>}
         {!asOf && <details className="desk-disclosure" open={focus === "fix" || focus === "confirm"}><summary>Crew replies<span>A sent correction is not a confirmation</span></summary><Acknowledgements /></details>}
         {asOf && <section className="panel"><h2>A moment in the record</h2><p className="meta">Select a wall to see what changed and who said it. Return to now to review today's actions.</p></section>}
-        <details className="desk-disclosure" open={focus === "fix"} hidden={focus === "ghost" || focus === "why" || focus === "confirm"}><summary>All proposed actions<span>Review before sending</span></summary><section className="panel">
-          <h2>Needs approval</h2>
-          <p className="meta">Review the proposed message before sending.</p>
+        <details className="desk-disclosure" open={focus === "fix"} hidden={focus === "ghost" || focus === "why" || focus === "confirm"}><summary>Messages waiting to be sent<span>Read each one before it goes to a crew</span></summary><section className="panel">
+          <h2>Waiting for your approval</h2>
+          <p className="meta">Nothing reaches a crew until you send it.</p>
           <Queue scene={state.scene} fixes={state.fixes} findings={d.all} messages={messages} />
         </section>
+        </details>
+        {!asOf && <details className="desk-disclosure"><summary>Morning huddle sheet<span>Tomorrow's plan on one page, to print</span></summary><Huddle day={rehearsal?.day} messages={messages} revision={`${state.t}:${messages.length}:${state.fixes.map((f) => `${f.id}-${f.status}`).join(",")}`} /></details>}
+        <details className="desk-disclosure desk-full-record" id="desk-record" open={focus === "numbers" || !!asOf || undefined}>
+          <summary>Full record<span>Every message behind the plan, which sheet each crew uses, and the measured results</span></summary>
+          {!asOf && <Sheets />}
+          <Record scene={state.scene} messages={messages} />
+          <Measured />
         </details>
         </div>
         <div id="desk-knows" hidden={workspace !== "knows"}>
@@ -347,12 +368,6 @@ function Main() {
         </div>
         <div id="desk-auto" hidden={workspace !== "auto"}>
           <Autonomy scene={state.scene} messages={messages} asOf={asOf} />
-        </div>
-        <div id="desk-record" hidden={workspace !== "record"}>
-        {!asOf && <Huddle day={rehearsal?.day} messages={messages} revision={`${state.t}:${messages.length}:${state.fixes.map((f) => `${f.id}-${f.status}`).join(",")}`} />}
-        {!asOf && <Sheets />}
-        <Record scene={state.scene} messages={messages} />
-        <Measured />
         </div>
         <div id="desk-learning" hidden={workspace !== "learning"}>
         <Lessons scene={state.scene} messages={messages} />

@@ -93,14 +93,21 @@ export function Inspector({
   );
 }
 
+const checkName: Record<Finding["check"], string> = {
+  latest_change: "changed since they last heard",
+  space_clash: "two crews, one place",
+  order_of_work: "out of order",
+  open_decision: "not decided yet",
+};
+
 function FindingBlock({ f, scene, messages }: { f: Finding; scene: Scene; messages: Map<string, ChatMessage> }) {
   return (
     <section className="finding">
       <p className="severity">
-        {f.severity === "hold" ? "Hold" : "Check"} · {f.check.replace(/_/g, " ")} · {f.trigger === "live" ? "live check" : "evening rehearsal"}
+        {f.severity === "hold" ? "Hold" : "Check"} · {checkName[f.check]} · {f.trigger === "live" ? "found when it was said" : "found in the evening run-through"}
       </p>
       <p>{f.summary}</p>
-      {f.ghost && <p className="meta">Ghost offset: {f.ghost.label}</p>}
+      {f.ghost && <p className="meta">Red dashed line: where they last heard the wall was, {f.ghost.label} from the record</p>}
       <h3>What was said</h3>
       <Source id={f.sourceMessageId} messages={messages} scene={scene} />
       {f.evidenceMessageIds.length > 0 && (
@@ -123,7 +130,7 @@ export function Queue({ scene, fixes, findings, messages }: { scene: Scene; fixe
   const byId = new Map(findings.map((f) => [f.id, f]));
   const ordered = [...fixes].reverse().sort((a, b) => Number(a.status === "approved") - Number(b.status === "approved"));
 
-  if (ordered.length === 0) return <p className="meta">Nothing waiting. Every plan on record checks out.</p>;
+  if (ordered.length === 0) return <p className="meta">Nothing waiting to be sent.</p>;
   return (
     <ol className="queue-list">
       {ordered.map((fix) => {
@@ -140,13 +147,13 @@ export function Queue({ scene, fixes, findings, messages }: { scene: Scene; fixe
               <>
                 <p className="draft">“{fix.messages[0]?.text}”</p>
                 <button type="button" disabled={busy === fix.id} onClick={() => void approve(fix.id)}>
-                  {fix.kind === "ask_crew" ? `Ask ${crews}` : `Send fix to ${crews}`}
+                  {fix.kind === "ask_crew" ? `Ask ${crews}` : `Send correction to ${crews}`}
                 </button>
               </>
             )}
             {done && (
               <>
-                <p className="sent-mark">{awaiting ? "Sent · confirmation or recheck pending" : "Fix sent"}</p>
+                <p className="sent-mark">{awaiting ? "Sent. Waiting for the crew to confirm." : "Sent"}</p>
                 {sent.map((m) => (
                   <p key={m.id} className="draft">
                     To {crewName(scene, m.crewId ?? "")}: “{m.text}”
@@ -272,9 +279,10 @@ export function Record({ scene, messages }: { scene: Scene; messages: ChatMessag
   const shown = all ? said : said.filter((m) => changed.has(m.id));
   return (
     <section className="panel">
-      <h2>The record</h2>
+      <h2>{all ? "Every message on record" : "Messages that changed the floor or the plan"}</h2>
       <p className="meta">
-        {all ? `All ${said.length} messages, newest first.` : `The ${shown.length} messages that changed the floor or the plan, newest first. The other ${said.length - shown.length} changed nothing.`}
+        {all ? `All ${said.length} messages, newest first.` : `${shown.length} of ${said.length} messages, newest first. The other ${said.length - shown.length} changed nothing in the model.`}
+        {" "}Pick one to see the floor as it was at that moment.
       </p>
       <button type="button" className="quiet record-toggle" onClick={() => setAll(!all)}>
         {all ? "Show only messages that changed something" : `Show all ${said.length} messages`}

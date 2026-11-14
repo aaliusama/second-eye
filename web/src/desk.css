@@ -1,0 +1,46 @@
+/* Owner: D. The desk's opening moment: when work starts, how much to settle, the worst one. Tokens only. */
+
+.desk-opening {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  padding: 22px var(--pad) var(--pad);
+}
+.desk-opening h2 {
+  font-size: var(--title);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.desk-opening-when { color: var(--ink-soft); font-weight: 550; }
+.desk-opening-count { color: var(--ink); }
+
+/* The worst one is a conflict on the plan, so it carries the redline rule the ghost carries. */
+.desk-opening-worst {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+  min-height: var(--control-height);
+  padding: var(--gap) var(--pad);
+  text-align: left;
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: var(--rule) solid var(--paper-rule);
+  border-left: 3px solid var(--redline);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color var(--answer) var(--ease-out);
+}
+.desk-opening-worst:hover:not(:disabled) { background: var(--surface); border-color: var(--ink-soft); border-left-color: var(--redline); }
+.desk-opening-worst[aria-pressed="true"] { border-color: var(--ink); border-left-color: var(--redline); }
+.desk-opening-label { font-size: var(--small); font-weight: 600; color: var(--ink-soft); }
+.desk-opening-line { font-size: var(--text); font-weight: 550; line-height: 1.4; }
+.desk-opening-show { font-size: var(--small); color: var(--ink-soft); text-decoration: underline; text-underline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .desk-opening-worst { transition: none; }
+}

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import type { ChatMessage, Finding, Fix, PlanTask, Scene } from "@site/contracts";
-import { resolvedFindingIds } from "./derive";
+import type { ChatMessage, Finding, Fix, PlanTask, Rehearsal, Scene } from "@site/contracts";
+import { clock, resolvedFindingIds } from "./derive";
 import { describeSource, sourceLine } from "./sources";
 import { useSite } from "./store";
 
@@ -10,10 +10,10 @@ const checkPriority: Record<Finding["check"], number> = {
 };
 
 const title: Record<Finding["check"], string> = {
-  latest_change: "A change may not have reached the crew",
-  order_of_work: "Check what must happen first",
-  open_decision: "A decision is still open",
-  space_clash: "Two plans need the same space",
+  latest_change: "Changed since the crew last heard",
+  order_of_work: "Booked before the work it depends on",
+  open_decision: "Booked before it is decided",
+  space_clash: "Two crews booked in one place",
 };
 
 const incidentKey = (finding: Finding) => [
@@ -22,6 +22,13 @@ const incidentKey = (finding: Finding) => [
 
 const slotWord: Record<PlanTask["slot"], string> = { morning: "morning", afternoon: "afternoon", full_day: "all day" };
 const task = (t: string) => t.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase());
+/** What the crew will do, as a superintendent says it. "other" has no verb: the sentence leaves it out. */
+const verb: Partial<Record<PlanTask["taskType"], string>> = {
+  layout: "lay out", rough_in_plumbing: "rough in", rough_in_electrical: "rough in", inspection: "inspect",
+  close_wall: "close the wall", finish_drywall: "finish drywall", paint: "paint", tile: "tile", install_fixtures: "install fixtures",
+};
+/** Replay-clock day arithmetic only: "2026-11-14" is "Tomorrow" when the record's time is on 13 Nov. */
+const nextDay = (day: string) => new Date(Date.parse(`${day}T12:00:00Z`) + 86_400_000).toISOString().slice(0, 10);
 /** Formatting only: a recorded YYYY-MM-DD shown as "Sat 14 Nov". */
 const dayLabel = (day: string) => {
   const d = new Date(`${day}T12:00:00Z`);
@@ -32,7 +39,7 @@ const dayLabel = (day: string) => {
  * Open incidents in the order the superintendent settles them, and the first planned work they touch.
  * Shared by the desk list and the page heading so both always agree on what comes first.
  */
-export function rankIncidents(scene: Scene, findings: Finding[], fixes: Fix[]) {
+export function rankIncidents(scene: Scene, findings: Finding[], fixes: Fix[], rehearsal?: Rehearsal, now?: string) {
   const resolved = resolvedFindingIds(fixes, findings);
   const active = findings.filter((finding) => !resolved.has(finding.id)).sort((a, b) =>
     Number(a.severity !== "hold") - Number(b.severity !== "hold") ||
@@ -48,7 +55,35 @@ export function rankIncidents(scene: Scene, findings: Finding[], fixes: Fix[]) {
   const firstWork = scene.tasks
     .filter((t) => t.status === "planned" && all.some((g) => g.some((f) => f.taskIds.includes(t.id))))
     .sort((a, b) => a.day.localeCompare(b.day) || (a.slot === "afternoon" ? 1 : 0) - (b.slot === "afternoon" ? 1 : 0))[0];
-  return { all, firstWork, when: firstWork ? `${dayLabel(firstWork.day)} ${slotWord[firstWork.slot]}` : undefined };
+  // "Tomorrow 07:00": the day relative to the record's clock, the hour from the rehearsal frame where that work starts.
+  const today = now?.slice(0, 10);
+  const relDay = firstWork && (firstWork.day === today ? "Today" : today && firstWork.day === nextDay(today) ? "Tomorrow" : dayLabel(firstWork.day));
+  const frame = firstWork && rehearsal?.day === firstWork.day ? rehearsal.frames.find((f) => f.activeTaskIds.includes(firstWork.id)) : undefined;
+  const start = firstWork ? `${relDay} ${frame ? clock(frame.time) : slotWord[firstWork.slot]}` : undefined;
+  return { all, firstWork, start, when: firstWork ? `${dayLabel(firstWork.day)} ${slotWord[firstWork.slot]}` : undefined };
+}
+
+/**
+ * The worst open incident as one sentence a superintendent would say, e.g.
+ * "<crew> plans to rough in against <wall>, which moved <offset>." Every part comes from the finding
+ * and its tasks; a part that is not on record is left out.
+ */
+export function worstLine(scene: Scene, finding: Finding): string {
+  const name = (id: string) => scene.elements.find((e) => e.id === id)?.name;
+  const crewNames = finding.crewIds.map((id) => scene.crews.find((c) => c.id === id)?.name).filter(Boolean);
+  const crews = crewNames.join(" and ");
+  const t = scene.tasks.find((x) => finding.taskIds.includes(x.id));
+  const doing = t && verb[t.taskType];
+  const place = (t && name(t.placeId)) ?? finding.elementIds.map(name).find(Boolean);
+  if (finding.check === "latest_change" && finding.ghost && crews) {
+    const found = name(finding.ghost.elementId);
+    const el = found ? `the ${found}` : "a wall";
+    const plan = doing ? `${crews} plans to ${doing} against ${el}` : `${crews} works against ${el}`;
+    return `${plan}${finding.ghost.label ? `, which moved ${finding.ghost.label}` : ""}. They may not have heard.`;
+  }
+  if (finding.check === "space_clash" && crewNames.length > 1) return `${crews} are both booked in ${place ?? "the same place"} at the same time.`;
+  if (finding.check === "open_decision" && crews) return `${crews} ${doing ? `plans to ${doing}` : "is booked"}${place ? ` in ${place}` : ""} before it is decided.`;
+  return incidentLead(scene, finding);
 }
 
 /** The top incident in one sentence, from the finding itself. */
@@ -82,14 +117,14 @@ export function IncidentFocus({ scene, findings, fixes, messages, onInspect }: {
   return <section className="incident-focus" aria-label="Priority site decisions">
     <header>
       <p className="incident-count">
-        {all.length === 0 ? "Nothing flagged" : `${all.length} to settle`}
-        {firstWork && <span> before {dayLabel(firstWork.day)} {slotWord[firstWork.slot]}</span>}
+        {all.length === 0 ? "Nothing to settle" : "The plan, in this order"}
+        {all.length > 0 && firstWork && <span> before {dayLabel(firstWork.day)} {slotWord[firstWork.slot]}</span>}
       </p>
       {all.length > 3 && <p className="meta">{showAll ? `All ${all.length}, most urgent first.` : `The 3 most urgent of ${all.length}.`}</p>}
     </header>
     {incidents.length === 0 && <div className="incident-empty">
-      <h3>No open findings in this view</h3>
-      <p className="meta">The record has no flagged conflict here. This does not verify the work on site.</p>
+      <h3>Nothing flagged for this day</h3>
+      <p className="meta">The record shows no clash here. That does not mean the work on site is checked.</p>
     </div>}
     <ol className="incident-list">
       {incidents.map((group) => {
@@ -110,20 +145,20 @@ export function IncidentFocus({ scene, findings, fixes, messages, onInspect }: {
         const recipients = pending ? [...new Set(pending.messages.map((message) => crewName(message.crewId)))].join(" and ") : "";
         const work = [...new Set(tasks.map((t) => `${crewName(t.crewId)}: ${task(t.taskType)}, ${dayLabel(t.day)} ${slotWord[t.slot]}`))].slice(0, 2);
         return <li className={`incident-item ${state}`} key={incidentKey(finding)}>
-          <div className="incident-place"><span>{place}</span><span className="severity">{state === "awaiting" ? "Waiting for reply" : finding.severity === "hold" ? "Hold" : "Confirm"}</span></div>
+          <div className="incident-place"><span>{place}</span><span className="severity">{state === "awaiting" ? "Waiting for reply" : finding.severity === "hold" ? "Hold" : "Check"}</span></div>
           <h3 className="incident-title">{title[finding.check]}</h3>
           {work.length > 0 ? <ul className="incident-work">{work.map((line) => <li key={line}>{line}</li>)}</ul> : <p className="incident-crew">{crews}</p>}
-          {finding.ghost && <p className="incident-offset">{finding.ghost.label} <span className="meta">between the line they last heard and the latest line on record</span></p>}
+          {finding.ghost && <p className="incident-offset">{finding.ghost.label} <span className="meta">from where they last heard it was</span></p>}
           {pending && <button className="incident-action primary" type="button" disabled={!!busy} onClick={() => void approve(pending.id)}>
             {busy === pending.id ? "Sending…" : pending.kind === "ask_crew" ? `Ask ${recipients}` : `Send correction to ${recipients}`}
           </button>}
-          {state === "awaiting" && <p className="incident-waiting">Sent to {crews}. Still held until they reply; sending is not confirmation.</p>}
+          {state === "awaiting" && <p className="incident-waiting">Sent to {crews}. Still on hold until they reply: sent is not confirmed.</p>}
           <div className="incident-links">
             <button className="quiet" type="button" onClick={() => onInspect(finding)}>Show on plan</button>
             <details className="incident-detail">
-              <summary>{pending ? "Why, and the exact message" : "Why"}</summary>
+              <summary>{pending ? "Why, and what will be sent" : "Why"}</summary>
               <p>{finding.summary}</p>
-              {finding.severity === "warn" && <p className="meta">The record is uncertain. Confirm the missing information before treating this as a conflict.</p>}
+              {finding.severity === "warn" && <p className="meta">The record is not sure. Get the missing detail before treating this as a clash.</p>}
               {sources.map((id) => {
                 const source = describeSource(id, messages, crewName);
                 return <blockquote key={id}><p>{source.text ?? "Source text not found"}</p><footer>{sourceLine(source)}</footer></blockquote>;
@@ -131,7 +166,7 @@ export function IncidentFocus({ scene, findings, fixes, messages, onInspect }: {
               {pending ? <div className="incident-next">
                 <h4>What will be sent</h4>
                 {pending.messages.map((message, index) => <blockquote key={`${message.crewId}-${index}`}><p>{message.text}</p><footer>To {crewName(message.crewId)}</footer></blockquote>)}
-              </div> : !sent && <p className="meta">No pending correction found. Review the source record with the superintendent.</p>}
+              </div> : !sent && <p className="meta">No correction drafted for this one. Read the messages above and settle it before work starts.</p>}
             </details>
           </div>
         </li>;
