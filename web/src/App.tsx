@@ -104,10 +104,14 @@ function Main() {
   const refresh = useSite((s) => s.refresh);
   const [view, setView] = useState<"flat" | "3d">("flat");
   const [no3D, setNo3D] = useState(false);
+  const [workspace, setWorkspace] = useState<"today" | "record" | "learning">("today");
   const phoneOpen = useSite((s) => s.phoneOpen);
   const setPhoneOpen = useSite((s) => s.setPhoneOpen);
   const focus = useSite((s) => s.focus);
   const story = focus !== undefined && STORY_BEATS.has(focus);
+  useEffect(() => {
+    setWorkspace(focus === "learn" || focus === "run2" ? "learning" : focus === "numbers" ? "record" : "today");
+  }, [focus]);
 
   const d = useMemo(() => {
     if (!state) return undefined;
@@ -173,10 +177,14 @@ function Main() {
 
   return (
     <div className="app">
+      <a className="skip-link" href="#site-workspace">Skip to site workspace</a>
       <header className="top">
         <div className="title">
+          <svg className="site-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M4 27V5h24v22H4Zm8 0V13h16M4 13h8M21 5v8" fill="none" stroke="currentColor" strokeWidth="2" /></svg>
+          <div>
           <h1>Site Rehearsal</h1>
           <span className="meta">{state.scene.name}</span>
+          </div>
         </div>
         <div className="top-right">
           {!no3D && (
@@ -193,7 +201,12 @@ function Main() {
         </div>
       </header>
 
-      <main className="model">
+      <main className="model" id="site-workspace" tabIndex={-1}>
+        <div className="model-caption">
+          <div><p className="meta">{asOf ? "Site history" : "Tomorrow, before it happens"}</p>
+          <h2>{story ? "The 204 bathroom wall" : "One floor. One shared record."}</h2></div>
+          <span className="record-basis">{asOf ? formatTime(asOf) : "Plans and changes, per the record"}</span>
+        </div>
         {(asOf || error) && (
           <div className="banner">
             {asOf && (
@@ -228,6 +241,11 @@ function Main() {
         <Inspector scene={state.scene} selection={selection} findings={d.all} messages={msgMap} onClose={() => select(undefined)} />
         {focus === "numbers" && <MeasuredLarge />}
         <Presenter />
+        <div className="drawing-legend" aria-label="Drawing legend">
+          <span><i className="legend-line" />Recorded</span>
+          <span><i className="legend-line ghost-line" />Conflict</span>
+          <span><i className="legend-line pending-line" />Awaiting reply</span>
+        </div>
         <div className="phone-inset">
           {phoneOpen && <Phone scene={state.scene} messages={messages} day={rehearsal?.day} compact onPosted={() => void refresh()} />}
           <div className="row">
@@ -242,18 +260,38 @@ function Main() {
       </main>
 
       <aside className="side">
-        {!asOf && <Acknowledgements />}
-        {!asOf && <Huddle day={rehearsal?.day} messages={messages} revision={`${state.t}:${messages.length}:${state.fixes.map((f) => `${f.id}-${f.status}`).join(",")}`} />}
-        <section className="panel">
+        <div className="workspace-heading"><h2>Site desk</h2><p className="meta">Review the risk. Decide the next step.</p></div>
+        <nav className="workspace-nav" aria-label="Site desk sections">
+          {([ ["today", "Today"], ["record", "Record"], ["learning", "Learning"] ] as const).map(([id, label]) =>
+            <button key={id} type="button" aria-pressed={workspace === id} aria-controls={`desk-${id}`} onClick={() => setWorkspace(id)}>{label}</button>
+          )}
+        </nav>
+        <div id="desk-today" hidden={workspace !== "today"}>
+        {!asOf && !story && <Huddle day={rehearsal?.day} messages={messages} revision={`${state.t}:${messages.length}:${state.fixes.map((f) => `${f.id}-${f.status}`).join(",")}`} />}
+        {(focus === "ghost" || focus === "why") && <section className="panel story-context">
+          <h2>One change. Two versions.</h2>
+          <p>The crew's intended work is checked against the latest recorded wall.</p>
+          <dl><dt>Solid line</dt><dd>The wall in the latest site record.</dd><dt>Dashed red line</dt><dd>The earlier position available to the crew.</dd></dl>
+          <p className="meta">Select the wall or ghost to inspect the messages behind this mismatch.</p>
+        </section>}
+        {!asOf && <details className="desk-disclosure" open={focus === "fix" || focus === "confirm"}><summary>Crew confirmations<span>Sent is not confirmed</span></summary><Acknowledgements /></details>}
+        {asOf && <section className="panel"><h2>A moment in the record</h2><p className="meta">Select a wall to see what changed and who said it. Return to now to review today's actions.</p></section>}
+        <section className="panel" hidden={focus === "ghost" || focus === "why" || focus === "confirm"}>
           <h2>Needs approval</h2>
+          <p className="meta">Review the proposed message before sending.</p>
           <Queue scene={state.scene} fixes={state.fixes} findings={d.all} messages={messages} />
         </section>
-        {!asOf && <Dismissals />}
+        </div>
+        <div id="desk-record" hidden={workspace !== "record"}>
         {!asOf && <Sheets />}
-        <Learning scene={state.scene} items={unresolved} />
         <AgentLog scene={state.scene} messages={messages} asOf={asOf} />
         <Record scene={state.scene} messages={messages} />
         <Measured />
+        </div>
+        <div id="desk-learning" hidden={workspace !== "learning"}>
+        <Learning scene={state.scene} items={unresolved} />
+        {!asOf && <Dismissals />}
+        </div>
       </aside>
 
       <footer className="bottom">

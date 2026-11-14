@@ -1,5 +1,11 @@
 # Parallel implementation status
 
+## Completed Codex work: README and interface redesign
+
+README and web design work is complete; read `docs/DESIGN_REVIEW.md` and the top of `docs/CLAUDE_RESUME.md` before editing. The design ownership reservation is released. All eleven beats were exercised; 311 root tests, 24 HTTP tests, typecheck and build passed. Screenshots are retained in `docs/assets/design-review/`. Preserve the new section navigation, source disclosures and pending-confirmation semantics.
+
+Claude can continue server correctness, live extraction/evaluation and MCP shared-record validation. Other agents' backend changes were preserved; `mcp/tools.ts` was dirty at final review and is excluded from this design commit. Coordinate shared contract/root-script changes before editing. No new Talona integration or backend feature is part of this design pass. Historical completion notices below refer to earlier revisions.
+
 Latest documentation-only review: see `docs/TALONA_ALIGNMENT.md` and the top of `docs/CLAUDE_RESUME.md`. The checkout includes subsequent commits through `a26c680`; preserve them. Next proposed lanes are visual demonstration, live extraction evidence and an existing MCP consumer of the shared incident record. No new lane was launched during this review.
 
 Final status: both batches committed as `5a9fd3b` and pushed to `origin/win/integration`; not merged into main. Read the TOP of `docs/CLAUDE_RESUME.md` for completed features, final checks and proposed next lanes. All agents finished; no exclusive edit locks remain. Proposed lanes have not started. Historical in-progress notes below are retained as history, not current assignments.

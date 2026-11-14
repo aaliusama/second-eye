@@ -313,7 +313,7 @@ export function FlatView(props: FlatViewProps) {
 
   if (!base) return <p className="empty">No elements in the record.</p>;
 
-  const framing = focus && whole !== reveal.key;
+  const framing = focus && (tight || selection !== undefined) && whole !== reveal.key;
   const box = framing ? lerpBox(base, focus, easeInOut(phase(reveal.elapsed, 0, REVEAL.frameEnd))) : base;
   const r = drawing.bubbleRadius;
   const vb = { x: box.minX - r * 3.4, y: -box.maxY - r * 3.4, w: box.maxX - box.minX + r * 3.6, h: box.maxY - box.minY + r * 3.6 };
