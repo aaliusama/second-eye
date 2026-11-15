@@ -40,6 +40,11 @@ and coordinate corrections before work begins.
 > [!IMPORTANT]
 > **Hackathon prototype on simulated data.** Built for the Talona · Context for the Physical World track at proximata Hackathon '26. The model reflects what was *said in the record*, not what was built. A crew acknowledgement records receipt in the simulation; it does not establish inspection, completed work or physical safety.
 
+> [!NOTE]
+> **🏆 Winning project — proximata Hackathon '26 (Building Better Worlds), Talona · Context for the Physical World track.**
+> Built as a team. Team lead: **[Ali Usama](https://github.com/aaliusama)**. Contributors: **[Waji Ul Hassan Syed](https://github.com/syedwajiulhassan715-rgb)**, **[Gencay Aslan](https://github.com/GencAyAslan)** and **[Sacha](https://github.com/hubbedklin)**.
+> This repository is a portfolio copy with the full commit history and all branches of the original team repo, [syedwajiulhassan715-rgb/Proximata-Hackathon](https://github.com/syedwajiulhassan715-rgb/Proximata-Hackathon).
+
 ## Overview
 
 Second Eye is a construction coordination prototype that connects site communication with spatial and scheduling context. It transforms crew messages into a versioned model of one floor, compares intended work with the latest recorded changes, and identifies conflicts in geometry, shared work areas, task dependencies and unresolved decisions.
